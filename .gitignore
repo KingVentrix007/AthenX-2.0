@@ -1,0 +1,12 @@
+*.o
+*.bin
+obj/*.o
+obj/*.bin
+*iso
+<<<<<<< HEAD
+obj/
+FAT32_IMG/
+*.img
+=======
+obj/
+>>>>>>> parent of 197eb83 (added more file to ignore)

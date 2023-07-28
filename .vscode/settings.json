@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "types.h": "c",
+        "console.h": "c",
+        "io_ports.h": "c",
+        "vga.h": "c",
+        "type_traits": "c",
+        "stddef.h": "c",
+        "terminal.h": "c",
+        "bios32.h": "c",
+        "vesa.h": "c",
+        "vesa_display.h": "c",
+        "string.h": "c",
+        "bool.h": "c",
+        "stdbool.h": "c",
+        "ide.h": "c",
+        "display.h": "c"
+    }
+}
