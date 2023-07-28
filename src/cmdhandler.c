@@ -89,13 +89,19 @@ void cmd_handler(char *buffer[512])
 
        
     }
-    else if (strcmp(buffer,"write1") == 0)
+    else if (strcmp(buffer,"list") == 0)
+    {
+        printf("\n");
+        list_files();
+    }
+    
+    else if (strcmp(buffer,"write1!") == 0)
     {
         uint32 l;
         l = write("food", "eat food");
         printf("L: %d\n",l);
     }
-    else if (strcmp(buffer,"read1") == 0)
+    else if (strcmp(buffer,"read1!") == 0)
     {
         uint32 l;
         l = read("food");
@@ -104,30 +110,29 @@ void cmd_handler(char *buffer[512])
     
     else if(strcmp(buffer,"exit") == 0)
     {
-
-        
+        fs_master_table_update();
     }
     
-    // else if (strcmp(buffer,"screen size") == 0)
-    // {
-    //     const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
-    //     const uint32 LBA = 0;
-    //     const uint8 NO_OF_SECTORS = 1;
-    //     char buf[ATA_SECTOR_SIZE] = {0};
-    //     struct scree_size {
-    //         char checksum[32];
-    //         int x;
-    //         int y;
-    //     };
+    else if (strcmp(buffer,"screen size") == 0)
+    {
+        const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
+        const uint32 LBA = KERNEL_SECTOR_BASE+1;
+        const uint8 NO_OF_SECTORS = 1;
+        char buf[ATA_SECTOR_SIZE] = {0};
+        struct scree_size {
+            char checksum[32];
+            int x;
+            int y;
+        };
 
-    //     struct scree_size sc_size;
-    //     strcpy(sc_size.checksum,"True");
-    //     sc_size.x = 1280;
-    //     sc_size.y = 1024;
-    //     memcpy(buf, &sc_size, sizeof(sc_size));
-    //     ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-    //     printf("data written\n");
-    // }
+        struct scree_size sc_size;
+        strcpy(sc_size.checksum,"True");
+        sc_size.x = 1280;
+        sc_size.y = 1024;
+        memcpy(buf, &sc_size, sizeof(sc_size));
+        ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
+        printf("data written\n");
+    }
     // else if (strcmp(buffer,"text") == 0)
     // {
     //    char out[512];
@@ -146,6 +151,25 @@ void cmd_handler(char *buffer[512])
         set_vesa_row(0);
         set_vesa_colum(0);
         vbe_print_available_modes();
+    }
+    else if(strcmp(buffer,"format disk") == 0)
+    {
+        format_disk();
+    }
+    else if (strstr(buffer,"delete(") != NULL) 
+    {
+        char *parser;
+        char string[1];
+        parser = strstr(buffer, "delete(");
+        parser += strlen("delete(");
+        parse_string(string, parser, ')');
+        const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
+        //const uint32 LBA = atoi(string);
+        const uint8 NO_OF_SECTORS = 1;
+        char buf[ATA_SECTOR_SIZE] = {0};
+
+        memset(buf, 0, sizeof(buf));
+        delete_file(string);
     }
     
     
@@ -200,3 +224,8 @@ void kernel_command_handler(char *buffer[512])
 
     }
 }
+
+// void format_disk()
+// {
+//     run_once();
+// }

@@ -1,7 +1,10 @@
 #include "keyboard.h"
 #include "string.h"
+#include "display.h"
+#include "ide.h"
 int text_editor(int max_letters,char *dest)
 {
+    int max = max_letters;
     char out[max_letters];
     while(1==1)
     {
@@ -10,7 +13,8 @@ int text_editor(int max_letters,char *dest)
             {
                 //crude_song();
                 if(backspace(out))
-                {
+                {  
+                    max = max +1;
                     printf("\b");
                 }
                 else
@@ -34,7 +38,7 @@ int text_editor(int max_letters,char *dest)
                 //crude_song();
             }
             
-            else
+            else if(max >= 1)
             {
                 
                 char* s;
@@ -42,8 +46,12 @@ int text_editor(int max_letters,char *dest)
                 //printf(s);
                 printf(s);
                 //printf(s);
-                
+                max = max -1;
                 append(out,c);
+            }
+            else
+            {
+                beep();
             }
     }
     memcpy(dest,out,sizeof(out));

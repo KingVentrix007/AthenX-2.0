@@ -2,6 +2,7 @@
 #define STRING_H
 #include <stdbool.h>
 #include "types.h"
+#include <stddef.h>;
 #define swap(a, b) (a ^= b ^= a ^= b)
 void *memset(void *dst, char c, uint32 n);
 char *strstr(char *s1, const char *s2);
@@ -16,7 +17,7 @@ int strcmp(const char *s1, char *s2);
 int strcpy(char *dst, const char *src);
 char *ctos(char s[2], const char c);
 void strcat(char *dest, const char *src);
-
+char *strncpy(char *dst, const char *src, size_t n);
 int isspace(char c);
 
 int isalpha(char c);
@@ -25,7 +26,7 @@ char lower(char c);
 bool backspace(char buffer[]);
 
 void itoa(char *buf, int base, int d);
-
+int strncmp(const char *s1, const char *s2, size_t n);
 int string_length(char s[]);
 void append(char s[], char n);
 #endif

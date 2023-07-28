@@ -23,6 +23,12 @@ typedef struct {
     unsigned char model[41]; // drive name
 } IDE_DEVICE;
 
+
+#define KERNEL_SECTOR_BASE 25
+#define FILE_SECTOR_BASE 45
+
+
+
 #define MAXIMUM_CHANNELS    2
 #define MAXIMUM_IDE_DEVICES    5
 
@@ -130,10 +136,11 @@ void ide_irq();
 
 // start from lba = 0
 int ide_read_sectors(uint8 drive, uint8 num_sectors, uint32 lba, uint32 buffer);
-
+int ide_read_sectors_fat(uint32_t start_block, uint8_t *buffer, uint32_t sector_count);
 // start from lba = 0
 int ide_write_sectors(uint8 drive, uint8 num_sectors, uint32 lba, uint32 buffer);
-
+int ide_write_sectors_fat(uint32_t start_block, uint8_t *buffer, uint32_t sector_count);
+int print_drives();
 
 void ata_init();
 int ata_get_drive_by_model(const char *model);

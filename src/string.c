@@ -148,6 +148,36 @@ char lower(char c) {
     return c;
 }
 
+
+
+
+
+char *strncpy(char *dst, const char *src, size_t n)
+{
+	if (n != 0) {
+		char *d = dst;
+		const char *s = src;
+
+		do {
+			if ((*d++ = *s++) == 0) {
+				/* NUL pad the remaining n-1 bytes */
+				while (--n != 0)
+					*d++ = 0;
+				break;
+			}
+		} while (--n != 0);
+	}
+	return (dst);
+}
+
+
+int strncmp(const char *s1, const char *s2, size_t n)
+{
+    while (n--)
+        if (*s1++ != *s2++)
+            return *(unsigned char *)(s1 - 1) - *(unsigned char *)(s2 - 1);
+    return 0;
+}
 void itoa(char *buf, int base, int d) {
     char *p = buf;
     char *p1, *p2;

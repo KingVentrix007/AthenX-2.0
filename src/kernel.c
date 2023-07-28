@@ -1,3 +1,4 @@
+#include "fat_filelib.h"
 #include "kernel.h"
 #include "display.h"
 #include "panic.h"
@@ -109,7 +110,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         kheap_init(start, end);
         //@ Gets screen size from memory
         const int DRIVE = 0;
-        const uint32 LBA = 0;
+        const uint32 LBA = KERNEL_SECTOR_BASE+1;
         const uint8 NO_OF_SECTORS = 1;
         char buf[ATA_SECTOR_SIZE] = {0};
         struct screen_size{
@@ -131,13 +132,44 @@ void kmain(unsigned long magic, unsigned long addr) {
         }
         else
         {
-            cmd_handler("screen size");
+            //cmd_handler("screen size");
             x = 800;
             y = 600;
         }
+
         int ret = display_init(0,x,y,32);
+        
         //run_once();
-        //init_fs();
+        #define FAT 1
+        #if FAT
+            init_fs();
+            //run_once();
+        #else
+            fl_init();
+
+            // Attach media access functions to library
+            if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
+            {
+                printf("ERROR: Failed to init file system\n");
+                return -1;
+            }
+        
+            // List the root directory
+            fl_listdirectory("/");
+        #endif
+        print_drives();
+        //fs_master_table_p();
+    //     fl_init();
+
+    // // Attach media access functions to library
+    // if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
+    // {
+    //     printf("ERROR: Failed to init file system\n");
+    //     int i = fl_format(100,"file");
+    //     //printf("\nI: %d", i);
+    //     //return -1;
+    // }
+    // fl_listdirectory("/");
         //run_once();
         //kernel_command_handler("login set");
          //printf("X: %d, Y: %d",sc_size.x,sc_size.y);
@@ -333,17 +365,22 @@ void terminal_main()
 {
    
     //login(1);
-    printf("Login:\n");
-    while (1 == 1)
-    {
-        if(login(0) == 1)
+    #define LOGIN 0
+    #if LOGIN
+        printf("Login:\n");
+        while (1 == 1)
         {
-            printf("Login successful\n");
-            break;
+            if(login(0) == 1)
+            {
+                printf("Login successful\n");
+                break;
+            }
+            else{printf("Invalid login\n");}
+            
         }
-        else{printf("Invalid login\n");}
-        
-    }
+    
+
+    #endif
     
      printf(">");
     //sleep(10);
