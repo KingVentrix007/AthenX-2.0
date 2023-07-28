@@ -115,3 +115,6 @@ run-bin:
 	make clean
 	make os-image.bin
 	qemu-system-x86_64 os-image.bin -drive file=HDD.img
+
+HDD:
+	qemu-img create HDD.img 1G

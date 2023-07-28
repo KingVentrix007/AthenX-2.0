@@ -11,7 +11,8 @@ void parse_string(char *parser, char *string, char c);
 int memcmp(uint8 *s1, uint8 *s2, uint32 n);
 uint32_t atoi(const char *str);
 int strlen(const char *s);
-
+int strncmp(const char *s1, const char *s2, size_t n);
+char *strncpy(char *dst, const char *src, size_t n);
 int strcmp(const char *s1, char *s2);
 
 int strcpy(char *dst, const char *src);

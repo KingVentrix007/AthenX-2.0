@@ -141,7 +141,39 @@ char upper(char c) {
         return (c - 32);
     return c;
 }
+// char *strncpy(char *dst, const char *src, size_t n)
+// {
+// 	if (n != 0) {
+// 		char *d = dst;
+// 		const char *s = src;
 
+// 		do {
+// 			if ((*d++ = *s++) == 0) {
+// 				/* NUL pad the remaining n-1 bytes */
+// 				while (--n != 0)
+// 					*d++ = 0;
+// 				break;
+// 			}
+// 		} while (--n != 0);
+// 	}
+// 	return (dst);
+// }
+
+// int strncmp(const char *s1, const char *s2, register size_t n)
+// {
+//   register unsigned char u1, u2;
+
+//   while (n-- > 0)
+//     {
+//       u1 = (unsigned char) *s1++;
+//       u2 = (unsigned char) *s2++;
+//       if (u1 != u2)
+// 	return u1 - u2;
+//       if (u1 == '\0')
+// 	return 0;
+//     }
+//   return 0;
+// }
 char lower(char c) {
     if ((c >= 'A') && (c <= 'Z'))
         return (c + 32);

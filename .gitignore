@@ -2,7 +2,8 @@
 *.bin
 obj/*.o
 obj/*.bin
-*iso
+*.iso
+*.log
 <<<<<<< HEAD
 obj/
 FAT32_IMG/
