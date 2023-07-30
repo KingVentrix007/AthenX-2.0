@@ -43,11 +43,11 @@ int run_once();
 int read(char filename[8]);
 int init_fs();
 int update_table();
-int list_files();
+void list_files();
 int fs_master_table_update();
 int fs_master_table_p();
 int format_disk();
 delete_file(char *filename[8]);
-int clean_fs_master_table(int num);
+void clean_fs_master_table(int num);
 int make_dir(char *dir_name[8]);
 #endif
