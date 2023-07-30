@@ -7,7 +7,7 @@
 <!-- [![GNU License][license-shield]][license-url] -->
 
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/KingVentrix007/AthenX-2.0">
     <img src="images/athenx-low-resolution-color-logo.png" alt="Logo" width="100" height="">
   </a>
 
