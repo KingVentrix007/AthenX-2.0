@@ -47,4 +47,4 @@ This section is more for people i invite to contribute, but you should consider 
 
 2. Try and explain your function as simply as possible, if you have to use specific language, make sure it is included in the [terminology](https://github.com/KingVentrix007/AthenX-2.0/blob/main/docs/Terminology.md) file.
 
-3. It is recommended to only use code licensed under the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html). If your code is not licensed under this license, I **will not** accept it unless it dose something that i have absolutely no idea how to do myself. please read [Occasions when non GPLv3 code is used]()
+3. It is recommended to only use code licensed under the [GNU General Public License Version 3](https://www.gnu.org/licenses/gpl-3.0.en.html). If your code is not licensed under this license, I **will not** accept it unless it dose something that i have absolutely no idea how to do myself. please read [Occasions when non GPLv3 code is used](https://github.com/KingVentrix007/AthenX-2.0/blob/main/OtherLicenses/NonGPLv3.md)
