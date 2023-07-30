@@ -259,7 +259,7 @@ int login(int skip)
         char password_stored[32];
     };
     const int DRIVE = 0;
-    const uint32 LBA = 1;
+    const uint32 LBA = KERNEL_SECTOR_BASE+3;
     const uint8 NO_OF_SECTORS = 1;
     char buf[ATA_SECTOR_SIZE] = {0};
     

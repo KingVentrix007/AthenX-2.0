@@ -138,8 +138,6 @@ Simply add any changes you want then and save them, then type 'make run' and wat
   * [ ] chat application
   * [ ] Basic utility apps
 
-
-
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated** even if i don't add it to the main project.
@@ -149,11 +147,11 @@ Don't forget to give the project a star! Thanks again!
 
 1. [Read this](https://github.com/KingVentrix007/AthenX-2.0/blob/main/docs/Contributing.md)
 2. [Read this](https://github.com/KingVentrix007/AthenX-2.0/blob/main/docs/Terminology.md)
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+3. Fork the Project
+4. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+5. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+6. Push to the Branch (`git push origin feature/AmazingFeature`)
+7. Open a Pull Request
 
 ## License
 
@@ -219,7 +217,3 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
   <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="images/File handling.png" alt="Logo" width="" height="">
   </a>
-
-
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/KingVentrix007/AthenX-2.0/blob/main/LICENSE.txt
