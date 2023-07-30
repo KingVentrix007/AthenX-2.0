@@ -105,7 +105,7 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
 
 ### Modifying
 
-Simply add any changes you want then and save them, the type 'make run' and watch you change come to life (or not).
+Simply add any changes you want then and save them, then type 'make run' and watch you change come to life (or not).
 
 ## Roadmap
 
