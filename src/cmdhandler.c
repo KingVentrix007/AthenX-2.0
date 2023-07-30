@@ -14,8 +14,12 @@
 #include "display.h"
 #include "keyboard.h"
 #include "fs.h"
+//* This file handles all the commands passed to it from the main function //*
+
+//* Main command handling function
 void cmd_handler(char *buffer[512])
 {
+    
     if(strcmp(buffer, "bg") == 0)
     {
         cool_colors();

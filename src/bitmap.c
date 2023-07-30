@@ -1835,6 +1835,7 @@ uint32 ASCII_BITMAPS[127][BITMAP_SIZE] = {
 
 };
 
+//* Draws a bitmap character
 void bitmap_draw_char(char ch, int x, int y, int color) {
     int temp = 0, pix_data = 0;
 
@@ -1854,7 +1855,7 @@ void bitmap_draw_char(char ch, int x, int y, int color) {
     }
 }
 
-
+//* Draws a string of bitmap characters
 void bitmap_draw_string(const char *str, int x, int y, int color) {
     int new_x = x;
     int new_y = y;
@@ -1868,7 +1869,7 @@ void bitmap_draw_string(const char *str, int x, int y, int color) {
         }
     }
 }
-
+//* Draws an upper case string of characters
 void bitmap_draw_string_upper(char *str, int x, int y, int color) {
     char *old_str = str;
     while (*str) {
