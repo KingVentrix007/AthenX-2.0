@@ -119,7 +119,7 @@ Simply add any changes you want then and save them, then type 'make run' and wat
   * [X] delete file
   * [x] list files
   * [x] read files
-  * [ ] read files
+  * [ ] edit files
   * [ ] make dictionary
   * [ ] rename dictionary
   * [ ] delete dictionary
