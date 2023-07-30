@@ -1,3 +1,4 @@
+#include "cmdhandler.h"
 #include "ide.h"
 #include "display.h"
 #include "string.h"
@@ -12,7 +13,7 @@
 
 struct fs_table fs_master_table;
 struct format_table fs_format_table;
-
+char current_dir[8] = "root";
 int init_fs()
 {
 
@@ -91,6 +92,62 @@ int update_table()
     memcpy(buf, &min_tab, sizeof(min_tab));
     ide_write_sectors(0,8,5,buf);
 }
+int make_dir(char *dir_name[8])
+{
+    char buf[512] = {0};
+    memset(buf, 0, sizeof(buf));
+    for (uint32 i = FILE_SECTOR_BASE+1; i < 900; i++)
+    {
+        uint32 LBA = i;
+        
+        
+        //ide_read_sectors(0, 1, i, (uint32)buf);
+        // memcpy(&f, buf, sizeof(f));
+        //printf("File lba: %d\n",LBA);
+        //printf("Is_file: %s\n",f.is_file);
+        #define DEBUG
+        #ifdef DEBUG
+
+            printf("%d : ",fs_master_table.used_sectors[i-FILE_SECTOR_BASE+1]);
+        #endif
+        if(isInArray(LBA,fs_master_table.used_sectors,900) != 0)
+        {
+             
+                //printf("hello world");
+                struct DICTIONARY d;
+                memset(buf, 0, sizeof(buf));
+                
+                ide_read_sectors(0, 1, i, (uint32)buf);
+                memcpy(&d, buf, sizeof(d));
+                fs_master_table.used_sectors[i-FILE_SECTOR_BASE+1] = LBA;
+                strcpy(d.dict_name,dir_name);
+                
+                
+             
+                
+                memset(buf, 0, sizeof(buf));
+                memcpy(buf, &d, sizeof(d));
+                ide_write_sectors(0,1,LBA,buf);
+                printf("\nYour file is stored in LBA %d", LBA);
+                fs_master_table_update();
+                // printf(" \nis_file: %s\n",f.is_file);
+                // printf("File name: %s\n",f.filename);
+                // printf("File data: %s\n",f.data);
+                // printf("lba: %d",LBA);
+                return LBA;
+            
+           
+        }
+
+        
+
+       
+        
+        
+    }
+    return -1;
+
+}
 int isInArray(int num, int* arr, int size) {
     for (int i = 0; i < size; i++) {
         if (arr[i] == num) {
@@ -137,6 +194,23 @@ void removeIntFromArray(int *arr, int *size, int num) {
         printf("Number %d is not in the list.\n", num);
     }
 }
+int clean_fs_master_table(int num)
+{
+    //printf("%d\n", fs_master_table.used_sectors[2]);
+    int *array[900];
+    for (size_t i = 0; i < 900; i++)
+    {
+        if(fs_master_table.used_sectors[i] == num)
+        {   //?printf("Fs_master_table.used_sectors[%d] = %d\n",i,fs_master_table.used_sectors[i]);
+            fs_master_table.used_sectors[i] = NULL;
+            //?printf("Fs_master_table.used_sectors[%d] = %d",i,fs_master_table.used_sectors[i]);
+        }
+    }
+    
+    
+    update_table();
+    //removeIntFromArray(&fs_master_table.used_sectors,sizeof(fs_master_table.used_sectors)/8,fs_master_table.used_sectors[2]);
+}
 int list_files()
 {
      for (uint32 i = FILE_SECTOR_BASE+1; i < 900; i++)
@@ -144,19 +218,20 @@ int list_files()
         uint32 LBA = i;
         char buf[512] = {0};
         memset(buf, 0, sizeof(buf));
-        struct FILE f;
+        struct FILE_V2 f;
         ide_read_sectors(0, 1, i, (uint32)buf);
         memcpy(&f, buf, sizeof(f));
         //printf("File name: %s\n",f.filename);
         //printf("is_file: %s\n",f.is_file);
-        if(isInArray(LBA,fs_master_table.used_sectors,900) == 0 && strcmp(f.is_file,"True")==0)
+        if(isInArray(LBA,fs_master_table.used_sectors,900) == 0 && strcmp(f.is_file,"True")==0 && strcmp(f.dictionary,current_dir) == 0)
         {
             printf("\nFile name: %s",f.filename);
+            printf("\nDirectory name: %s",f.dictionary);
             printf("\nLBA %d",LBA);
             if(strcmp(f.is_file,"True") != 0 && isInArray(LBA,fs_master_table.used_sectors,sizeof(fs_master_table.used_sectors)/8) == 0)
             {
                
-                removeIntFromArray(fs_master_table.used_sectors,sizeof(fs_master_table.used_sectors)/8,LBA);
+                clean_fs_master_table(LBA);
             }
             // strcpy(f.filename,filename);
             // strcpy(f.data,data);
@@ -182,12 +257,17 @@ int format_disk()
     char buf[512];
     strcpy(format.format,"SSFS_V1");
     strcpy(format.is_format,"True");
+    for (size_t i = 0; i < 900; i++)
+    {
+        fs_master_table.used_sectors[i] = 0;
+    }
     
     format.sector_size = 512;
 
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &format, sizeof(format));
     ide_write_sectors(0,1,20,buf);
+    cmd_handler("set-xy");
 }
 
 int fs_master_table_p()
@@ -204,7 +284,7 @@ int fs_master_table_p()
     
 }
 
-int write(char filename[8], char data[512-10])
+int write(char filename[8], char file_type[3],char data[512-10])
 {
     char buf[512] = {0};
     memset(buf, 0, sizeof(buf));
@@ -212,21 +292,25 @@ int write(char filename[8], char data[512-10])
     {
         uint32 LBA = i;
         
-        struct FILE f;
-        memset(buf, 0, sizeof(buf));
         
-        ide_read_sectors(0, 1, i, (uint32)buf);
-        memcpy(&f, buf, sizeof(f));
         //ide_read_sectors(0, 1, i, (uint32)buf);
         // memcpy(&f, buf, sizeof(f));
         //printf("File lba: %d\n",LBA);
         //printf("Is_file: %s\n",f.is_file);
-        
-        printf("%d : ",fs_master_table.used_sectors[i-FILE_SECTOR_BASE+1]);
+        #define DEBUG
+        #ifdef DEBUG
+
+            printf("%d : ",fs_master_table.used_sectors[i-FILE_SECTOR_BASE+1]);
+        #endif
         if(isInArray(LBA,fs_master_table.used_sectors,900) != 0)
         {
              
                 //printf("hello world");
+                struct FILE_V2 f;
+                memset(buf, 0, sizeof(buf));
+                
+                ide_read_sectors(0, 1, i, (uint32)buf);
+                memcpy(&f, buf, sizeof(f));
                 fs_master_table.used_sectors[i-FILE_SECTOR_BASE+1] = LBA;
                 strcpy(f.filename,filename);
                 if(sizeof(data) >= sizeof(f.data))
@@ -239,7 +323,7 @@ int write(char filename[8], char data[512-10])
                 }
                 strcpy(f.data,data);
                 strcpy(f.is_file,"True");
-
+                strcpy(f.dictionary,current_dir);
                 memset(buf, 0, sizeof(buf));
                 memcpy(buf, &f, sizeof(f));
                 ide_write_sectors(0,1,LBA,buf);
@@ -272,13 +356,13 @@ int read(char filename[8])
         uint32 LBA = i;
         char buf[512] = {0};
         memset(buf, 0, sizeof(buf));
-        struct FILE f;
+        struct FILE_V2 f;
         ide_read_sectors(0, 1, i, (uint32)buf);
         memcpy(&f, buf, sizeof(f));
         //printf("File name: %s\n",f.filename);
         //printf("is_file: %s\n",f.is_file);
         
-        if(isInArray(LBA,fs_master_table.used_sectors,900) == 0 && strcmp(f.filename,filename) == 0)
+        if(isInArray(LBA,fs_master_table.used_sectors,900) == 0 && strcmp(f.filename,filename) == 0 && strcmp(f.dictionary,current_dir) == 0)
         {
             // if(f.next_sector != 0)
             // {
@@ -308,7 +392,7 @@ int delete_file(char *filename[8])
         uint32 LBA = i;
         char buf[512] = {0};
         memset(buf, 0, sizeof(buf));
-        struct FILE f;
+        struct FILE_V2 f;
         ide_read_sectors(0, 1, i, (uint32)buf);
         memcpy(&f, buf, sizeof(f));
         //printf("File name: %s\n",f.filename);
@@ -322,7 +406,7 @@ int delete_file(char *filename[8])
             memset(buf, 0, sizeof(buf));
             ide_write_sectors(0, 1, i, (uint32)buf);
             
-            removeIntFromArray(fs_master_table.used_sectors,900,fs_master_table.used_sectors[i-FILE_SECTOR_BASE+1]);
+            clean_fs_master_table(LBA);
 
             // strcpy(f.filename,filename);
             // strcpy(f.data,data);

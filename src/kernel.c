@@ -143,6 +143,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         #define FAT 1
         #if FAT
             init_fs();
+            //clean_fs_master_table(46);
+            //fs_master_table_p();
             //run_once();
         #else
             fl_init();
@@ -421,7 +423,7 @@ void terminal_main()
                 set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
-                printf(">");
+                printf("%s>");
                 //crude_song();
             }
             

@@ -51,7 +51,7 @@ void cmd_handler(char *buffer[512])
        //printf(out);
         strcpy(buf, out);
 
-        write(string, out);
+        write(string, "txt",out);
         // ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
         // printf("\nLBA: %d\n",LBA);
         // memset(buf, 0, sizeof(buf));
@@ -94,26 +94,48 @@ void cmd_handler(char *buffer[512])
         printf("\n");
         list_files();
     }
-    
-    else if (strcmp(buffer,"write1!") == 0)
+    else if (strstr(buffer,"mkdir(") != NULL)
     {
-        uint32 l;
-        l = write("food", "eat food");
-        printf("L: %d\n",l);
+        char *parser;
+        char string[32];
+        parser = strstr(buffer, "write(");
+        parser += strlen("write(");
+        parse_string(string, parser, ')');
+        const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
+        //const uint32 LBA = atoi(string);
+        
+       
+        const uint8 NO_OF_SECTORS = 1;
+        char buf[ATA_SECTOR_SIZE] = {0};
+      
+        
+        char out[512];
+       printf("\nText:");
+       text_editor(512,out);
+       //printf(out);
+        strcpy(buf, out);
+
+        write(string, "txt", out);
     }
-    else if (strcmp(buffer,"read1!") == 0)
-    {
-        uint32 l;
-        l = read("food");
-        //printf("L: %d\n",l);
-    }
+    // else if (strcmp(buffer,"write1!") == 0)
+    // {
+    //     uint32 l;
+    //     l = write("food", "eat food");
+    //     printf("L: %d\n",l);
+    // }
+    // else if (strcmp(buffer,"read1!") == 0)
+    // {
+    //     uint32 l;
+    //     l = read("food");
+    //     //printf("L: %d\n",l);
+    // }
     
     else if(strcmp(buffer,"exit") == 0)
     {
         fs_master_table_update();
     }
     
-    else if (strcmp(buffer,"screen size") == 0)
+    else if (strcmp(buffer,"set-xy") == 0)
     {
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         const uint32 LBA = KERNEL_SECTOR_BASE+1;
@@ -156,12 +178,17 @@ void cmd_handler(char *buffer[512])
     {
         format_disk();
     }
-    else if (strstr(buffer,"delete(") != NULL) 
+    else if (strcmp(buffer,"table") == 0)
+    {
+        fs_master_table_p();
+    }
+    
+    else if (strstr(buffer,"rm(") != NULL) 
     {
         char *parser;
         char string[1];
-        parser = strstr(buffer, "delete(");
-        parser += strlen("delete(");
+        parser = strstr(buffer, "rm(");
+        parser += strlen("rm(");
         parse_string(string, parser, ')');
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         //const uint32 LBA = atoi(string);
