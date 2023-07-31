@@ -9,7 +9,7 @@
 #define MAX_SIZE 100
 
 // Global Variables
-struct fs_table fs_master_table;
+struct fs_partition_table fs_partition_table_main;
 struct format_table fs_format_table;
 char current_dir[8] = "root";
 
@@ -33,7 +33,7 @@ int init_fs()
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
         ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
-        memcpy(&fs_master_table, buf, sizeof(fs_master_table));
+        memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
         printf("File format: %s\n", fs_format_table.format);
 
@@ -42,9 +42,9 @@ int init_fs()
         #if FILE_OUT
             for (size_t i = 0; i < 512; i++)
             {
-                if (fs_master_table.used_sectors[i] != 0)
+                if (fs_partition_table_main.used_sectors[i] != 0)
                 {
-                    printf("\nUsed sectors: %d", fs_master_table.used_sectors[i]);
+                    printf("\nUsed sectors: %d", fs_partition_table_main.used_sectors[i]);
                 }
             }
         #endif
@@ -59,16 +59,16 @@ int init_fs()
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
         ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
-        memcpy(&fs_master_table, buf, sizeof(fs_master_table));
+        memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
         // Debug: Print used sectors in the master table
         #define FILE_OUT 0
         #if FILE_OUT
             for (size_t i = 0; i < 512; i++)
             {
-                if (fs_master_table.used_sectors[i] != 0)
+                if (fs_partition_table_main.used_sectors[i] != 0)
                 {
-                    printf("\nUsed sectors: %d", fs_master_table.used_sectors[i]);
+                    printf("\nUsed sectors: %d", fs_partition_table_main.used_sectors[i]);
                 }
             }
         #endif
@@ -81,7 +81,7 @@ int init_fs()
 // Return: Integer - Returns 0 if successful.
 int run_once()
 {
-    struct fs_table min_tab;
+    struct fs_partition_table min_tab;
     char buf[sizeof(min_tab)];
     min_tab.used_sectors[0] = FILE_SECTOR_BASE;
 
@@ -96,12 +96,12 @@ int run_once()
 // Return: Integer - Returns 0 if successful.
 int update_table()
 {
-    struct fs_table min_tab;
-    memcmp(&min_tab.used_sectors, fs_master_table.used_sectors, sizeof(fs_master_table.used_sectors)); //min_tab.used_sectors = fs_master_table.used_sectors;
+    struct fs_partition_table min_tab;
+    memcmp(&min_tab.used_sectors, fs_partition_table_main.used_sectors, sizeof(fs_partition_table_main.used_sectors)); //min_tab.used_sectors = fs_partition_table_main.used_sectors;
     char buf[920];
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &min_tab, sizeof(min_tab));
-    ide_write_sectors(0, 8, 5, buf);
+    ide_write_sectors(0, 8, KERNEL_SECTOR_BASE + 2, buf);
     return 0;
 }
 
@@ -119,24 +119,24 @@ int make_dir(char *dir_name[8])
         uint32 LBA = i;
         #define DEBUG
         #ifdef DEBUG
-            printf("%d : ", fs_master_table.used_sectors[i - FILE_SECTOR_BASE + 1]);
+            printf("%d : ", fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1]);
         #endif
 
         // Check if the sector is available for use
-        if (isInArray(LBA, fs_master_table.used_sectors, 900) != 0)
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) != 0)
         {
             struct DICTIONARY d;
             memset(buf, 0, sizeof(buf));
             ide_read_sectors(0, 1, i, (uint32)buf);
             memcpy(&d, buf, sizeof(d));
-            fs_master_table.used_sectors[i - FILE_SECTOR_BASE + 1] = LBA;
+            fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1] = LBA;
             strcpy(d.dict_name, dir_name);
 
             memset(buf, 0, sizeof(buf));
             memcpy(buf, &d, sizeof(d));
             ide_write_sectors(0, 1, LBA, buf);
             printf("\nYour directory is stored in LBA %d", LBA);
-            fs_master_table_update();
+            fs_partition_table_main_update();
             return LBA;
         }
     }
@@ -224,19 +224,19 @@ void removeIntFromArray(int *arr, int *size, int num)
     }
 }
 
-// Function: clean_fs_master_table
+// Function: clean_fs_partition_table_main
 // Description: Cleans the master table by removing a given number from the used sectors array.
 // Parameters:
 //      - num: The number to remove from the used sectors array.
 // Return: None
-void clean_fs_master_table(int num)
+void clean_fs_partition_table_main(int num)
 {
     int *array[900];
     for (size_t i = 0; i < 900; i++)
     {
-        if (fs_master_table.used_sectors[i] == num)
+        if (fs_partition_table_main.used_sectors[i] == num)
         {
-            fs_master_table.used_sectors[i] = NULL;
+            fs_partition_table_main.used_sectors[i] = 0;
         }
     }
     update_table();
@@ -252,12 +252,12 @@ void list_files()
         uint32 LBA = i;
         char buf[512] = {0};
         memset(buf, 0, sizeof(buf));
-        struct FILE_V2 f;
+        struct FILE_HEADER_V1 f;
         ide_read_sectors(0, 1, i, (uint32)buf);
         memcpy(&f, buf, sizeof(f));
 
         // Check if the sector is used and the file belongs to the current directory
-        if (isInArray(LBA, fs_master_table.used_sectors, 900) == 0 &&
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) == 0 &&
             strcmp(f.is_file, "True") == 0 && strcmp(f.dictionary, current_dir) == 0)
         {
             printf("\nFile name: %s", f.filename);
@@ -265,9 +265,9 @@ void list_files()
             printf("\nLBA %d", LBA);
 
             // Clean up master table if necessary
-            if (strcmp(f.is_file, "True") != 0 && isInArray(LBA, fs_master_table.used_sectors, sizeof(fs_master_table.used_sectors) / 8) == 0)
+            if (strcmp(f.is_file, "True") != 0 && isInArray(LBA, fs_partition_table_main.used_sectors, sizeof(fs_partition_table_main.used_sectors) / 8) == 0)
             {
-                clean_fs_master_table(LBA);
+                clean_fs_partition_table_main(LBA);
             }
         }
     }
@@ -289,7 +289,7 @@ int format_disk()
     // Clear used sectors in the master table
     for (size_t i = 0; i < 900; i++)
     {
-        fs_master_table.used_sectors[i] = 0;
+        fs_partition_table_main.used_sectors[i] = 0;
     }
 
     memset(buf, 0, sizeof(buf));
@@ -299,21 +299,30 @@ int format_disk()
     return 0;
 }
 
-// Function: fs_master_table_p
+// Function: fs_partition_table_main_p
 // Description: Prints the master table for debugging purposes.
 // Return: None
-int fs_master_table_p()
+int fs_partition_table_main_p()
 {
     printf("\n");
     clear_screen();
-    printf("%d\n", sizeof(fs_master_table));
+    printf("%d\n", sizeof(fs_partition_table_main));
     for (size_t i = 0; i < 900; i++)
     {
-        printf("%d|", fs_master_table.used_sectors[i]);
+        printf("%d|", fs_partition_table_main.used_sectors[i]);
     }
     return 0;
 }
-
+int str_len(char *str) 
+{
+    int len = 0;
+    while(*str)
+    {
+        len++;
+        *str++;
+    }
+    return len;
+}
 // Function: write
 // Description: Writes data to a file with the specified name in the current directory.
 // Parameters:
@@ -321,44 +330,88 @@ int fs_master_table_p()
 //      - file_type: The type of the file (up to 3 characters).
 //      - data: The data to be written to the file.
 // Return: Integer - Returns the Logical Block Address (LBA) of the file if successful, or -1 if failed.
-int write(char filename[8], char file_type[3], char data[512 - 10])
+int write(char filename[8], char file_type[3], char data[1024])
 {
     char buf[512] = {0};
     memset(buf, 0, sizeof(buf));
+    printf("\nData: %d\n",sizeof(data));
     for (uint32 i = FILE_SECTOR_BASE + 1; i < 900; i++)
     {
         uint32 LBA = i;
         #define DEBUG
         #ifdef DEBUG
-            printf("%d : ", fs_master_table.used_sectors[i - FILE_SECTOR_BASE + 1]);
+            printf("\n%d : ", fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1]);
         #endif
 
         // Check if the sector is available for use
-        if (isInArray(LBA, fs_master_table.used_sectors, 900) != 0)
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) != 0)
         {
-            struct FILE_V2 f;
+            struct FILE_HEADER_V1 f;
             memset(buf, 0, sizeof(buf));
             ide_read_sectors(0, 1, i, (uint32)buf);
             memcpy(&f, buf, sizeof(f));
-            fs_master_table.used_sectors[i - FILE_SECTOR_BASE + 1] = LBA;
+            fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1] = LBA;
             strcpy(f.filename, filename);
-            if (sizeof(data) >= sizeof(f.data))
+            
+            struct BLOCK fs_data;
+            int count = 0;
+            printf("\n");
+            for (size_t x = 0; x < (strlen(data)/512)+1; x++)
             {
-                printf("Warning: Data size exceeds maximum file size.\n");
+                printf("Write: f.data[%d] = %d\n",x,LBA+x+1);
+                f.data[x] = LBA+x+1;
+                count = count + 1;
+                printf("Count: %d\n",count);
+                
+
             }
-            else
-            {
-                f.next_sector = 0;
-            }
-            strcpy(f.data, data);
+            f.next_sector = count;
+            
+            
+            
             strcpy(f.is_file, "True");
             strcpy(f.dictionary, current_dir);
-
+            //printf("\nBuf: %d\n",sizeof(buf));
             memset(buf, 0, sizeof(buf));
             memcpy(buf, &f, sizeof(f));
-            ide_write_sectors(0, 1, LBA, buf);
+            ide_write_sectors(0, 1, LBA, (uint32)buf);
+            int start = 0;
+            for (size_t w = 0; w < count; w++)
+            {
+                
+                //printf("W");
+                memset(fs_data.data,0,sizeof(fs_data.data));
+                memset(buf, 0, sizeof(buf));
+                for (size_t e = start; e < start+512; e++)
+                {
+                    if(strlen(data) <= start)
+                    {
+                       printf("%d ", e);
+                    }
+                     append(buf, data[e]);
+                    
+                    
+                }
+                append(buf,'\0');
+                strcpy(fs_data.data, buf);
+                 memset(buf, 0, sizeof(buf));
+                 memcpy(buf, &fs_data, sizeof(fs_data));
+                ide_write_sectors(0,1,f.data[w],(uint32)buf);
+                printf("Data at LBA+1+w: %d\n",f.data[w]);
+                printf("%s\n",buf);
+                start = start + 512;
+                
+                //printf("\n fs_data.data: %s",buf);
+                fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2+w] = f.data[w];
+            }
+            
+            // memset(buf, 0, sizeof(buf));
+            // memcpy(buf, &fs_data, sizeof(fs_data));
+            // ide_write_sectors(0,1,LBA+1,(uint32)buf);
+            //printf("\n fs_data.data: %s",buf);
+             //fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2] = LBA+1;
             printf("\nYour file is stored in LBA %d", LBA);
-            fs_master_table_update();
+            fs_partition_table_main_update();
             return LBA;
         }
     }
@@ -377,19 +430,59 @@ int read(char filename[8])
         uint32 LBA = i;
         char buf[512] = {0};
         memset(buf, 0, sizeof(buf));
-        struct FILE_V2 f;
+        struct FILE_HEADER_V1 f;
         ide_read_sectors(0, 1, i, (uint32)buf);
         memcpy(&f, buf, sizeof(f));
 
         // Check if the sector is used and the file belongs to the current directory
-        if (isInArray(LBA, fs_master_table.used_sectors, 900) == 0 &&
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) == 0 &&
             strcmp(f.filename, filename) == 0 && strcmp(f.dictionary, current_dir) == 0)
         {
             // if(f.next_sector != 0)
             // {
             //     printf("here: %d",f.next_sector);
             // }
-            printf("\nFile data\n%s", f.data);
+             memset(buf, 0, sizeof(buf));
+             
+             char data_out[1024] = {0};
+             memset(data_out, 0, sizeof(data_out));
+             printf("\n");
+             for (size_t x = 0; x < f.next_sector; x++)
+             {
+                struct BLOCK fs_data;
+                if(f.data[x] != 0)
+                {
+                    //printf("Read: f.data[%d] = %d\n",x,f.data[x]);
+                    char inner_buf[512] = {0};
+                    memset(inner_buf, 0, sizeof(inner_buf));
+                    ide_read_sectors(0,1,f.data[x],(uint32)inner_buf);
+                    memcpy(&fs_data, inner_buf, sizeof(fs_data));
+                    //printf("strlen(%d)",strlen(fs_data.data));
+                    for (size_t q = 0; q < 512; q++)
+                    {
+                        if(fs_data.data[q] != 0)
+                        {
+                            append(data_out,fs_data.data[q]);
+                        }
+                       
+                       //printf("fs_data.data[%d] = %s ",q,fs_data.data[q]);
+                    }
+                    printf("Data at: %d\n",f.data[x]);
+                    printf("%s\n",fs_data.data);
+                   
+                     //printf("\nFile data in loop\n%s", data_out);
+                    
+                    
+                }
+                else
+                {
+                    break;
+                }
+               
+
+             }
+             
+            printf("\nFile data\n%s", data_out);
             return LBA;
         }
     }
@@ -408,7 +501,7 @@ int delete_file(char *filename[8])
         uint32 LBA = i;
         char buf[512] = {0};
         memset(buf, 0, sizeof(buf));
-        struct FILE_V2 f;
+        struct FILE_HEADER_V1 f;
         ide_read_sectors(0, 1, i, (uint32)buf);
         memcpy(&f, buf, sizeof(f));
 
@@ -421,23 +514,23 @@ int delete_file(char *filename[8])
             memset(buf, 0, sizeof(buf));
             ide_write_sectors(0, 1, i, (uint32)buf);
 
-            clean_fs_master_table(LBA);
+            clean_fs_partition_table_main(LBA);
             return LBA;
         }
     }
     return -1;
 }
 
-// Function: fs_master_table_update
+// Function: fs_partition_table_main_update
 // Description: Updates the master table on the disk with the current in-memory master table.
 // Return: None
-int fs_master_table_update()
+int fs_partition_table_main_update()
 {
-    struct fs_table min_tab;
+    struct fs_partition_table min_tab;
     char buf[920];
 
     memset(buf, 0, sizeof(buf));
-    memcpy(buf, &fs_master_table, sizeof(fs_master_table));
+    memcpy(buf, &fs_partition_table_main, sizeof(fs_partition_table_main));
     ide_write_sectors(0, 1, KERNEL_SECTOR_BASE + 2, buf);
     return 0;
 }

@@ -143,8 +143,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         #define FAT 1
         #if FAT
             init_fs();
-            //clean_fs_master_table(46);
-            //fs_master_table_p();
+            //clean_fs_partition_table_main(46);
+            //fs_partition_table_main_p();
             //run_once();
         #else
             fl_init();
@@ -160,7 +160,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             fl_listdirectory("/");
         #endif
         print_drives();
-        //fs_master_table_p();
+        //fs_partition_table_main_p();
     //     fl_init();
 
     // // Attach media access functions to library

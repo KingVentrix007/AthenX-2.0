@@ -36,7 +36,7 @@ void cmd_handler(char *buffer[512])
     {
         
         char *parser;
-        char string[32];
+        char string[8];
         parser = strstr(buffer, "write(");
         parser += strlen("write(");
         parse_string(string, parser, ')');
@@ -48,11 +48,11 @@ void cmd_handler(char *buffer[512])
         char buf[ATA_SECTOR_SIZE] = {0};
       
         
-        char out[512];
+        char out[1024];
        printf("\nText:");
        text_editor(512,out);
        //printf(out);
-        strcpy(buf, out);
+        //strcpy(buf, out);
 
         write(string, "txt",out);
         // ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
@@ -83,7 +83,7 @@ void cmd_handler(char *buffer[512])
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         //const uint32 LBA = atoi(string);
         const uint8 NO_OF_SECTORS = 1;
-        char buf[ATA_SECTOR_SIZE] = {0};
+        char buf[1024] = {0};
 
         memset(buf, 0, sizeof(buf));
         read(string);
@@ -112,7 +112,7 @@ void cmd_handler(char *buffer[512])
         char buf[ATA_SECTOR_SIZE] = {0};
       
         
-        char out[512];
+        char out[1024];
        printf("\nText:");
        text_editor(512,out);
        //printf(out);
@@ -135,7 +135,7 @@ void cmd_handler(char *buffer[512])
     
     else if(strcmp(buffer,"exit") == 0)
     {
-        fs_master_table_update();
+        fs_partition_table_main_update();
     }
     
     else if (strcmp(buffer,"set-xy") == 0)
@@ -183,7 +183,7 @@ void cmd_handler(char *buffer[512])
     }
     else if (strcmp(buffer,"table") == 0)
     {
-        fs_master_table_p();
+        fs_partition_table_main_p();
     }
     
     else if (strstr(buffer,"rm(") != NULL) 

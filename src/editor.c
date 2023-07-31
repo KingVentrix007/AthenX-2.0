@@ -4,8 +4,8 @@
 #include "ide.h"
 int text_editor(int max_letters,char *dest)
 {
-    int max = max_letters;
-    char out[max_letters];
+    int max = 0;
+    char out[1024];
     while(1==1)
     {
             char c = kb_getchar();
@@ -14,7 +14,7 @@ int text_editor(int max_letters,char *dest)
                 //crude_song();
                 if(backspace(out))
                 {  
-                    max = max +1;
+                    //max = max +1;
                     printf("\b");
                 }
                 else
@@ -26,6 +26,7 @@ int text_editor(int max_letters,char *dest)
             }
             else if (c == '`')
             {
+                append(out,'\0');
                 break;
                 //printf("\n");
                 // cmd_handler(buffer);
@@ -38,7 +39,7 @@ int text_editor(int max_letters,char *dest)
                 //crude_song();
             }
             
-            else if(max >= 1)
+            else if(1 == 1)
             {
                 
                 char* s;
@@ -46,10 +47,10 @@ int text_editor(int max_letters,char *dest)
                 //printf(s);
                 printf(s);
                 //printf(s);
-                max = max -1;
+                max = max + 1;
                 append(out,c);
             }
-            else
+            if(max >= 512)
             {
                 beep();
             }

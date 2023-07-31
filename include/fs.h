@@ -9,7 +9,7 @@ typedef struct FILE
     char is_file[5];
     int next_sector;
 };
-typedef struct fs_table
+typedef struct fs_partition_table
 {
     int used_sectors[900];
 
@@ -24,30 +24,44 @@ typedef struct format_table
 
 
 };
-typedef struct FILE_V2
+// typedef struct FILE_V2
+// {
+//     char filename[8];
+//     char data[ATA_SECTOR_SIZE-8-5-8-8-3];
+//     char is_file[5];
+//     char dictionary[8];
+//     char file_type[3];
+//     int next_sector;
+// };
+typedef struct FILE_HEADER_V1
 {
     char filename[8];
-    char data[ATA_SECTOR_SIZE-8-5-8-8-3];
+    int data[(ATA_SECTOR_SIZE-8-5-8-8-3)/8]; //stores a list of the LBA where the files data is stored
     char is_file[5];
     char dictionary[8];
     char file_type[3];
     int next_sector;
+};
+typedef struct BLOCK
+{
+    char data[ATA_SECTOR_SIZE];
+    
 };
 typedef struct DICTIONARY
 {
     char dict_name[8];
     char flies[20][8];
 };
-int write(char filename[8],char file_type[3],char data[512-8]);
+int write(char filename[8],char file_type[3],char data[1024]);
 int run_once();
 int read(char filename[8]);
 int init_fs();
 int update_table();
 void list_files();
-int fs_master_table_update();
-int fs_master_table_p();
+int fs_partition_table_main_update();
+int fs_partition_table_main_p();
 int format_disk();
 delete_file(char *filename[8]);
-void clean_fs_master_table(int num);
+void clean_fs_partition_table_main(int num);
 int make_dir(char *dir_name[8]);
 #endif
