@@ -48,9 +48,9 @@ void cmd_handler(char *buffer[512])
         char buf[ATA_SECTOR_SIZE] = {0};
       
         
-        char out[1024];
+        char out[MAX_FILE_SIZE];
        printf("\nText:");
-       text_editor(512,out);
+       text_editor(MAX_FILE_SIZE,out);
        //printf(out);
         //strcpy(buf, out);
 
@@ -83,7 +83,7 @@ void cmd_handler(char *buffer[512])
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         //const uint32 LBA = atoi(string);
         const uint8 NO_OF_SECTORS = 1;
-        char buf[1024] = {0};
+        char buf[MAX_FILE_SIZE] = {0};
 
         memset(buf, 0, sizeof(buf));
         read(string);
@@ -92,7 +92,7 @@ void cmd_handler(char *buffer[512])
 
        
     }
-    else if (strcmp(buffer,"list") == 0)
+    else if (strcmp(buffer,"ls") == 0)
     {
         printf("\n");
         list_files();
@@ -101,8 +101,8 @@ void cmd_handler(char *buffer[512])
     {
         char *parser;
         char string[32];
-        parser = strstr(buffer, "write(");
-        parser += strlen("write(");
+        parser = strstr(buffer, "mkdir(");
+        parser += strlen("mkdir(");
         parse_string(string, parser, ')');
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         //const uint32 LBA = atoi(string);
@@ -112,13 +112,23 @@ void cmd_handler(char *buffer[512])
         char buf[ATA_SECTOR_SIZE] = {0};
       
         
-        char out[1024];
-       printf("\nText:");
-       text_editor(512,out);
+    //     char out[MAX_FILE_SIZE];
+    //    printf("\nDict name:");
+    //    text_editor(8,out);
        //printf(out);
-        strcpy(buf, out);
+        //strcpy(buf, out);
 
-        write(string, "txt", out);
+        make_dir(string);
+    }
+    else if(strstr(buffer, "cd("))
+    {
+         char *parser;
+        char string[32];
+        parser = strstr(buffer, "cd(");
+        parser += strlen("cd(");
+        parse_string(string, parser, ')');
+        set_dir(string);
+
     }
     // else if (strcmp(buffer,"write1!") == 0)
     // {

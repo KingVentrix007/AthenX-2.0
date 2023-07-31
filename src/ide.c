@@ -587,3 +587,17 @@ int print_drives()
             printf("  signature: 0x%x, features: %d\n", g_ide_devices[i].signature, g_ide_devices[i].features);
         }
 }
+
+uint64 get_sectors(int drive)
+{
+     for (int i = 0; i < 4; i++)
+        if (g_ide_devices[i].reserved == 1) {
+            if(g_ide_devices[i].drive == drive)
+            {
+                uint64 sectors;
+                sectors = g_ide_devices[i].size;
+                return sectors;
+            }
+        }
+    
+}

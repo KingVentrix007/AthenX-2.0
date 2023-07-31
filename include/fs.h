@@ -2,16 +2,22 @@
 #define FS_H
 #include "stdint.h"
 #include "types.h"
+
+#define MAX_FILE_SIZE 1024 //max file size in bytes
+
+
 typedef struct FILE
 {
     char filename[8];
     char data[ATA_SECTOR_SIZE-8-5-8];
     char is_file[5];
-    int next_sector;
+    int num_sectors;
 };
 typedef struct fs_partition_table
 {
-    int used_sectors[900];
+    int used_sectors[128-4];
+    int next_partition;
+    
 
 };
 
@@ -31,16 +37,17 @@ typedef struct format_table
 //     char is_file[5];
 //     char dictionary[8];
 //     char file_type[3];
-//     int next_sector;
+//     int num_sectors;
 // };
 typedef struct FILE_HEADER_V1
 {
     char filename[8];
-    int data[(ATA_SECTOR_SIZE-8-5-8-8-3)/8]; //stores a list of the LBA where the files data is stored
+    int file_data_lbas[(ATA_SECTOR_SIZE-8-5-8-8-3-8)/8]; //stores a list of the LBA where the files data is stored
     char is_file[5];
     char dictionary[8];
     char file_type[3];
-    int next_sector;
+    int num_sectors;
+    int file_size; //number of sectors in the file
 };
 typedef struct BLOCK
 {
@@ -63,5 +70,6 @@ int fs_partition_table_main_p();
 int format_disk();
 delete_file(char *filename[8]);
 void clean_fs_partition_table_main(int num);
-int make_dir(char *dir_name[8]);
+int make_dir(char dir_name[8]);
+int set_dir(char dirname[8]);
 #endif

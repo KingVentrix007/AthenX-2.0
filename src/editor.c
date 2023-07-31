@@ -2,10 +2,11 @@
 #include "string.h"
 #include "display.h"
 #include "ide.h"
+#include "fs.h"
 int text_editor(int max_letters,char *dest)
 {
     int max = 0;
-    char out[1024];
+    char out[max_letters];
     while(1==1)
     {
             char c = kb_getchar();
@@ -39,7 +40,7 @@ int text_editor(int max_letters,char *dest)
                 //crude_song();
             }
             
-            else if(1 == 1)
+            else if(max < max_letters)
             {
                 
                 char* s;
@@ -50,7 +51,7 @@ int text_editor(int max_letters,char *dest)
                 max = max + 1;
                 append(out,c);
             }
-            if(max >= 512)
+            if(max >= max_letters)
             {
                 beep();
             }
