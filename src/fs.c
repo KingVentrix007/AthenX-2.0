@@ -330,7 +330,7 @@ int str_len(char *str)
 //      - file_type: The type of the file (up to 3 characters).
 //      - data: The data to be written to the file.
 // Return: Integer - Returns the Logical Block Address (LBA) of the file if successful, or -1 if failed.
-int write(char filename[8], char file_type[3], char data[1024])
+int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
 {
     char buf[512] = {0};
     memset(buf, 0, sizeof(buf));
@@ -445,7 +445,7 @@ int read(char filename[8])
             // }
              memset(buf, 0, sizeof(buf));
              
-             char data_out[1024] = {0};
+             char data_out[MAX_FILE_SIZE] = {0};
              memset(data_out, 0, sizeof(data_out));
              //+printf("\n");
              for (size_t x = 0; x < f.num_sectors; x++)

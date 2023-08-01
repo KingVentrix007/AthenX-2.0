@@ -90,6 +90,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     display_init(1,0,0,32);
      //timer_init();
      ata_init();
+     //mouse_init();
     //console_init(COLOR_WHITE, COLOR_BLACK);
 
     keyboard_init();

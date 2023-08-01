@@ -48,9 +48,9 @@ void cmd_handler(char *buffer[512])
         char buf[ATA_SECTOR_SIZE] = {0};
       
         
-        char out[1024];
+        char out[MAX_FILE_SIZE];
        printf("\nText:");
-       text_editor(512,out);
+       text_editor(MAX_FILE_SIZE,out);
        //printf(out);
         //strcpy(buf, out);
 
@@ -83,7 +83,7 @@ void cmd_handler(char *buffer[512])
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         //const uint32 LBA = atoi(string);
         const uint8 NO_OF_SECTORS = 1;
-        char buf[1024] = {0};
+        char buf[MAX_FILE_SIZE] = {0};
 
         memset(buf, 0, sizeof(buf));
         read(string);
@@ -112,7 +112,7 @@ void cmd_handler(char *buffer[512])
         char buf[ATA_SECTOR_SIZE] = {0};
       
         
-        char out[1024];
+        char out[MAX_FILE_SIZE];
        printf("\nText:");
        text_editor(512,out);
        //printf(out);

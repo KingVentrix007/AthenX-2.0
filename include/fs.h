@@ -63,7 +63,7 @@ typedef struct DICTIONARY
     char dict_name[8];
     char flies[20][8];
 };
-int write(char filename[8],char file_type[3],char data[1024]);
+int write(char filename[8],char file_type[3],char data[MAX_FILE_SIZE]);
 int run_once();
 int read(char filename[8]);
 int init_fs();
