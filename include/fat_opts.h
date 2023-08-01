@@ -77,7 +77,7 @@
         #define FAT_PRINTF(a)               printf a
     // Include stdio to use printf
     #else
-        #include <stdio.h>
+        //#include <stdio.h>
         #define FAT_PRINTF(a)               printf a
     #endif
 #endif
