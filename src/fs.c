@@ -30,12 +30,15 @@ int init_fs()
     if (strcmp(fs_format_table.is_format, "True") == 0)
     {
         // Read the master table from disk
+        printf("File format: %s\n", fs_format_table.format);
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
         ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
         memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
-        printf("File format: %s\n", fs_format_table.format);
+        
+        //printf("Size of int --> %d\n",sizeof(fs_partition_table_main.used_sectors));
+        //printf("Size of unsigned int --> %d\n",sizeof(unsigned int));
 
         // Debug: Print used sectors in the master table
         #define FILE_OUT 0
@@ -123,7 +126,7 @@ int make_dir(char *dir_name[8])
         #endif
 
         // Check if the sector is available for use
-        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) != 0)
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 128) != 0)
         {
             struct DICTIONARY d;
             memset(buf, 0, sizeof(buf));
@@ -232,7 +235,7 @@ void removeIntFromArray(int *arr, int *size, int num)
 void clean_fs_partition_table_main(int num)
 {
     int *array[900];
-    for (size_t i = 0; i < 900; i++)
+    for (size_t i = 0; i < 128; i++)
     {
         if (fs_partition_table_main.used_sectors[i] == num)
         {
@@ -257,7 +260,7 @@ void list_files()
         memcpy(&f, buf, sizeof(f));
 
         // Check if the sector is used and the file belongs to the current directory
-        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) == 0 &&
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 128) == 0 &&
             strcmp(f.is_file, "True") == 0 && strcmp(f.dictionary, current_dir) == 0)
         {
             printf("\nFile name: %s", f.filename);
@@ -287,7 +290,7 @@ int format_disk()
     format.sector_size = 512;
 
     // Clear used sectors in the master table
-    for (size_t i = 0; i < 900; i++)
+    for (size_t i = 0; i < 128; i++)
     {
         fs_partition_table_main.used_sectors[i] = 0;
     }
@@ -307,7 +310,7 @@ int fs_partition_table_main_p()
     printf("\n");
     clear_screen();
     printf("%d\n", sizeof(fs_partition_table_main));
-    for (size_t i = 0; i < 900; i++)
+    for (size_t i = 0; i < 128; i++)
     {
         printf("%d|", fs_partition_table_main.used_sectors[i]);
     }
@@ -344,7 +347,7 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
         #endif
 
         // Check if the sector is available for use
-        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) != 0)
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 128) != 0)
         {
             struct FILE_HEADER_V1 f;
             memset(buf, 0, sizeof(buf));
@@ -436,7 +439,7 @@ int read(char filename[8])
         memcpy(&f, buf, sizeof(f));
 
         // Check if the sector is used and the file belongs to the current directory
-        if (isInArray(LBA, fs_partition_table_main.used_sectors, 900) == 0 &&
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 128) == 0 &&
             strcmp(f.filename, filename) == 0 && strcmp(f.dictionary, current_dir) == 0)
         {
             // if(f.next_sector != 0)

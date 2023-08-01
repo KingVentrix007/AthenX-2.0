@@ -11,7 +11,7 @@ typedef struct FILE
 };
 typedef struct fs_partition_table
 {
-    int used_sectors[900];
+    int used_sectors[128];
 
 };
 
