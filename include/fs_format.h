@@ -9,14 +9,14 @@ typedef struct
     char is_formated[5];
 
 
-
 }SUPER_BLOCK;
 
 typedef struct
 {
-    unsigned int used_blocks[120];
-    unsigned int next_partition;
+    unsigned int used_blocks[125];
+    unsigned int last_block;
     unsigned int partition_number;
+    unsigned int num_free_sectors;
 
 
 

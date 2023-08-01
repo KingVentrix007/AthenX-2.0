@@ -69,8 +69,9 @@ void list_files();
 int fs_partition_table_main_update();
 int fs_partition_table_main_p();
 int format_disk();
-delete_file(char *filename[8]);
+int delete_file(char *filename[8]);
 void clean_fs_partition_table_main(int num);
 int make_dir(char dir_name[8]);
 int set_dir(char dirname[8]);
+int isInArray(int num, int *arr, int size);
 #endif

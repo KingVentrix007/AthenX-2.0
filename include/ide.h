@@ -24,8 +24,16 @@ typedef struct {
 } IDE_DEVICE;
 
 
-#define KERNEL_SECTOR_BASE 100
-#define FILE_SECTOR_BASE 200
+#define KERNEL_SECTOR_BASE 100// Start of kernel data loaded or written during boot
+#define FILE_SECTOR_BASE 200 // Start of user file data  
+/*
+Contains SUPER_BLOCK table at FILE_SECTOR_BASE
+Contains First PART_TABLE at FILE_SECTOR_BASE+1
+Contains a PARTITION_TABLE at every next 127 sectors
+
+*/
+
+
 
 
 
