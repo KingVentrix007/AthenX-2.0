@@ -20,10 +20,16 @@ char current_dir[8] = "root";
 int init_fs()
 {
     // Read format table from disk
+    int ret = 0;
     uint32 LBA = 5;
     char table[512];
     memset(table, 0, sizeof(table));
-    ide_read_sectors(0, 1, 20, (uint32)table);
+    ret = ide_read_sectors(0, 1, 20, (uint32)table);
+    if(ret != 0) 
+    {
+        return ret;
+
+    }
     memcpy(&fs_format_table, table, sizeof(fs_format_table));
 
     // Check if the disk is formatted
@@ -33,7 +39,11 @@ int init_fs()
         printf("File format: %s\n", fs_format_table.format);
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
-        ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
+        ret = ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
+        if(ret != 0)
+        {
+            return ret;
+        }
         memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
         
@@ -61,7 +71,11 @@ int init_fs()
         printf("Formatted disk\n");
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
-        ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
+        ret = ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
+        if(ret != 0)
+        {
+            return ret;
+        }
         memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
         // Debug: Print used sectors in the master table
@@ -99,13 +113,14 @@ int run_once()
 // Return: Integer - Returns 0 if successful.
 int update_table()
 {
+    int ret = 0;
     struct fs_partition_table min_tab;
     memcmp(&min_tab.used_sectors, fs_partition_table_main.used_sectors, sizeof(fs_partition_table_main.used_sectors)); //min_tab.used_sectors = fs_partition_table_main.used_sectors;
     char buf[920];
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &min_tab, sizeof(min_tab));
-    ide_write_sectors(0, 8, KERNEL_SECTOR_BASE + 2, buf);
-    return 0;
+    ret = ide_write_sectors(0, 8, KERNEL_SECTOR_BASE + 2, buf);
+    return ret;
 }
 
 // Function: make_dir
@@ -242,6 +257,7 @@ void clean_fs_partition_table_main(int num)
             fs_partition_table_main.used_sectors[i] = 0;
         }
     }
+    //TODO: Add a return value
     update_table();
 }
 
@@ -250,6 +266,7 @@ void clean_fs_partition_table_main(int num)
 // Return: None
 void list_files()
 {
+    //TODO: Add a return value
     for (uint32 i = FILE_SECTOR_BASE + 1; i < 900; i++)
     {
         uint32 LBA = i;
@@ -297,9 +314,10 @@ int format_disk()
 
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &format, sizeof(format));
-    ide_write_sectors(0, 1, 20, buf);
+    int ret = 0;
+    ret = ide_write_sectors(0, 1, 20, buf);
     cmd_handler("set-xy");
-    return 0;
+    return ret;
 }
 
 // Function: fs_partition_table_main_p
@@ -337,6 +355,7 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
 {
     char buf[512] = {0};
     memset(buf, 0, sizeof(buf));
+    int ret = 0;
     //printf("\nData: %d\n",sizeof(data));
     for (uint32 i = FILE_SECTOR_BASE + 1; i < 900; i++)
     {
@@ -351,7 +370,11 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
         {
             struct FILE_HEADER_V1 f;
             memset(buf, 0, sizeof(buf));
-            ide_read_sectors(0, 1, i, (uint32)buf);
+            ret = ide_read_sectors(0, 1, i, (uint32)buf);
+            if(ret != 0)
+            {
+                return ret;
+            }
             memcpy(&f, buf, sizeof(f));
             fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1] = LBA;
             strcpy(f.filename, filename);
@@ -378,7 +401,11 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
             //printf("\nBuf: %d\n",sizeof(buf));
             memset(buf, 0, sizeof(buf));
             memcpy(buf, &f, sizeof(f));
-            ide_write_sectors(0, 1, LBA, (uint32)buf);
+            ret = ide_write_sectors(0, 1, LBA, (uint32)buf);
+            if(ret != 0)
+            {
+                return ret;
+            }
             int start = 0;
             for (size_t w = 0; w < count; w++)
             {
@@ -400,7 +427,11 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
                 strcpy(fs_data.data, buf);
                  memset(buf, 0, sizeof(buf));
                  memcpy(buf, &fs_data, sizeof(fs_data));
-                ide_write_sectors(0,1,f.file_data_lbas[w],(uint32)buf);
+                ret = ide_write_sectors(0,1,f.file_data_lbas[w],(uint32)buf);
+                if(ret != 0)
+                {
+                    return ret;
+                }
                 // printf("Data at LBA+1+w: %d\n",f.file_data_lbas[w]);
                 // printf("%s\n",buf);
                 start = start + 512;
@@ -416,10 +447,10 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
              //fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2] = LBA+1;
             //printf("\nYour file is stored in LBA %d", LBA);
             fs_partition_table_main_update();
-            return LBA;
+            return 0;
         }
     }
-    return -1;
+    return ret;
 }
 
 // Function: read
