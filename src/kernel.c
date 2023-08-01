@@ -15,6 +15,7 @@
 #include "cmdhandler.h"
 #include "timer.h"
 #include "fs.h"
+#include "fs_format.h"
 KERNEL_MEMORY_MAP g_kmap;
 
 int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
@@ -143,6 +144,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         #define FAT 1
         #if FAT
             init_fs();
+            format_disk_main(0);
             //clean_fs_partition_table_main(46);
             //fs_partition_table_main_p();
             //run_once();

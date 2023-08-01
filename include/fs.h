@@ -2,6 +2,7 @@
 #define FS_H
 #include "stdint.h"
 #include "types.h"
+#include "ide.h"
 
 #define MAX_FILE_SIZE 1024 //max file size in bytes
 
