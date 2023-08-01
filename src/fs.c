@@ -270,7 +270,7 @@ void list_files()
         {
             printf("\nFile name: %s", f.filename);
             printf("\nDirectory name: %s", f.dictionary);
-            printf("\nFile size: [%d] bytes [%d] sectors", f.file_size*ATA_SECTOR_SIZE,f.file_size);
+            //printf("\nFile size: [%d] bytes [%d] sectors", f.file_size*ATA_SECTOR_SIZE,f.file_size);
             printf("\nLBA %d", LBA);
 
             // Clean up master table if necessary
@@ -324,24 +324,24 @@ int format_disk()
     memset(min_tab_buf, 0, sizeof(min_tab_buf));
     memcpy(min_tab_buf, &master_partition_table, sizeof(master_partition_table));
     ide_write_sectors(0, 1, KERNEL_SECTOR_BASE + 2, min_tab_buf);
-    printf("\nset main partition\n");
-    char partition_map_buf[512];
-    struct fs_partition_table partition_map;
-    printf("writing partition tables\n");
-    for (size_t partitions = 0; partitions < number_of_partitions; partitions++)
-    {
-        //printf("%d|", next_part);
+    // printf("\nset main partition\n");
+    // char partition_map_buf[512];
+    // struct fs_partition_table partition_map;
+    // printf("writing partition tables\n");
+    // for (size_t partitions = 0; partitions < number_of_partitions; partitions++)
+    // {
+    //     //printf("%d|", next_part);
         
          
-        partition_map.used_sectors[0] = next_part;
-        partition_map.next_partition = next_part+124;
-        memset(partition_map_buf, 0, sizeof(partition_map_buf));
-        memcpy(partition_map_buf, &partition_map, sizeof(partition_map_buf));
-        ide_write_sectors(0, 1, next_part, (uint32)partition_map_buf);
-        next_part = next_part + 124;
+    //     partition_map.used_sectors[0] = next_part;
+    //     partition_map.next_partition = next_part+124;
+    //     memset(partition_map_buf, 0, sizeof(partition_map_buf));
+    //     memcpy(partition_map_buf, &partition_map, sizeof(partition_map_buf));
+    //     ide_write_sectors(0, 1, next_part, (uint32)partition_map_buf);
+    //     next_part = next_part + 124;
         
-    }
-    printf("done\n");
+    // }
+    // printf("done\n");
     
    
     return 0;
