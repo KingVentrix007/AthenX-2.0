@@ -33,14 +33,25 @@ typedef struct format_table
 //     char file_type[3];
 //     int next_sector;
 // };
+// typedef struct FILE_HEADER_V1
+// {
+//     char filename[8];
+//     int data[(ATA_SECTOR_SIZE-8-5-8-8-3)/8]; //stores a list of the LBA where the files data is stored
+//     char is_file[5];
+//     char dictionary[8];
+//     char file_type[3];
+//     int next_sector;
+// };
+#define MAX_FILE_SIZE 1024 //max file size in bytes
 typedef struct FILE_HEADER_V1
 {
     char filename[8];
-    int data[(ATA_SECTOR_SIZE-8-5-8-8-3)/8]; //stores a list of the LBA where the files data is stored
+    int file_data_lbas[(ATA_SECTOR_SIZE-8-5-8-8-3-8)/8]; //stores a list of the LBA where the files data is stored
     char is_file[5];
     char dictionary[8];
     char file_type[3];
-    int next_sector;
+    int num_sectors;
+    int file_size; //number of sectors in the file
 };
 typedef struct BLOCK
 {

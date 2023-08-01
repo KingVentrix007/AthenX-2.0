@@ -334,12 +334,12 @@ int write(char filename[8], char file_type[3], char data[1024])
 {
     char buf[512] = {0};
     memset(buf, 0, sizeof(buf));
-    printf("\nData: %d\n",sizeof(data));
+    //printf("\nData: %d\n",sizeof(data));
     for (uint32 i = FILE_SECTOR_BASE + 1; i < 900; i++)
     {
         uint32 LBA = i;
-        #define DEBUG
-        #ifdef DEBUG
+        #define DEBUG 0
+        #if DEBUG
             printf("\n%d : ", fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1]);
         #endif
 
@@ -355,22 +355,23 @@ int write(char filename[8], char file_type[3], char data[1024])
             
             struct BLOCK fs_data;
             int count = 0;
-            printf("\n");
+            //printf("\n");
             for (size_t x = 0; x < (strlen(data)/512)+1; x++)
             {
-                printf("Write: f.data[%d] = %d\n",x,LBA+x+1);
-                f.data[x] = LBA+x+1;
+                //printf("Write: f.data[%d] = %d\n",x,LBA+x+1);
+                f.file_data_lbas[x] = LBA+x+1;
                 count = count + 1;
-                printf("Count: %d\n",count);
+                //printf("Count: %d\n",count);
                 
 
             }
-            f.next_sector = count;
+            f.num_sectors = count;
             
             
             
             strcpy(f.is_file, "True");
             strcpy(f.dictionary, current_dir);
+            f.file_size = strlen(data);
             //printf("\nBuf: %d\n",sizeof(buf));
             memset(buf, 0, sizeof(buf));
             memcpy(buf, &f, sizeof(f));
@@ -396,13 +397,13 @@ int write(char filename[8], char file_type[3], char data[1024])
                 strcpy(fs_data.data, buf);
                  memset(buf, 0, sizeof(buf));
                  memcpy(buf, &fs_data, sizeof(fs_data));
-                ide_write_sectors(0,1,f.data[w],(uint32)buf);
-                printf("Data at LBA+1+w: %d\n",f.data[w]);
-                printf("%s\n",buf);
+                ide_write_sectors(0,1,f.file_data_lbas[w],(uint32)buf);
+                // printf("Data at LBA+1+w: %d\n",f.file_data_lbas[w]);
+                // printf("%s\n",buf);
                 start = start + 512;
                 
                 //printf("\n fs_data.data: %s",buf);
-                fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2+w] = f.data[w];
+                fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2+w] = f.file_data_lbas[w];
             }
             
             // memset(buf, 0, sizeof(buf));
@@ -410,7 +411,7 @@ int write(char filename[8], char file_type[3], char data[1024])
             // ide_write_sectors(0,1,LBA+1,(uint32)buf);
             //printf("\n fs_data.data: %s",buf);
              //fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2] = LBA+1;
-            printf("\nYour file is stored in LBA %d", LBA);
+            //printf("\nYour file is stored in LBA %d", LBA);
             fs_partition_table_main_update();
             return LBA;
         }
@@ -446,29 +447,29 @@ int read(char filename[8])
              
              char data_out[1024] = {0};
              memset(data_out, 0, sizeof(data_out));
-             printf("\n");
-             for (size_t x = 0; x < f.next_sector; x++)
+             //+printf("\n");
+             for (size_t x = 0; x < f.num_sectors; x++)
              {
                 struct BLOCK fs_data;
-                if(f.data[x] != 0)
+                if(f.file_data_lbas[x] != 0)
                 {
                     //printf("Read: f.data[%d] = %d\n",x,f.data[x]);
                     char inner_buf[512] = {0};
                     memset(inner_buf, 0, sizeof(inner_buf));
-                    ide_read_sectors(0,1,f.data[x],(uint32)inner_buf);
+                    ide_read_sectors(0,1,f.file_data_lbas[x],(uint32)inner_buf);
                     memcpy(&fs_data, inner_buf, sizeof(fs_data));
                     //printf("strlen(%d)",strlen(fs_data.data));
                     for (size_t q = 0; q < 512; q++)
                     {
-                        if(fs_data.data[q] != 0)
+                        if(fs_data.data[q] != 0 && strlen(data_out) <= f.file_size-1)
                         {
                             append(data_out,fs_data.data[q]);
                         }
                        
                        //printf("fs_data.data[%d] = %s ",q,fs_data.data[q]);
                     }
-                    printf("Data at: %d\n",f.data[x]);
-                    printf("%s\n",fs_data.data);
+                    //printf("Data at: %d\n",f.data[x]);
+                    //printf("%s\n",fs_data.data);
                    
                      //printf("\nFile data in loop\n%s", data_out);
                     
@@ -488,7 +489,6 @@ int read(char filename[8])
     }
     return -1;
 }
-
 // Function: delete_file
 // Description: Deletes a file with the specified name from the current directory.
 // Parameters:
@@ -507,9 +507,9 @@ int delete_file(char *filename[8])
 
         if (strcmp(f.filename, filename) == 0)
         {
-            // if(f.next_sector != 0)
+            // if(f.num_sectors != 0)
             // {
-            //     printf("here: %d",f.next_sector);
+            //     printf("here: %d",f.num_sectors);
             // }
             memset(buf, 0, sizeof(buf));
             ide_write_sectors(0, 1, i, (uint32)buf);
