@@ -2,6 +2,7 @@
 #define FS_H
 #include "stdint.h"
 #include "types.h"
+#include "ide.h"
 typedef struct FILE
 {
     char filename[8];

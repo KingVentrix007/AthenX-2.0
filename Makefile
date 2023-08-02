@@ -116,5 +116,11 @@ run-bin:
 	make os-image.bin
 	qemu-system-x86_64 os-image.bin -drive file=HDD.img
 
-HDD:
+HDD-SSFS:
 	qemu-img create HDD.img 1G
+
+run-part:
+	make iso
+	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=Algea-fs.img -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
+fs-img:
+	qemu-img create Algea-fs.img 1G

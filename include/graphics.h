@@ -8,6 +8,8 @@ void clear_screen();
 void plot_pixel(int x, int y, char* pixel_color);
 void draw_logo(int start_x, int start_y);
 void draw_char(unsigned char c,int fgcolor, int bgcolor, int x, int y, int base_address);
+void draw_image(int x, int y, int rows, int cols);
+char* logo();
 #endif
 
 

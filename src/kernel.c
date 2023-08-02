@@ -15,6 +15,7 @@
 #include "cmdhandler.h"
 #include "timer.h"
 #include "fs.h"
+#include "graphics.h"
 KERNEL_MEMORY_MAP g_kmap;
 
 int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
@@ -139,6 +140,15 @@ void kmain(unsigned long magic, unsigned long addr) {
         }
 
         int ret = display_init(0,x,y,32);
+        char* mode = logo();
+        set_screen_x(0);
+        set_screen_y(0);
+        clear_screen();
+        if(strcmp(mode,"b") != 0)
+        {
+            printf("more boot options coming soon\n");
+        }
+        printf("%s\n",mode);
         
         //run_once();
         #define FAT 1
@@ -218,6 +228,19 @@ void kmain(unsigned long magic, unsigned long addr) {
             // }
         } else {
             // fill some colors
+    //          int rows, cols;
+    
+    // // Inline assembly to get the screen size using INT 10h BIOS interrupt
+    //         asm("mov $0x13, %%ah \n"    // AH = 0x13 (function 13h - Get Video Mode Information)
+    //             "int $0x10 \n"         // Call BIOS interrupt 0x10
+    //             "mov %%ax, %0 \n"      // Store the number of rows in 'rows' variable
+    //             "mov %%bx, %1"         // Store the number of columns in 'cols' variable
+    //             : "=r" (rows), "=r" (cols) // Outputs
+    //             :                        // Inputs (none)
+    //             : "%ax", "%bx"           // Clobbered registers
+    //         );
+
+    //         printf("Screen size: %dx%d\n", cols, rows);
             terminal_main();
             // uint32 x = 0;
             // for (uint32 c = 0; c < 267; c++) {

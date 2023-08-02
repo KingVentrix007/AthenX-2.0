@@ -92,15 +92,23 @@ void cmd_handler(char *buffer[512])
 
        
     }
+    else if (strcmp(buffer,"logo") == 0)
+    {
+         set_screen_x(0); // Set screen x position to 0;
+       set_screen_y(0); // Set screen y position to 0
+        clear_screen(); // Clear screen
+        
+        draw_image(0,0,320,200);
+    }
     else if (strcmp(buffer,"list") == 0)
     {
-        printf("\n");
-        list_files();
+        printf("\n"); 
+        list_files();//Lists all files
     }
     else if (strstr(buffer,"mkdir(") != NULL)
     {
         char *parser;
-        char string[32];
+        char string[32]; // Buffer to hold dictionary name
         parser = strstr(buffer, "write(");
         parser += strlen("write(");
         parse_string(string, parser, ')');

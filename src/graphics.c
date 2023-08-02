@@ -11,6 +11,8 @@
 #include "speaker.h"
 #include "logos.h"
 #include "terminal.h"
+#include "display.h"
+#include "keyboard.h"
 int x = 0;
 int y = 0;
 unsigned char *VGA_address_13 = (void *)0xA0000;
@@ -423,6 +425,12 @@ void clear_screen()
     
 }
 
+
+void draw_large_img(int start_x, int start_y,int width, int height)
+{
+
+}
+
 void draw_logo(int start_x, int start_y)
 {
 	//char *logo = log_img;
@@ -434,14 +442,83 @@ void draw_logo(int start_x, int start_y)
 		for (int w = 0; w < img_w; w++)
 		{
 			if(strcmp(logo_img[h][w],'#') == 0){
+                vbe_putpixel(start_x+w,start_y+h,VBE_RGB(0,255,0));
 				plot_pixel(start_x+w,start_y+h,COLOR_GREEN);
 			}
 			else
 			{
+                vbe_putpixel(start_x+w,start_y+h,VBE_RGB(0,0,0));
 				plot_pixel(start_x+w,start_y+h,COLOR_BLACK);
 			}
 			
 		}
 		
 	}
+    set_screen_x(350);
+    set_screen_y(0);
+    printf("Size of image in sectors %d", sizeof(logo_img)/512);
+}
+
+
+void draw_square(int x, int y, uint32 color) {
+    int size = 10; // Square size is 10x10 pixels
+
+    // Calculate the positions of each pixel in the square
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            int pixel_x = x + i;
+            int pixel_y = y + j;
+            vbe_putpixel(pixel_x, pixel_y,color);
+        }
+    }
+}
+
+// Function to draw an image made up of 10x10 squares at a given position
+void draw_image(int x, int y, int rows, int cols) {
+    int square_size = 4; // Square size is 10x10 pixels
+
+    // Calculate the positions of each square in the image
+    int square_x;
+    int square_y;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            square_x = x + (i * square_size);
+            square_y = y + (j * square_size);
+            if(strcmp(logo_img[j][i],'#') == 0){
+                draw_square(square_x, square_y,VBE_RGB(0,255,0));
+            }
+            else
+            {
+                draw_square(square_x, square_y,VBE_RGB(0,0,0));
+            }
+            
+        }
+    }
+    set_screen_x((square_x/2)-100);
+    set_screen_y(square_y+square_size*3);
+    printf("A T H E N X");
+}
+
+char* logo()
+{
+    draw_image(0,0,320,200);
+    while(1==1)
+    {
+          char c = kb_getchar();
+        
+        char* s;
+        s = ctos(s, c);
+      
+        if(strcmp(s,"b") == 0)
+        {
+            
+            return s;
+        }
+        else if (strcmp(s,"h") == 0)
+        {
+            return s;
+        }
+        printf("%s",c);
+        
+    }
 }
