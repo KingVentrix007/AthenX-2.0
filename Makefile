@@ -54,7 +54,7 @@ HackOS.bin:$(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
 	
 	
 iso: HackOS.bin
-	make clean
+	
 	make HackOS.bin
 	mkdir iso
 	mkdir iso/boot

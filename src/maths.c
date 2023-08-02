@@ -55,16 +55,9 @@ uint32_t fact(uint32_t n)
     return fact;
 }
 
-double abs(double x)
+int abs(int n)
 {
-    if (x < 0)
-    {
-        return -x;
-    }
-    else
-    {
-        return x;
-    }
+    return (n < 0) ? -n : n;
 }
 
 // https://stackoverflow.com/questions/47025373/fastest-implementation-of-the-natural-exponential-function-using-sse

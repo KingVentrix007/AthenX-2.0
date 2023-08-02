@@ -2,6 +2,11 @@
 #define GRAPHICS_H
 
 #include "types.h"
+typedef struct {
+    int x;
+    int y;
+} Point;
+
 int printChar(int x, int y, char c);
 void cool_colors();
 void clear_screen();
@@ -11,6 +16,9 @@ void draw_char(unsigned char c,int fgcolor, int bgcolor, int x, int y, int base_
 void draw_image(int x, int y, int rows, int cols);
 char* logo();
 int demo_3D();
+int draw_line();
+
+void bresenham_line(Point start, Point end);
 #endif
 
 

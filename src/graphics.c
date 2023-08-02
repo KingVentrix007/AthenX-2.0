@@ -14,6 +14,7 @@
 #include "display.h"
 #include "keyboard.h"
 #include "maths.h"
+#include "graphics.h"
 int x = 0;
 int y = 0;
 unsigned char *VGA_address_13 = (void *)0xA0000;
@@ -661,12 +662,41 @@ char* logo()
 typedef struct {
     double x, y, z;
 } Point3D;
+void vbe_drawline(int x1, int y1, int x2, int y2, int color) {
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int sx = (x1 < x2) ? 1 : -1;
+    int sy = (y1 < y2) ? 1 : -1;
+    int err = dx - dy;
 
-// Function to perform 3D-to-2D projection and draw the shape
+    while (1) {
+        vbe_putpixel(x1, y1, color);
+        //printf("X:%fY:%f||",x1,y1);
+        if (x1 == x2 && y1 == y2)
+            break;
+        
+
+        int e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+}
+
+// Structure to represent a 3D point
+
+
+// Function to perform 3D-to-2D projection and draw the shape with lines
 void draw3DShape(Point3D* shape, int numVertices, Point3D viewpoint) {
     // Focal length of the camera (you may need to adjust this value)
     double focalLength = 100.0;
-
+    int vertices[numVertices][2];
+    // Perform 3D-to-2D projection and draw the vertices
     for (int i = 0; i < numVertices; i++) {
         // Calculate the perspective projection of each 3D point onto the 2D plane
         double projectedX = (focalLength * shape[i].x) / (focalLength - shape[i].z);
@@ -677,40 +707,42 @@ void draw3DShape(Point3D* shape, int numVertices, Point3D viewpoint) {
         int screenY = (int)(viewpoint.y + projectedY);
 
         // Draw the point on the screen using the vbe_putpixel function
-        vbe_putpixel(screenX, screenY, 0xFFFFFF); // Assuming white color (adjust as needed)
-
-        // Connect the current vertex to the next vertex
-        int nextIndex = (i + 1) % numVertices;
-        double projectedNextX = (focalLength * shape[nextIndex].x) / (focalLength - shape[nextIndex].z);
-        double projectedNextY = (focalLength * shape[nextIndex].y) / (focalLength - shape[nextIndex].z);
-        int screenNextX = (int)(viewpoint.x + projectedNextX);
-        int screenNextY = (int)(viewpoint.y + projectedNextY);
-
-        // Draw a line from the current vertex to the next vertex
-        // This uses a simple Bresenham's line algorithm
-        int dx = abs(screenNextX - screenX);
-        int dy = abs(screenNextY - screenY);
-        int sx = screenX < screenNextX ? 1 : -1;
-        int sy = screenY < screenNextY ? 1 : -1;
-        int err = dx - dy;
-
-        while (1) {
-            vbe_putpixel(screenX, screenY, VBE_RGB(0,255,0)); // Assuming white color (adjust as needed)
-
-            if (screenX == screenNextX && screenY == screenNextY)
-                break;
-
-            int e2 = 2 * err;
-            if (e2 > -dy) {
-                err -= dy;
-                screenX += sx;
-            }
-            if (e2 < dx) {
-                err += dx;
-                screenY += sy;
-            }
-        }
+        draw_square(screenX, screenY, VBE_RGB(0,255,0)); // Assuming white color (adjust as needed)
+        vertices[i][0] = screenX; 
+        vertices[i][1] = screenY;
     }
+
+    // Draw lines between the vertices to form the shape
+    printf("Draw lines number of vertices %d\n", numVertices);
+    int pos;
+    for (int i = 0; i < numVertices; i++) {
+        
+        // int nextIndex = (i + 1) % numVertices; // Wrap around for the last vertex
+        // double projectedX1 = (focalLength * shape[i].x) / (focalLength - shape[i].z);
+        // double projectedY1 = (focalLength * shape[i].y) / (focalLength - shape[i].z);
+        // double projectedX2 = (focalLength * shape[nextIndex].x) / (focalLength - shape[nextIndex].z);
+        // double projectedY2 = (focalLength * shape[nextIndex].y) / (focalLength - shape[nextIndex].z);
+
+        // // Translate the projected points according to the viewpoint
+        // int screenX1 = (int)(viewpoint.x + projectedX1);
+        // int screenY1 = (int)(viewpoint.y + projectedY1);
+        // int screenX2 = (int)(viewpoint.x + projectedX2);
+        // int screenY2 = (int)(viewpoint.y + projectedY2);
+
+        // Draw the line on the screen using the vbe_drawline function
+        //vbe_drawline(screenX1, screenY1, screenX2, screenY2, VBE_RGB(0,0,255)); // Assuming white color (adjust as needed)
+        Point start = {vertices[i][0], vertices[i][1]};
+        Point end = {vertices[i+1][0],vertices[i+1][1]};
+        printf("SSX: %d, SSY: %d\n",start.x, start.y);
+        printf("EEX: %d, EEY: %d\n",end.x, end.y);
+        bresenham_line(start, end);
+
+
+    }
+    //  Point start = {vertices[pos][0], vertices[pos][1]};
+    // Point end = {vertices[0][0],vertices[0][1]};
+    // bresenham_line(start, end);
+
 }
 
 int demo_3D()
@@ -728,9 +760,75 @@ int demo_3D()
     Point3D viewpoint = {320.0, 240.0, 0.0}; // Assuming the screen is 640x480
 
     // Draw the 3D shape on the 2D plane
+    printf("Number of vertices: %d\n", numVertices);
+    
     draw3DShape(shape, numVertices, viewpoint);
-
+    //vbe_drawline(0,0,12,12, VBE_RGB(0,255,0));
     return 0;
 
 }
 
+
+
+
+void bresenham_line(Point start, Point end) {
+    
+    int dx = abs(end.x - start.x);
+    int dy = abs(end.y - start.y);
+    if(dx > vbe_get_width)
+    {
+        dx = vbe_get_width-dx;
+    }
+    if (dy > vbe_get_height)
+    {
+        dy = vbe_get_height-dy;
+    }
+    int x = start.x;
+    int y = start.y;
+    printf("SX: %d, SY: %d\n",start.x, start.y);
+    printf("EX: %d, EY: %d\n",end.x, end.y);
+    printf("DX:%d DY:%d\n", dx, dy);
+    sleep(2);
+    
+    int inc_x = end.x >= start.x ? 1 : -1;
+    int inc_y = end.y >= start.y ? 1 : -1;
+
+    int is_steep = dy > dx;
+
+    if (is_steep) {
+        int temp = dx;
+        dx = dy;
+        dy = temp;
+    }
+
+    int error = 2 * dy - dx;
+
+    for (int i = 0; i <= dx; i++) {
+        vbe_putpixel(x,y,VBE_RGB(0,0,255));
+
+        if (is_steep) {
+            y += inc_y;
+        } else {
+            x += inc_x;
+        }
+
+        error += 2 * dy;
+
+        if (error > 0) {
+            if (is_steep) {
+                x += inc_x;
+            } else {
+                y += inc_y;
+            }
+            error -= 2 * dx;
+        }
+    }
+}
+
+int draw_line()
+{
+    Point start = {0, 0};
+    Point end = {7, 4};
+
+    bresenham_line(start, end);
+}

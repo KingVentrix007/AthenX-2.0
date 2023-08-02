@@ -38,7 +38,7 @@ void srand();
 
 double machine_eps(double x);
 uint32_t fact(uint32_t n);
-double abs(double x);
+int abs(int n);
 double ipow(double x, uint32_t n);
 double pow(double x, double y);
 double sqrt(double x);
