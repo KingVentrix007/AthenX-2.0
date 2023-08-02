@@ -13,6 +13,7 @@
 #include "terminal.h"
 #include "display.h"
 #include "keyboard.h"
+#include "maths.h"
 int x = 0;
 int y = 0;
 unsigned char *VGA_address_13 = (void *)0xA0000;
@@ -518,7 +519,218 @@ char* logo()
         {
             return s;
         }
-        printf("%s",c);
+        //printf("%s",c);
         
     }
 }
+
+
+// void calculate_shape_vertices(float side_lengths[], float angles[], int num_sides, float vertices[][3]) {
+//     if (num_sides < 3) {
+//         printf("Error: Number of sides should be at least 3.\n");
+//         return;
+//     }
+
+//     float total_angle_sum = 0.0f;
+//     for (int i = 0; i < num_sides; i++) {
+//         total_angle_sum += angles[i];
+//     }
+
+//     // if (total_angle_sum != (num_sides - 2) * 180.0f) {
+//     //     printf("Error: Invalid angles. The sum of angles should be equal to (num_sides - 2) * 180.\n");
+//     //     printf("%f\n",total_angle_sum);
+//     //     printf("%f\n",(num_sides - 2) * 180.0f);
+//     //     return;
+//     // }
+
+//     // ... Implement the vertex calculation based on the side lengths and angles ...
+//     // (This part depends on the specific shape you want to draw. You may need to use trigonometry and geometric calculations.)
+
+//     // For demonstration purposes, we'll just assume a simple shape with equal side lengths
+//     float side_length = side_lengths[0];
+//     float angle_rad = angles[0] * PI / 180.0f;
+//     float half_width = side_length * sin(angle_rad / 2.0f);
+//     float half_height = side_length * cos(angle_rad / 2.0f);
+
+//     for (int i = 0; i < num_sides; i++) {
+//         float x = side_length * i;
+//         float y = 0.0f;
+//         float z = 0.0f;
+
+//         // Assume the shape is lying flat on the 2D plane (z = 0)
+//         vertices[i][0] = x;
+//         vertices[i][1] = y;
+//         vertices[i][2] = z;
+//     }
+// }
+
+// void draw_3d_shape(int num_sides, float side_lengths[], float angles[]) {
+//     if (num_sides < 3) {
+//         printf("Error: Number of sides should be at least 3.\n");
+//         return;
+//     }
+
+//     // Assuming the 3D shape is lying flat on the 2D plane
+//     float vertices[num_sides][3];
+//     calculate_shape_vertices(side_lengths, angles, num_sides, vertices);
+
+//     // Drawing edges
+//     for (int i = 0; i < num_sides; i++) {
+//         int next_vertex_index = (i + 1) % num_sides;
+//         int x0 = (int)vertices[i][0];
+//         int y0 = (int)vertices[i][1];
+//         int x1 = (int)vertices[next_vertex_index][0];
+//         int y1 = (int)vertices[next_vertex_index][1];
+
+//         // Assuming z coordinate doesn't affect the pixel drawing
+//         vbe_putpixel(x0, y0,VBE_RGB(0,255,255));
+//         vbe_putpixel(x1, y1,VBE_RGB(0,255,255));
+//     }
+// }
+
+// int demo_3D() {
+//     int num_sides = 5;
+//     float side_lengths[] = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
+//     float angles[] = {90.0f, 90.0f, 90.0f, 90.0f, 90.0f};
+
+//     draw_3d_shape(num_sides, side_lengths, angles);
+
+//     return 0;
+// }
+
+// Structure to store the 3D coordinates of a point
+// typedef struct {
+//     float x;
+//     float y;
+//     float z;
+// } Point3D;
+
+// // Function to draw a pixel at (x, y)
+// void putPixel(int x, int y) {
+//     vbe_putpixel(x,y,VBE_RGB(0,255,0));
+// }
+// // Function to calculate the vertices of a cuboid given its dimensions (length, breadth, width)
+// void calculateCuboidVertices(float length, float breadth, float width, Point3D vertices[8]) {
+//     // Calculate half dimensions to simplify vertex calculations
+//     float half_length = length * 0.5f;
+//     float half_breadth = breadth * 0.5f;
+//     float half_width = width * 0.5f;
+
+//     // Define the 8 vertices of the cuboid
+//     // Vertices are defined in the order (front, back) and (bottom, top) as follows:
+//     // Front face: 0 (bottom-left), 1 (bottom-right), 2 (top-right), 3 (top-left)
+//     // Back face: 4 (bottom-left), 5 (bottom-right), 6 (top-right), 7 (top-left)
+//     vertices[0] = (Point3D){-half_length, -half_breadth, -half_width};
+//     vertices[1] = (Point3D){half_length, -half_breadth, -half_width};
+//     vertices[2] = (Point3D){half_length, half_breadth, -half_width};
+//     vertices[3] = (Point3D){-half_length, half_breadth, -half_width};
+//     vertices[4] = (Point3D){-half_length, -half_breadth, half_width};
+//     vertices[5] = (Point3D){half_length, -half_breadth, half_width};
+//     vertices[6] = (Point3D){half_length, half_breadth, half_width};
+//     vertices[7] = (Point3D){-half_length, half_breadth, half_width};
+// }
+// // Function to calculate the vertices of a 3D shape given its dimensions and corner angle
+// void calculateShapeVertices(float length, float breadth, float width, float corner_angle, int num_sides, Point3D vertices[]) {
+//     if (num_sides < 3) {
+//         printf("Error: Number of sides should be at least 3.\n");
+//         return;
+//     }
+
+//     float half_length = length * 0.5f;
+//     float half_breadth = breadth * 0.5f;
+//     float half_width = width * 0.5f;
+//     float radius = sqrt(half_length * half_length + half_breadth * half_breadth + half_width * half_width);
+
+//     float angle_increment = 2 * PI / num_sides;
+//     float current_angle = 0.0f;
+
+//     for (int i = 0; i < num_sides; i++) {
+//         float x = radius * cos(current_angle);
+//         float y = radius * sin(current_angle);
+//         float z = half_width;
+
+//         // Apply corner angle rotation in XZ-plane
+//         float corner_angle_rad = corner_angle * PI / 180.0f;
+//         float new_x = x * cos(corner_angle_rad) - z * sin(corner_angle_rad);
+//         float new_z = x * sin(corner_angle_rad) + z * cos(corner_angle_rad);
+
+//         vertices[i] = (Point3D){new_x, y, new_z};
+//         current_angle += angle_increment;
+//     }
+// }
+typedef struct {
+    double x, y, z;
+} Point3D;
+
+// Function to perform 3D-to-2D projection and draw the shape
+void draw3DShape(Point3D* shape, int numVertices, Point3D viewpoint) {
+    // Focal length of the camera (you may need to adjust this value)
+    double focalLength = 100.0;
+
+    for (int i = 0; i < numVertices; i++) {
+        // Calculate the perspective projection of each 3D point onto the 2D plane
+        double projectedX = (focalLength * shape[i].x) / (focalLength - shape[i].z);
+        double projectedY = (focalLength * shape[i].y) / (focalLength - shape[i].z);
+
+        // Translate the projected points according to the viewpoint
+        int screenX = (int)(viewpoint.x + projectedX);
+        int screenY = (int)(viewpoint.y + projectedY);
+
+        // Draw the point on the screen using the vbe_putpixel function
+        vbe_putpixel(screenX, screenY, 0xFFFFFF); // Assuming white color (adjust as needed)
+
+        // Connect the current vertex to the next vertex
+        int nextIndex = (i + 1) % numVertices;
+        double projectedNextX = (focalLength * shape[nextIndex].x) / (focalLength - shape[nextIndex].z);
+        double projectedNextY = (focalLength * shape[nextIndex].y) / (focalLength - shape[nextIndex].z);
+        int screenNextX = (int)(viewpoint.x + projectedNextX);
+        int screenNextY = (int)(viewpoint.y + projectedNextY);
+
+        // Draw a line from the current vertex to the next vertex
+        // This uses a simple Bresenham's line algorithm
+        int dx = abs(screenNextX - screenX);
+        int dy = abs(screenNextY - screenY);
+        int sx = screenX < screenNextX ? 1 : -1;
+        int sy = screenY < screenNextY ? 1 : -1;
+        int err = dx - dy;
+
+        while (1) {
+            vbe_putpixel(screenX, screenY, VBE_RGB(0,255,0)); // Assuming white color (adjust as needed)
+
+            if (screenX == screenNextX && screenY == screenNextY)
+                break;
+
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                screenX += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                screenY += sy;
+            }
+        }
+    }
+}
+
+int demo_3D()
+{
+    Point3D shape[] = {
+        {0.0, 0.0, 100.0}, // Vertex 1
+        {50.0, 0.0, 200.0}, // Vertex 2
+        {0.0, 50.0, 150.0}  // Vertex 3
+        // Add more vertices to represent your shape
+    };
+
+    int numVertices = sizeof(shape) / sizeof(shape[0]);
+
+    // Viewpoint of the camera (you can change this point to change the perspective)
+    Point3D viewpoint = {320.0, 240.0, 0.0}; // Assuming the screen is 640x480
+
+    // Draw the 3D shape on the 2D plane
+    draw3DShape(shape, numVertices, viewpoint);
+
+    return 0;
+
+}
+

@@ -209,6 +209,18 @@ void cmd_handler(char *buffer[512])
         memset(buf, 0, sizeof(buf));
         delete_file(string);
     }
+    else if (strstr(buffer,"mv(")!= NULL)
+    {
+
+    }
+    else if (strcmp(buffer,"3d") == 0)
+    {
+        clear_screen();
+        set_screen_x(0);
+        set_cursor_y(0);
+        demo_3D();
+    }
+    
     
     
     else

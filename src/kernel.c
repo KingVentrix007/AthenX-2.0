@@ -1,3 +1,4 @@
+#include "maths.h"
 #include "fat_filelib.h"
 #include "kernel.h"
 #include "display.h"
@@ -16,6 +17,7 @@
 #include "timer.h"
 #include "fs.h"
 #include "graphics.h"
+#include "fpu.h"
 KERNEL_MEMORY_MAP g_kmap;
 
 int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
@@ -241,6 +243,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     //         );
 
     //         printf("Screen size: %dx%d\n", cols, rows);
+            fpu_enable();
             terminal_main();
             // uint32 x = 0;
             // for (uint32 c = 0; c < 267; c++) {
