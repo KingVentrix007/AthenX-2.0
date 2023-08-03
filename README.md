@@ -55,6 +55,9 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
      ```sh
   sudo apt install grub-common
   ```
+     ```sh
+  sudo apt install grub-pc-bin
+```
 
 * nasm
 
@@ -76,7 +79,7 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
 
 * xorriso
 
- ```sh
+     ```sh
   sudo apt install xorriso
   ```
 
@@ -94,7 +97,7 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
     make HDD
     make run
     ```
-
+    make HDD creates a 1GB hardisk
 3. From this point on you only have to type
 
     ``` sh
