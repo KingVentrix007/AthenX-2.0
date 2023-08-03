@@ -136,10 +136,10 @@ void ide_irq();
 
 // start from lba = 0
 int ide_read_sectors(uint8 drive, uint8 num_sectors, uint32 lba, uint32 buffer);
-int ide_read_sectors_fat(uint32_t start_block, uint8_t *buffer, uint32_t sector_count);
+int ide_read_sectors_fat(uint32 sector, uint8 *buffer, uint32 sector_count);
 // start from lba = 0
 int ide_write_sectors(uint8 drive, uint8 num_sectors, uint32 lba, uint32 buffer);
-int ide_write_sectors_fat(uint32_t start_block, uint8_t *buffer, uint32_t sector_count);
+int ide_write_sectors_fat(uint32 sector, uint8 *buffer, uint32 sector_count);
 int print_drives();
 
 void ata_init();

@@ -9,7 +9,7 @@ typedef uint32 PMM_PHYSICAL_ADDRESS;
  Make sure you pass memory to qemu using -m option
 */
 
-#define PMM_BLOCK_SIZE    4096
+#define PMM_BLOCK_SIZE    4096 //Bytes
 
 
 typedef struct {

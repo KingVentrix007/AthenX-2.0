@@ -18,6 +18,7 @@ char* logo();
 int demo_3D();
 int draw_line();
 
+int ArtemisVision();
 void bresenham_line(Point start, Point end);
 #endif
 

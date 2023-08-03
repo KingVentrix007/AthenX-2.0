@@ -15,9 +15,12 @@
 #include "keyboard.h"
 #include "maths.h"
 #include "graphics.h"
+#include "pmm.h"
 int x = 0;
 int y = 0;
 unsigned char *VGA_address_13 = (void *)0xA0000;
+
+
 
 int printChar(int x, int y, char c) {
 	// Loop to "null terminator character"
@@ -436,6 +439,7 @@ void draw_large_img(int start_x, int start_y,int width, int height)
 void draw_logo(int start_x, int start_y)
 {
 	//char *logo = log_img;
+    
 	cls_screen(COLOR_LIGHT_GREEN);
 	int img_h = 220;
 	int img_w = 320;
@@ -459,10 +463,11 @@ void draw_logo(int start_x, int start_y)
     set_screen_x(350);
     set_screen_y(0);
     printf("Size of image in sectors %d", sizeof(logo_img)/512);
+    
 }
 
 
-void draw_square(int x, int y, uint32 color) {
+void draw_square(int x, int y, uint32 color, unsigned char *buffer) {
     int size = 10; // Square size is 10x10 pixels
 
     // Calculate the positions of each pixel in the square
@@ -471,12 +476,14 @@ void draw_square(int x, int y, uint32 color) {
             int pixel_x = x + i;
             int pixel_y = y + j;
             vbe_putpixel(pixel_x, pixel_y,color);
+            //sleep(10000000000000000000000000000000000000000000000000000000);
         }
     }
 }
 
 // Function to draw an image made up of 10x10 squares at a given position
 void draw_image(int x, int y, int rows, int cols) {
+    //unsigned char *Buffer_2 = pmm_alloc_blocks(14400);
     int square_size = 4; // Square size is 10x10 pixels
 
     // Calculate the positions of each square in the image
@@ -487,18 +494,22 @@ void draw_image(int x, int y, int rows, int cols) {
             square_x = x + (i * square_size);
             square_y = y + (j * square_size);
             if(strcmp(logo_img[j][i],'#') == 0){
-                draw_square(square_x, square_y,VBE_RGB(0,255,0));
+                draw_square(square_x, square_y,VBE_RGB(0,255,0),0);
+                sleep(10000);
             }
             else
             {
-                draw_square(square_x, square_y,VBE_RGB(0,0,0));
+                draw_square(square_x, square_y,VBE_RGB(0,0,0),0);
+                sleep(1000);
             }
             
         }
-    }
+    };
+    //vese_mem(Buffer_2, sizeof(Buffer_2));
     set_screen_x((square_x/2)-100);
     set_screen_y(square_y+square_size*3);
     printf("A T H E N X");
+    //pmm_free_blocks(Buffer_2,14400);
 }
 
 char* logo()
@@ -575,34 +586,34 @@ void draw3DShape(Point3D* shape, int numVertices, Point3D viewpoint) {
         int screenY = (int)(viewpoint.y + projectedY);
 
         // Draw the point on the screen using the vbe_putpixel function
-        draw_square(screenX, screenY, VBE_RGB(0,255,0)); // Assuming white color (adjust as needed)
+        draw_square(screenX, screenY, VBE_RGB(0,255,0),00); // Assuming white color (adjust as needed)
         vertices[i][0] = screenX; 
         vertices[i][1] = screenY;
     }
 
     // Draw lines between the vertices to form the shape
-    printf("Draw lines number of vertices %d\n", numVertices);
+    //printf("Draw lines number of vertices %d\n", numVertices);
     int pos;
     for (int i = 0; i < numVertices; i++) {
         
-        // int nextIndex = (i + 1) % numVertices; // Wrap around for the last vertex
-        // double projectedX1 = (focalLength * shape[i].x) / (focalLength - shape[i].z);
-        // double projectedY1 = (focalLength * shape[i].y) / (focalLength - shape[i].z);
-        // double projectedX2 = (focalLength * shape[nextIndex].x) / (focalLength - shape[nextIndex].z);
-        // double projectedY2 = (focalLength * shape[nextIndex].y) / (focalLength - shape[nextIndex].z);
+        int nextIndex = (i + 1) % numVertices; // Wrap around for the last vertex
+        double projectedX1 = (focalLength * shape[i].x) / (focalLength - shape[i].z);
+        double projectedY1 = (focalLength * shape[i].y) / (focalLength - shape[i].z);
+        double projectedX2 = (focalLength * shape[nextIndex].x) / (focalLength - shape[nextIndex].z);
+        double projectedY2 = (focalLength * shape[nextIndex].y) / (focalLength - shape[nextIndex].z);
 
-        // // Translate the projected points according to the viewpoint
-        // int screenX1 = (int)(viewpoint.x + projectedX1);
-        // int screenY1 = (int)(viewpoint.y + projectedY1);
-        // int screenX2 = (int)(viewpoint.x + projectedX2);
-        // int screenY2 = (int)(viewpoint.y + projectedY2);
+        // Translate the projected points according to the viewpoint
+        int screenX1 = (int)(viewpoint.x + projectedX1);
+        int screenY1 = (int)(viewpoint.y + projectedY1);
+        int screenX2 = (int)(viewpoint.x + projectedX2);
+        int screenY2 = (int)(viewpoint.y + projectedY2);
 
-        // Draw the line on the screen using the vbe_drawline function
+        //Draw the line on the screen using the vbe_drawline function
         //vbe_drawline(screenX1, screenY1, screenX2, screenY2, VBE_RGB(0,0,255)); // Assuming white color (adjust as needed)
         Point start = {vertices[i][0], vertices[i][1]};
         Point end = {vertices[i+1][0],vertices[i+1][1]};
-        printf("SSX: %d, SSY: %d\n",start.x, start.y);
-        printf("EEX: %d, EEY: %d\n",end.x, end.y);
+        // printf("SSX: %d, SSY: %d\n",start.x, start.y);
+        // printf("EEX: %d, EEY: %d\n",end.x, end.y);
         bresenham_line(start, end);
 
 
@@ -643,20 +654,20 @@ void bresenham_line(Point start, Point end) {
     
     int dx = abs(end.x - start.x);
     int dy = abs(end.y - start.y);
-    if(dx > vbe_get_width)
+    if(dx > vbe_get_width())
     {
-        dx = vbe_get_width-dx;
+        dx = vbe_get_width()-dx;
     }
-    if (dy > vbe_get_height)
+    if (dy > vbe_get_height())
     {
-        dy = vbe_get_height-dy;
+        dy = vbe_get_height()-dy;
     }
     int x = start.x;
     int y = start.y;
-    printf("SX: %d, SY: %d\n",start.x, start.y);
-    printf("EX: %d, EY: %d\n",end.x, end.y);
-    printf("DX:%d DY:%d\n", dx, dy);
-    sleep(2);
+    // printf("SX: %d, SY: %d\n",start.x, start.y);
+    // printf("EX: %d, EY: %d\n",end.x, end.y);
+    // printf("DX:%d DY:%d\n", dx, dy);
+    // sleep(2);
     
     int inc_x = end.x >= start.x ? 1 : -1;
     int inc_y = end.y >= start.y ? 1 : -1;
@@ -693,10 +704,97 @@ void bresenham_line(Point start, Point end) {
     }
 }
 
-int draw_line()
-{
-    Point start = {0, 0};
-    Point end = {7, 4};
 
-    bresenham_line(start, end);
+
+
+
+
+
+// Function to draw a pixel
+void drawPixel(int x, int y, int color) {
+    // Your implementation here
+    // This function should draw a pixel at (x, y) with the specified color
 }
+
+// Function to draw a wireframe 3D square
+void drawWireframeSquare(int x, int y, int size, int screen_width, int screen_height) {
+    // Calculate the four corners of the square in 3D space
+    int x0 = x;
+    int y0 = y;
+    int x1 = x + size;
+    int y1 = y;
+    int x2 = x + size;
+    int y2 = y + size;
+    int x3 = x;
+    int y3 = y + size;
+
+    // Check and adjust the coordinates to stay on the screen
+    if (x0 < 0) x0 = 0;
+    if (x0 >= screen_width) x0 = screen_width - 1;
+    if (x1 < 0) x1 = 0;
+    if (x1 >= screen_width) x1 = screen_width - 1;
+    if (x2 < 0) x2 = 0;
+    if (x2 >= screen_width) x2 = screen_width - 1;
+    if (x3 < 0) x3 = 0;
+    if (x3 >= screen_width) x3 = screen_width - 1;
+
+    if (y0 < 0) y0 = 0;
+    if (y0 >= screen_height) y0 = screen_height - 1;
+    if (y1 < 0) y1 = 0;
+    if (y1 >= screen_height) y1 = screen_height - 1;
+    if (y2 < 0) y2 = 0;
+    if (y2 >= screen_height) y2 = screen_height - 1;
+    if (y3 < 0) y3 = 0;
+    if (y3 >= screen_height) y3 = screen_height - 1;
+
+    // Connect the corners to draw the wireframe square
+    drawLine(x0, y0, x1, y1);
+    drawLine(x1, y1, x2, y2);
+    drawLine(x2, y2, x3, y3);
+    drawLine(x3, y3, x0, y0);
+}
+
+// Function to draw a line between two points (x0, y0) and (x1, y1)
+void drawLine(int x0, int y0, int x1, int y1) {
+    // Bresenham's line drawing algorithm (simplified for positive slopes)
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int yi = 1;
+
+    if (dy < 0) {
+        yi = -1;
+        dy = -dy;
+    }
+
+    int D = 2 * dy - dx;
+    int y = y0;
+
+    for (int x = x0; x <= x1; x++) {
+        //drawPixel(x, y, COLOR);
+        vbe_putpixel(x,y,VBE_RGB(100,0,100)); // Set the COLOR to the desired pixel color
+        if (D > 0) {
+            y += yi;
+            D -= 2 * dx;
+        }
+        D += 2 * dy;
+    }
+}
+
+int ArtemisVision() {
+    int x = 50; // X-coordinate of the top-left corner of the square
+    int y = 50; // Y-coordinate of the top-left corner of the square
+    int size = 100; // Size of the square
+    int screen_width = 800; // Screen width
+    int screen_height = 600; // Screen height
+
+    drawWireframeSquare(x, y, size, screen_width, screen_height);
+
+    return 0;
+}
+
+// draw_line(){
+//     Point start = {0, 0};
+//     Point end = {7, 4};
+
+//     bresenham_line(start, end);
+// }

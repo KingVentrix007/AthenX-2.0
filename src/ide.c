@@ -494,9 +494,9 @@ int ide_read_sectors(uint8 drive, uint8 num_sectors, uint32 lba, uint32 buffer) 
     return 0;
 }
 
-int ide_read_sectors_fat(uint32_t start_block, uint8_t *buffer, uint32_t sector_count) {
+int ide_read_sectors_fat(uint32 sector, uint8 *buffer, uint32 sector_count) {
     uint8 drive = 0;
-    uint32 lba = start_block;
+    uint32 lba = sector;
     uint32 num_sectors = sector_count;
     // 1: Check if the drive presents:
     if (drive > MAXIMUM_IDE_DEVICES || g_ide_devices[drive].reserved == 0) {
@@ -539,9 +539,9 @@ int ide_write_sectors(uint8 drive, uint8 num_sectors, uint32 lba, uint32 buffer)
     }
     return 0;
 }
-int ide_write_sectors_fat(uint32_t start_block, uint8_t *buffer, uint32_t sector_count) {
+int ide_write_sectors_fat(uint32 sector, uint8 *buffer, uint32 sector_count) {
      uint8 drive = 0;
-    uint32 lba = start_block;
+    uint32 lba = sector;
     uint32 num_sectors = sector_count;
     // 1: Check if the drive presents:
     if (drive > MAXIMUM_IDE_DEVICES || g_ide_devices[drive].reserved == 0) {

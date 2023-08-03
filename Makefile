@@ -4,7 +4,7 @@ ASM = nasm
 CONFIG = ./config
 GCCPARAMS = -m32 -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore
 ASPARAMS = --32
-LDPARAMS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib
+LDPARAMS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib --allow-multiple-definition
 
 SRC_DIR=src
 HDR_DIR=include/
@@ -103,6 +103,14 @@ changlog:
 run:
 	make iso
 	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=HDD.img -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
+run-ext2:
+	make iso
+	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=ext2.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
+
+run-fat:
+#	make iso
+#	make fat32
+	qemu-system-x86_64 -drive format=raw,file=fat32.img,if=ide,index=0,media=disk -m 2G
 run-c:
 	make iso
 	qemu-system-x86_64 HackOS.iso -drive file=HDD.img -serial stdio
@@ -124,3 +132,43 @@ run-part:
 	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=Algea-fs.img -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
 fs-img:
 	qemu-img create Algea-fs.img 1G
+
+ext2-img:
+	bash ./mkdisk.sh
+
+# Create fat32 img
+# Makefile to generate a virtual disk image formatted with FAT32
+
+# Variables
+DISK_SIZE = 1G
+DISK_IMAGE = ext4.img
+ISO_FILE = HackOS.iso
+# Rules
+ext4: $(DISK_IMAGE)
+
+$(DISK_IMAGE): clean-fat
+	@echo "Creating an empty disk image..."
+	dd if=/dev/zero of=$(DISK_IMAGE) bs=$(DISK_SIZE) count=1
+
+	@echo "Formatting the disk image with ext4..."
+	mkfs.ext4 $(DISK_IMAGE)
+
+	@echo "Mounting the disk image..."
+	mkdir -p mount_point
+	sudo mount -o loop $(DISK_IMAGE) mount_point
+
+	@echo "Copying the ISO file onto the disk image..."
+	sudo cp $(ISO_FILE) mount_point/
+
+	# @echo "Installing GRUB on the disk image..."
+	# sudo grub-install --target=i386-pc --boot-directory=mount_point/boot /dev/loop0
+	
+	@echo "Unmounting the disk image..."
+	sudo umount mount_point
+	sudo rm -rf mount_point
+
+
+
+clean-fat:
+	@echo "Cleaning up..."
+	rm -f $(DISK_IMAGE)

@@ -97,6 +97,8 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp);
 uint32 vbe_rgb(uint8 red, uint8 green, uint8 blue);
 void vbe_putpixel(int x, int y, int color);
 void vbe_print_available_modes();
+void vbe_putpixel_v2(int x, int y,int color, unsigned char *buffer);
+void vese_mem(void *src, int n);
 #define VBE_RGB(r, g, b) vbe_rgb(r, g, b)
 
 #endif

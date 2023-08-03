@@ -30,4 +30,5 @@ void itoa(char *buf, int base, int d);
 int strncmp(const char *s1, const char *s2, size_t n);
 int string_length(char s[]);
 void append(char s[], char n);
+void * malloc(int nbytes);
 #endif

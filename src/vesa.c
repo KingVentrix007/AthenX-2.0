@@ -71,7 +71,10 @@ uint32 vbe_find_mode(uint32 width, uint32 height, uint32 bpp) {
     }
     return -1;
 }
-
+void vese_mem(void *src, int n)
+{
+    memcpy(*(g_vbe_buffer),src,n);
+}
 // print availabel modes to console
 void vbe_print_available_modes() {
     VBE20_MODEINFOBLOCK modeinfoblock;
@@ -99,6 +102,12 @@ uint32 vbe_rgb(uint8 red, uint8 green, uint8 blue) {
 void vbe_putpixel(int x, int y, int color) {
     uint32 i = y * g_width + x;
     *(g_vbe_buffer + i) = color;
+}
+
+void vbe_putpixel_v2(int x, int y,int color, unsigned char *buffer)
+{
+    uint32 i = y * g_width + x;
+    *(buffer + i) = color;
 }
 
 int vesa_init(uint32 width, uint32 height, uint32 bpp) {

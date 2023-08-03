@@ -1,3 +1,4 @@
+
 #include "maths.h"
 #include "fat_filelib.h"
 #include "kernel.h"
@@ -18,6 +19,7 @@
 #include "fs.h"
 #include "graphics.h"
 #include "fpu.h"
+#include "ext2.h"
 KERNEL_MEMORY_MAP g_kmap;
 
 int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
@@ -84,7 +86,10 @@ void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
 
 void kmain(unsigned long magic, unsigned long addr) {
     MULTIBOOT_INFO *mboot_info;
-
+    char *shell = "User@SimpleOS ";
+    char *cwd = malloc(sizeof(*cwd)); //Current working directory, in it's path
+    cwd = "/";
+    char *pwd = "/"; //Previous working directory absolute path
     gdt_init();
     idt_init();
    
@@ -137,8 +142,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         else
         {
             //cmd_handler("screen size");
-            x = 800;
-            y = 600;
+            x = 1280;
+            y = 1024;
         }
 
         int ret = display_init(0,x,y,32);
@@ -153,26 +158,41 @@ void kmain(unsigned long magic, unsigned long addr) {
         printf("%s\n",mode);
         
         //run_once();
-        #define FAT 1
-        #if FAT
+        #define CUSTOM_FS 0
+        #if CUSTOM_FS
+           
             init_fs();
             //clean_fs_partition_table_main(46);
             //fs_partition_table_main_p();
             //run_once();
         #else
+            //printf("hello world");
+            //read_superblock();
+            //ext2_init();
             fl_init();
-
-            // Attach media access functions to library
             if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
             {
                 printf("ERROR: Failed to init file system\n");
-                return -1;
+                
+                fl_format(900,"NAME");
+
             }
-        
-            // List the root directory
+            else
+            {
+                printf("Success");
+            }
+   
+    // List the root directory
             fl_listdirectory("/");
         #endif
         print_drives();
+        // char *filedata = malloc(sizeof(*filedata));
+        // char * path = "/test";
+        // filedata = ext2_read_file(path);
+        // printf("%s\n", filedata);
+        // uint32 ino = ext2_path_to_inode(cwd);
+        // char **names = ext2_ls(ino);
+        // printf("\n");
         //fs_partition_table_main_p();
     //     fl_init();
 
