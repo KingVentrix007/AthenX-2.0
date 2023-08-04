@@ -24,8 +24,8 @@ typedef struct {
 } IDE_DEVICE;
 
 
-#define KERNEL_SECTOR_BASE 100// Start of kernel data loaded or written during boot
-#define FILE_SECTOR_BASE 200 // Start of user file data  
+#define RESERVED_SPACE_END 65536// Amount of sectors reserved for the actual OS code
+#define RESERVED_SYSTEM_FILES_END RESERVED_SPACE_END+200 // Start of user file data  
 /*
 Contains SUPER_BLOCK table at FILE_SECTOR_BASE
 Contains First PART_TABLE at FILE_SECTOR_BASE+1

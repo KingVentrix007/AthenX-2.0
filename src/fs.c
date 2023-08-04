@@ -23,7 +23,7 @@ int init_fs()
     uint32 LBA = 5;
     char table[ATA_SECTOR_SIZE];
     memset(table, 0, sizeof(table));
-    ide_read_sectors(0, 1, KERNEL_SECTOR_BASE, (uint32)table);
+    ide_read_sectors(0, 1, RESERVED_SPACE_END, (uint32)table);
     memcpy(&fs_format_table, table, sizeof(fs_format_table));
 
     // Check if the disk is formatted
@@ -32,7 +32,7 @@ int init_fs()
         // Read the master table from disk
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
-        ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
+        ide_read_sectors(0, 1, RESERVED_SPACE_END + 2, (uint32)buf);
         memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
         printf("File format: %s\n", fs_format_table.format);
@@ -58,7 +58,7 @@ int init_fs()
         printf("Formatted disk\n");
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
-        ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
+        ide_read_sectors(0, 1, RESERVED_SPACE_END + 2, (uint32)buf);
         memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
         // Debug: Print used sectors in the master table
@@ -87,7 +87,7 @@ int run_once()
 
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &min_tab, sizeof(min_tab));
-    ide_write_sectors(0, 1, KERNEL_SECTOR_BASE + 2, buf);
+    ide_write_sectors(0, 1, RESERVED_SPACE_END + 2, buf);
     return 0;
 }
 
@@ -101,7 +101,7 @@ int update_table()
     char buf[920];
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &min_tab, sizeof(min_tab));
-    ide_write_sectors(0, 8, KERNEL_SECTOR_BASE + 2, buf);
+    ide_write_sectors(0, 8, RESERVED_SPACE_END + 2, buf);
     return 0;
 }
 
@@ -303,7 +303,7 @@ int format_disk()
 
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &format, sizeof(format));
-    ide_write_sectors(0, 1, KERNEL_SECTOR_BASE, buf);
+    ide_write_sectors(0, 1, RESERVED_SPACE_END, buf);
     cmd_handler("set-xy");
     int sectors = get_sectors(0);
     sectors = sectors - FILE_SECTOR_BASE;
@@ -323,7 +323,7 @@ int format_disk()
     int next_part = FILE_SECTOR_BASE + 124;
     memset(min_tab_buf, 0, sizeof(min_tab_buf));
     memcpy(min_tab_buf, &master_partition_table, sizeof(master_partition_table));
-    ide_write_sectors(0, 1, KERNEL_SECTOR_BASE + 2, min_tab_buf);
+    ide_write_sectors(0, 1, RESERVED_SPACE_END + 2, min_tab_buf);
     // printf("\nset main partition\n");
     // char partition_map_buf[512];
     // struct fs_partition_table partition_map;
@@ -587,6 +587,6 @@ int fs_partition_table_main_update()
 
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &fs_partition_table_main, sizeof(fs_partition_table_main));
-    ide_write_sectors(0, 1, KERNEL_SECTOR_BASE + 2, buf);
+    ide_write_sectors(0, 1, RESERVED_SPACE_END + 2, buf);
     return 0;
 }

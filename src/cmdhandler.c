@@ -151,7 +151,7 @@ void cmd_handler(char *buffer[512])
     else if (strcmp(buffer,"set-xy") == 0)
     {
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
-        const uint32 LBA = KERNEL_SECTOR_BASE+1;
+        const uint32 LBA = RESERVED_SPACE_END+1;
         const uint8 NO_OF_SECTORS = 1;
         char buf[ATA_SECTOR_SIZE] = {0};
         struct scree_size {
