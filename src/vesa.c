@@ -88,6 +88,31 @@ void vbe_print_available_modes() {
         mode = *mode_list++;
     }
 }
+int * find_biggest_mode()
+{
+    int x, y;
+
+    VBE20_MODEINFOBLOCK modeinfoblock;
+
+    // iterate through video modes list
+    uint16 *mode_list = (uint16 *)g_vbe_infoblock.VideoModePtr;
+    uint16 mode = *mode_list++;
+    while (mode != 0xffff) {
+        get_vbe_mode_info(mode, &modeinfoblock);
+        printf("Mode: %d, X: %d, Y: %d\n", mode, modeinfoblock.XResolution, modeinfoblock.YResolution);
+        if(x < modeinfoblock.XResolution && y < modeinfoblock.YResolution)
+        {
+            x = modeinfoblock.XResolution;
+            y = modeinfoblock.YResolution;
+        }
+        mode = *mode_list++;
+    }
+    int* out;
+    out[0] = x;
+    out[1] = y;
+
+    return out;
+}
 
 // set rgb values in 32 bit number
 uint32 vbe_rgb(uint8 red, uint8 green, uint8 blue) {

@@ -13,7 +13,51 @@ void *memset(void *dst, char c, uint32 n) {
     for (; n != 0; n--) *temp++ = c;
     return dst;
 }
+char* strchr(const char* str, int character) {
+    while (*str != '\0') {
+        if (*str == character) {
+            return (char*)str;
+        }
+        str++;
+    }
 
+    // If the character is not found, return NULL
+    return NULL;
+}
+char* strtok(char* str, const char* delimiters) {
+    static char* next_token = NULL;
+    char* current_token;
+    const char* current_delimiter;
+
+    // If a new string is provided, set it as the starting point for tokenization
+    if (str != NULL) {
+        next_token = str;
+    }
+
+    // Skip leading delimiters
+    while (*next_token != '\0' && strchr(delimiters, *next_token) != NULL) {
+        next_token++;
+    }
+
+    // If the string is empty or contains only delimiters, return NULL
+    if (*next_token == '\0') {
+        return NULL;
+    }
+
+    // Find the end of the current token
+    current_token = next_token;
+    while (*next_token != '\0' && strchr(delimiters, *next_token) == NULL) {
+        next_token++;
+    }
+
+    // If we encountered a delimiter, null-terminate the current token and set the next_token to the character after the delimiter
+    if (*next_token != '\0') {
+        *next_token = '\0';
+        next_token++;
+    }
+
+    return current_token;
+}
 void *memcpy(void *dst, const void *src, uint32 n) {
     char *ret = dst;
     char *p = dst;

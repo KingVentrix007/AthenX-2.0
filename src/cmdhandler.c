@@ -1,3 +1,4 @@
+#include "rle.h"
 #include "editor.h"
 #include "cmdhandler.h"
 #include "string.h"
@@ -17,141 +18,138 @@
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
-void cmd_handler(char *buffer[512])
-{
-    if(strcmp(buffer, "bg") == 0)
-    {
-        cool_colors();
+#define MAX_COMMAND_LENGTH 50
+#define MAX_ARGUMENTS 10
+void display_available_commands() {
+    printf("\nAvailable commands:\n");
+    printf("help - Display this list of commands\n");
+    printf("time - Display the current time\n");
+    printf("echo <message> - Print the provided message\n");
+    printf("write <filename> <type> - Write content to a file\n");
+    printf("read <filename> - Read content from a file\n");
+    printf("ls - List files in the current directory\n");
+    printf("rm <filename> - Delete a file\n");
+    printf("cls - Clear the screen\n");
+    printf("bg - Change background colors\n");
+    printf("logo - Display a logo\n");
+    printf("mkdir <directoryname> - Create a new directory\n");
+    printf("exit - Update file system partition table\n");
+    printf("set-xt <x> <y> - Set screen resolution\n");
+    printf("song - Play a song\n");
+    printf("format <disk> - Format a disk\n");
+    printf("table - Display file system partition table\n");
+    printf("3d - Display a 3D demo\n");
+}
+void parse_command(const char* command) {
+    char command_copy[MAX_COMMAND_LENGTH];
+    strcpy(command_copy, command);
+
+    // Tokenize the command by spaces
+    char* token;
+    char* arguments[MAX_ARGUMENTS];
+    int arg_count = 0;
+
+    token = strtok(command_copy, " ");
+    while (token != NULL) {
+        arguments[arg_count++] = token;
+        token = strtok(NULL, " ");
     }
-    else if (strcmp(buffer,"cls") == 0)
+
+    // Check for different commands and execute them
+    if (strcmp(arguments[0], "help") == 0) {
+        if(arg_count <= 1)
+        {
+            display_available_commands();
+            
+        }
+        else
+        {
+            printf("This feature is still coming");
+        }
+
+         
+        // Implement help command logic
+        // For example: display a list of available commands
+    } else if (strcmp(arguments[0], "time") == 0) {
+        // Implement time command logic
+        // For example: display the current time
+        printf("Coming soon");
+    } else if (strcmp(arguments[0], "echo") == 0) {
+        // Implement echo command logic
+        // For example: print the following arguments
+        for (int i = 1; i < arg_count; i++) {
+            printf("%c", arguments[i]);
+            // Print each argument separated by a space
+            // You can implement this based on your output functionality
+        }
+    
+    } 
+    else if (strcmp(arguments[0], "write") == 0)
     {
-       //vbe_putpixel(100,100,VBE_RGB(0,255,0));
-       set_screen_x(0);
-       set_screen_y(0);
-        clear_screen();
-       //cool_colors();
-        
-    }
-    else if(strlen(buffer) > 0 && strstr(buffer,"write --") != NULL)
-    {
-        
-        char *parser;
-        char string[8];
-        parser = strstr(buffer, "write --");
-        parser += strlen("write --");
-        parse_string(string, parser, ' ');
-        const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
-        //const uint32 LBA = atoi(string);
-        
-       
-        const uint8 NO_OF_SECTORS = 1;
-        char buf[ATA_SECTOR_SIZE] = {0};
-      
-        
-        char out[MAX_FILE_SIZE];
-        clear_screen();
-        set_screen_x(87000000);
-        set_cursor_y(5656754);
-        cmd_handler("cls");
-        printf("\nPress ` to exit");
-        printf("\nWelcome to Text:\n");
-        text_editor(MAX_FILE_SIZE,out);
+        if(arg_count == 3)
+        {
+            char out[MAX_FILE_SIZE];
+            clear_screen();
+            set_screen_x(87000000);
+            set_cursor_y(5656754);
+            cmd_handler("cls");
+            printf("\nPress ` to exit");
+            printf("\nWelcome to Text:\n");
+            text_editor(MAX_FILE_SIZE,out);
        //printf(out);
         //strcpy(buf, out);
 
-        write(string, "txt",out);
-        // ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        // printf("\nLBA: %d\n",LBA);
-        // memset(buf, 0, sizeof(buf));
-        // memcpy(buf, &e, sizeof(e));
-        // ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA + 1, (uint32)buf);
-        // printf("data written\n");
+            write(arguments[1], arguments[2],out);
 
-        // read message from drive
-        // memset(buf, 0, sizeof(buf));
-        // ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        // printf("read data: %s\n", buf);
-
-        // memset(buf, 0, sizeof(buf));
-        // ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA + 3, (uint32)buf);
-        // memcpy(&e, buf, sizeof(e));
-        // printf("id: %d, name: %s\n", e.id, e.name);
-
+        }
+        else
+        {
+            printf("To many arguments");
+        }
     }
-    else if (strlen(buffer) > 0 && strstr(buffer,"read(") != NULL)
+    else if(strcmp(arguments[0],"read") == 0)
     {
-        char *parser;
-        char string[1];
-        parser = strstr(buffer, "read(");
-        parser += strlen("read(");
-        parse_string(string, parser, ')');
-        const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
-        //const uint32 LBA = atoi(string);
-        const uint8 NO_OF_SECTORS = 1;
-        char buf[MAX_FILE_SIZE] = {0};
-
-        memset(buf, 0, sizeof(buf));
-        read(string);
-        //ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        //printf("read data: %s\n", buf);
-
+        if(arg_count == 2)
+        {
+             read(arguments[1]);
+        }
        
     }
-    else if (strcmp(buffer,"logo") == 0)
+    else if(strcmp(arguments[0],"ls") == 0)
+    {
+        list_files();
+    }
+    else if(strcmp(arguments[0],"rm") == 0)
+    {
+        delete_file(arguments[1]);
+    }
+    else if (strcmp(arguments[0],"cls") == 0)
+    {
+        set_screen_x(0);
+       set_screen_y(0);
+        clear_screen();
+    }
+    else if(strcmp(arguments[0],"bg") == 0)
+    {
+        cool_colors();
+    }
+    else if(strcmp(arguments[0],"logo") == 0)
     {
          set_screen_x(0); // Set screen x position to 0;
-       set_screen_y(0); // Set screen y position to 0
+        set_screen_y(0); // Set screen y position to 0
         clear_screen(); // Clear screen
         
-        draw_image(0,0,320,200);
+        logo(0,0,320,200);
     }
-    else if (strcmp(buffer,"ls") == 0)
+    else if (strcmp(arguments[0],"mkdir") == 0)
     {
-        printf("\n"); 
-        list_files();//Lists all files
+        make_dir(arguments[1]);
     }
-    else if (strstr(buffer,"mkdir(") != NULL)
-    {
-        char *parser;
-        char string[32]; // Buffer to hold dictionary name
-        parser = strstr(buffer, "write(");
-        parser += strlen("write(");
-        parse_string(string, parser, ')');
-        const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
-        //const uint32 LBA = atoi(string);
-        
-       
-        const uint8 NO_OF_SECTORS = 1;
-        char buf[ATA_SECTOR_SIZE] = {0};
-      
-        
-        char out[MAX_FILE_SIZE];
-       printf("\nText:");
-       text_editor(512,out);
-       //printf(out);
-        strcpy(buf, out);
-
-        write(string, "txt", out);
-    }
-    // else if (strcmp(buffer,"write1!") == 0)
-    // {
-    //     uint32 l;
-    //     l = write("food", "eat food");
-    //     printf("L: %d\n",l);
-    // }
-    // else if (strcmp(buffer,"read1!") == 0)
-    // {
-    //     uint32 l;
-    //     l = read("food");
-    //     //printf("L: %d\n",l);
-    // }
-    
-    else if(strcmp(buffer,"exit") == 0)
+    else if (strcmp(arguments[0],"exit") == 0)
     {
         fs_partition_table_main_update();
     }
-    
-    else if (strcmp(buffer,"set-xy") == 0)
+    else if (strcmp(arguments[0],"set-xt") == 0)
     {
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         const uint32 LBA = KERNEL_SECTOR_BASE+1;
@@ -165,75 +163,49 @@ void cmd_handler(char *buffer[512])
 
         struct scree_size sc_size;
         strcpy(sc_size.checksum,"True");
-        sc_size.x = 1280;
-        sc_size.y = 1024;
+        sc_size.x = atoi(arguments[1]);
+        sc_size.y = atoi(arguments[2]);
         memcpy(buf, &sc_size, sizeof(sc_size));
         ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
         printf("data written\n");
     }
-    // else if (strcmp(buffer,"text") == 0)
-    // {
-    //    char out[512];
-    //    printf("\nText:");
-    //    text_editor(512,out);
-    //    printf(out);
-    // }
-    
-    else if (strcmp(buffer, "song") == 0)
+    else if(strcmp(arguments[0],"song") == 0)
     {
-        crude_song();
+         crude_song();
+
     }
-    else if (strcmp(buffer,"modes") == 0)
+    else if(strcmp(arguments[0],"format") == 0)
     {
-        clear_screen();
-        set_vesa_row(0);
-        set_vesa_colum(0);
-        vbe_print_available_modes();
+        int disk = atoi(arguments[1]);
+        format_disk(disk);
     }
-    else if(strcmp(buffer,"format disk") == 0)
-    {
-        format_disk();
-    }
-    else if (strcmp(buffer,"table") == 0)
+    else if(strcmp(arguments[0],"table") == 0)
     {
         fs_partition_table_main_p();
     }
-    
-    else if (strstr(buffer,"rm(") != NULL) 
+    else if(strcmp(arguments[0],"3d") == 0)
     {
-        char *parser;
-        char string[1];
-        parser = strstr(buffer, "rm(");
-        parser += strlen("rm(");
-        parse_string(string, parser, ')');
-        const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
-        //const uint32 LBA = atoi(string);
-        const uint8 NO_OF_SECTORS = 1;
-        char buf[ATA_SECTOR_SIZE] = {0};
-
-        memset(buf, 0, sizeof(buf));
-        delete_file(string);
+        printf("Please");
+        draw_window(0,0,50);
     }
-    else if (strstr(buffer,"mv(")!= NULL)
+    else if(strcmp(arguments[0],"rle") == 0)
     {
-
-    }
-    else if (strcmp(buffer,"3d") == 0)
-    {
-        clear_screen();
-        set_screen_x(0);
-        set_cursor_y(0);
-        demo_3D();
-    }
-    
-    
-    
-    else
-    {
+        main();
         
-        printf("\n%s is not a recognised commands",buffer);
     }
-   
+    else {
+        printf("[!] %c is not a valid command\n",arguments[0]);
+        // Handle invalid or unknown commands
+        // For example: display an error message
+    }
+}
+void cmd_handler(char *buffer[512])
+{
+    parse_command(buffer);
+    return;
+    
+
+
 }
 
 void kernel_command_handler(char *buffer[512])

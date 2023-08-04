@@ -1,3 +1,4 @@
+#include "vesa.h"
 #include "vfs.h"
 #include "maths.h"
 #include "fat_filelib.h"
@@ -24,7 +25,7 @@ KERNEL_MEMORY_MAP g_kmap;
 
 void access_grub_module(MULTIBOOT_INFO* mbi) {
     if (!(mbi->flags & 0x00000008))
-    printf("NONE");
+    printf("No Grub modules\n");
         return; // Module information not available
 
     uint32_t mods_count = mbi->mods_count;
@@ -36,7 +37,7 @@ void access_grub_module(MULTIBOOT_INFO* mbi) {
     if (mods_count >= 1) {
         uint32_t mod_start = modules[0].mod_start;
         uint32_t mod_end = modules[0].mod_end;
-        printf("ONE");
+        printf("There are %d modules", mods_count);
 
         // Now you can access the data in the module using the addresses mod_start and mod_end.
         // Be sure to check if the addresses are valid and properly aligned before accessing the data.
@@ -153,7 +154,7 @@ void kmain(unsigned long magic, unsigned long addr) {
 
             struct screen_size sc_size;
          memset(buf, 0, sizeof(buf));
-        //ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
+        ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
         memcpy(&sc_size, buf, sizeof(sc_size));
         int x;
         int y;
@@ -165,8 +166,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         else
         {
             //cmd_handler("screen size");
-            x = 1280;
-            y = 1024;
+            x = 2560;
+            y = 1440;
         }
 
         int ret = display_init(0,x,y,32);
@@ -180,6 +181,8 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("more boot options coming soon\n");
         }
         printf("%s\n",mode);
+        cmd_handler("cls");
+        //vbe_print_available_modes();
         initialize_file_system(0);
         
         //run_once();

@@ -14,8 +14,19 @@ int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
     int ret_int;
     if(display_mode == 0)
     {
-        ret_int = vesa_init(width,height,bpp);
-        display_mode_screen = 0;
+        if(width == -200044 && height == -950481)
+        {
+            ret_int = vesa_init(600,800,bpp);
+            int* out = find_biggest_mode();
+            ret_int = vesa_init(out[0],out[1],bpp);
+            
+        }
+        else
+        {
+            ret_int = vesa_init(width,height,bpp);
+            display_mode_screen = 0;
+        }
+        
     }
     else if (display_mode == 1)
     {

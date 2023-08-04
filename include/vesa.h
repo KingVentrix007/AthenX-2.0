@@ -99,6 +99,8 @@ void vbe_putpixel(int x, int y, int color);
 void vbe_print_available_modes();
 void vbe_putpixel_v2(int x, int y,int color, unsigned char *buffer);
 void vese_mem(void *src, int n);
+
+int * find_biggest_mode();
 #define VBE_RGB(r, g, b) vbe_rgb(r, g, b)
 
 #endif

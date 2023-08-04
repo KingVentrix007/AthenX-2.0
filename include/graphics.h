@@ -20,6 +20,7 @@ void draw_line(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint8 color);
 void drawLine(int x0, int y0, int x1, int y1);
 int ArtemisVision();
 void bresenham_line(Point start, Point end);
+void draw_window(int x, int y, int length);
 #endif
 
 

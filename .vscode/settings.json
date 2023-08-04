@@ -15,6 +15,10 @@
         "stdbool.h": "c",
         "ide.h": "c",
         "display.h": "c",
-        "ext2.h": "c"
+        "ext2.h": "c",
+        "keyboard.h": "c",
+        "speaker.h": "c",
+        "graphics.h": "c",
+        "bitmap.h": "c"
     }
 }

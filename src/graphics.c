@@ -760,30 +760,30 @@ void drawWireframeSquare(int x, int y, int size, int screen_width, int screen_he
 }
 
 // Function to draw a line between two points (x0, y0) and (x1, y1)
-void drawLine(int x0, int y0, int x1, int y1) {
-    // Bresenham's line drawing algorithm (simplified for positive slopes)
-    int dx = x1 - x0;
-    int dy = y1 - y0;
-    int yi = 1;
+// void drawLine(int x0, int y0, int x1, int y1) {
+//     // Bresenham's line drawing algorithm (simplified for positive slopes)
+//     int dx = x1 - x0;
+//     int dy = y1 - y0;
+//     int yi = 1;
 
-    if (dy < 0) {
-        yi = -1;
-        dy = -dy;
-    }
+//     if (dy < 0) {
+//         yi = -1;
+//         dy = -dy;
+//     }
 
-    int D = 2 * dy - dx;
-    int y = y0;
+//     int D = 2 * dy - dx;
+//     int y = y0;
 
-    for (int x = x0; x <= x1; x++) {
-        //drawPixel(x, y, COLOR);
-        vbe_putpixel(x,y,VBE_RGB(100,0,100)); // Set the COLOR to the desired pixel color
-        if (D > 0) {
-            y += yi;
-            D -= 2 * dx;
-        }
-        D += 2 * dy;
-    }
-}
+//     for (int x = x0; x <= x1; x++) {
+//         //drawPixel(x, y, COLOR);
+//         vbe_putpixel(x,y,VBE_RGB(100,0,100)); // Set the COLOR to the desired pixel color
+//         if (D > 0) {
+//             y += yi;
+//             D -= 2 * dx;
+//         }
+//         D += 2 * dy;
+//     }
+// }
 
 int ArtemisVision() {
     int x = 50; // X-coordinate of the top-left corner of the square
@@ -886,3 +886,51 @@ void draw_diamond(uint16 x, uint16 y, uint16 radius, uint8 color)
   } 
 }
 
+
+void drawLine(int x0, int y0, int x1, int y1) {
+    // Bresenham's line drawing algorithm (simplified for positive slopes)
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int yi = 1;
+
+    if (dy < 0) {
+        yi = -1;
+        dy = -dy;
+    }
+
+    int D = 2 * dy - dx;
+    int y = y0;
+
+    for (int x = x0; x <= x1; x++) {
+        vbe_putpixel(x, y, VBE_RGB(50,255,100)); // Set the COLOR to the desired pixel color
+        if (D > 0) {
+            y += yi;
+            D -= 2 * dx;
+        }
+        D += 2 * dy;
+    }
+}
+
+// Function to draw an empty 2D square at a given point (x, y) of a particular length
+void drawEmptySquare(int x, int y, int size) {
+    // Calculate the coordinates of the four corners of the square
+    int x0 = x;
+    int y0 = y;
+    int x1 = x + size;
+    int y1 = y;
+    int x2 = x + size;
+    int y2 = y + size;
+    int x3 = x;
+    int y3 = y + size;
+
+    // Draw the edges of the square
+    drawLine(x0, y0, x1, y1);
+    drawLine(x1, y1, x2, y2);
+    drawLine(x2, y2, x3, y3);
+    drawLine(x3, y3, x0, y0);
+}
+void draw_window(int x, int y, int length)
+{
+    drawEmptySquare(x, y, length);
+    
+}

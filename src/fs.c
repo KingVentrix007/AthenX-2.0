@@ -67,7 +67,7 @@ int init_fs()
         // If the disk is not formatted, format the disk and create a new master table
         printf("Disk not formatted\n");
         return -1;
-        format_disk();
+        format_disk(0);
         run_once();
         printf("Formatted disk\n");
         char buf[900] = {0};
@@ -297,7 +297,7 @@ void list_files()
 // Function: format_disk
 // Description: Formats the disk by writing the format table and initializing the master table.
 // Return: Integer - Returns 0 if successful.
-int format_disk()
+int format_disk(int drive)
 {
     struct format_table format;
     char buf[512];
@@ -316,7 +316,7 @@ int format_disk()
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &format, sizeof(format));
     int ret = 0;
-    ret = ide_write_sectors(0, 1, 20, buf);
+    ret = ide_write_sectors(drive, 1, 20, buf);
     cmd_handler("set-xy");
     return ret;
 }
