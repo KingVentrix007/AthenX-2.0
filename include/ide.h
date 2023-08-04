@@ -146,4 +146,5 @@ void ata_init();
 int ata_get_drive_by_model(const char *model);
 
 uint64 get_sectors(int drive);
+
 #endif

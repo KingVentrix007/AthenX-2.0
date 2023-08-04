@@ -19,6 +19,9 @@
         "keyboard.h": "c",
         "speaker.h": "c",
         "graphics.h": "c",
-        "bitmap.h": "c"
+        "bitmap.h": "c",
+        "limits": "c",
+        "streambuf": "c",
+        "iosfwd": "c"
     }
 }

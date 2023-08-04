@@ -76,4 +76,5 @@ int format_disk(int disk);
 delete_file(char *filename[8]);
 void clean_fs_partition_table_main(int num);
 int make_dir(char *dir_name[8]);
+int read_add(char filename[8],char* out);
 #endif

@@ -1,7 +1,7 @@
 #include "vesa.h"
 #include "vfs.h"
 #include "maths.h"
-
+#include "console.h"
 #include "kernel.h"
 #include "display.h"
 #include "panic.h"
@@ -468,6 +468,9 @@ void terminal_main()
                 if(backspace(buffer))
                 {
                     printf("\b");
+                    set_cursor_x(get_cursor_x()-2);
+                    printf("F");
+                    console_ungetchar();
                 }
                 else
                 {

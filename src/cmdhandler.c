@@ -1,3 +1,4 @@
+
 #include "rle.h"
 #include "editor.h"
 #include "cmdhandler.h"
@@ -39,6 +40,9 @@ void display_available_commands() {
     printf("format <disk> - Format a disk\n");
     printf("table - Display file system partition table\n");
     printf("3d - Display a 3D demo\n");
+    printf("rle - run length encoding tests\n");
+    printf("exe <filename> - run executable file\n");
+    printf("edit <filename> - edit a file\n");
 }
 void parse_command(const char* command) {
     char command_copy[MAX_COMMAND_LENGTH];
@@ -186,16 +190,48 @@ void parse_command(const char* command) {
     }
     else if(strcmp(arguments[0],"3d") == 0)
     {
-        printf("Please");
-        draw_window(0,0,50);
+        //printf("Please");
+        ArtemisVision();
     }
     else if(strcmp(arguments[0],"rle") == 0)
     {
         main();
         
     }
+    else if (strcmp(arguments[0],"exe") == 0)
+    {
+        char output[1024];
+        read_add(arguments[1],output);
+        cmd_handler(output);
+
+    }
+    
+    else if(strcmp(arguments[0],"sect") == 0)
+    {
+        char myArray[1024] = {0}; // This sets all elements to 0, change this pattern if desired
+
+    // Access and modify elements in the array
+        for (int i = 0; i < 1024; i++) {
+        // You can set the elements to any value you want, for example:
+            myArray[i] = i % 256; // This sets each element with values from 0 to 255 in a repeating pattern
+         }
+        printf("\n%c", myArray);
+        ide_write_sectors(0,2,60,(uint32)myArray);
+        char outb[1024] = {0};
+        ide_read_sectors(0,2,60,(uint32)outb);
+        printf("\n%c", outb);
+
+    }
+    else if(strcmp(arguments[0],"edit") == 0)
+    {
+        char data[1024] = {0};
+        memset(data,0,sizeof(data));
+        read_add(arguments[1],data);
+        printf("\n%c",data);
+        text_editor(1024,data);
+    }
     else {
-        printf("[!] %s is not a valid command\n",arguments[0]);
+        printf("\n[!] %s is not a valid command",arguments[0]);
         // Handle invalid or unknown commands
         // For example: display an error message
     }

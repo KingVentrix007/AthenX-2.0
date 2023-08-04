@@ -340,6 +340,7 @@ void ftoa_sci_v(char *buffer, double value)
     *buffer++ = 'e';
     itoa_d(buffer, exponent, 10);
 }
+
 int normalize_v(double *val)
 {
     int exponent = 0;

@@ -1,3 +1,4 @@
+#include "image.h"
 #include "bitmap.h"
 #include "vesa.h"
 #include "vga.h"
@@ -932,5 +933,20 @@ void drawEmptySquare(int x, int y, int size) {
 void draw_window(int x, int y, int length)
 {
     drawEmptySquare(x, y, length);
+    
+}
+
+int draw_png_image()
+{
+    for (size_t x = 0; x < vbe_get_width(); x++)
+    {
+        for (size_t y = 0; y < vbe_get_height(); y++)
+        {
+             vbe_putpixel(x,y,athenx[x*vbe_get_width()+y]);
+        }
+        
+
+       
+    }
     
 }

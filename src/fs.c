@@ -524,6 +524,72 @@ int read(char filename[8])
     }
     return -1;
 }
+int read_add(char filename[8],char* out)
+{
+    out = malloc(MAX_FILE_SIZE);
+    for (uint32 i = FILE_SECTOR_BASE + 1; i < 900; i++)
+    {
+        uint32 LBA = i;
+        char buf[512] = {0};
+        memset(buf, 0, sizeof(buf));
+        struct FILE_HEADER_V1 f;
+        ide_read_sectors(0, 1, i, (uint32)buf);
+        memcpy(&f, buf, sizeof(f));
+
+        // Check if the sector is used and the file belongs to the current directory
+        if (isInArray(LBA, fs_partition_table_main.used_sectors, 128) == 0 &&
+            strcmp(f.filename, filename) == 0 && strcmp(f.dictionary, current_dir) == 0)
+        {
+            // if(f.next_sector != 0)
+            // {
+            //     printf("here: %d",f.next_sector);
+            // }
+             memset(buf, 0, sizeof(buf));
+             
+             char data_out[MAX_FILE_SIZE] = {0};
+             memset(data_out, 0, sizeof(data_out));
+             //+printf("\n");
+             for (size_t x = 0; x < f.num_sectors; x++)
+             {
+                struct BLOCK fs_data;
+                if(f.file_data_lbas[x] != 0)
+                {
+                    //printf("Read: f.data[%d] = %d\n",x,f.data[x]);
+                    char inner_buf[512] = {0};
+                    memset(inner_buf, 0, sizeof(inner_buf));
+                    ide_read_sectors(0,1,f.file_data_lbas[x],(uint32)inner_buf);
+                    memcpy(&fs_data, inner_buf, sizeof(fs_data));
+                    //printf("strlen(%d)",strlen(fs_data.data));
+                    for (size_t q = 0; q < 512; q++)
+                    {
+                        if(fs_data.data[q] != 0 && strlen(data_out) <= f.file_size-1)
+                        {
+                            append(data_out,fs_data.data[q]);
+                        }
+                       
+                       //printf("fs_data.data[%d] = %s ",q,fs_data.data[q]);
+                    }
+                    //printf("Data at: %d\n",f.data[x]);
+                    //printf("%s\n",fs_data.data);
+                   
+                     //printf("\nFile data in loop\n%s", data_out);
+                    
+                    
+                }
+                else
+                {
+                    break;
+                }
+               
+
+             }
+             memcpy(out, data_out, sizeof(data_out));
+            printf("\nFile data\n%s", data_out);
+            return LBA;
+        }
+    }
+    return -1;
+}
 // Function: delete_file
 // Description: Deletes a file with the specified name from the current directory.
 // Parameters:

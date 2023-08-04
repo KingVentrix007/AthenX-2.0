@@ -96,13 +96,20 @@ void console_putchar(char ch) {
         }
     } else if (ch == '\n') {
         console_newline();
-    } else {
+    }
+    else if (ch == '\b')
+    {
+        g_vga_buffer[g_vga_index--] = vga_item_entry(' ', g_fore_color, g_back_color);
+        vga_set_cursor_pos(cursor_pos_x--, cursor_pos_y);
+    }
+    else {
         if (ch > 0) {
             g_vga_buffer[g_vga_index++] = vga_item_entry(ch, g_fore_color, g_back_color);
             //bitmap_draw_char(ch,20,20,VBE_RGB(255,0,0));
             vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
         }
     }
+    
 }
 
 // revert back the printed character and add 0 to it
