@@ -91,6 +91,10 @@ typedef struct {
     uint8 framebuffer_bpp;
     uint8 framebuffer_type;  // indexed = 0, RGB = 1, EGA = 2
 
+    uint32_t mods_count;
+    uint32_t mods_addr;
+
+
 } MULTIBOOT_INFO;
 
 

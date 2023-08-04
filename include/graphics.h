@@ -16,8 +16,8 @@ void draw_char(unsigned char c,int fgcolor, int bgcolor, int x, int y, int base_
 void draw_image(int x, int y, int rows, int cols);
 char* logo();
 int demo_3D();
-int draw_line();
-
+void draw_line(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint8 color);
+void drawLine(int x0, int y0, int x1, int y1);
 int ArtemisVision();
 void bresenham_line(Point start, Point end);
 #endif

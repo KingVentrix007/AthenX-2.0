@@ -14,6 +14,7 @@
         "bool.h": "c",
         "stdbool.h": "c",
         "ide.h": "c",
-        "display.h": "c"
+        "display.h": "c",
+        "ext2.h": "c"
     }
 }

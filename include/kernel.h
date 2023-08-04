@@ -49,7 +49,12 @@ typedef struct {
 
 extern KERNEL_MEMORY_MAP g_kmap;
 
-
+struct module {
+    uint32_t mod_start;
+    uint32_t mod_end;
+    // Other fields
+    // ...
+};
 
 #endif
 

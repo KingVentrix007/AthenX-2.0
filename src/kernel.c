@@ -22,6 +22,27 @@
 #include "ext2.h"
 KERNEL_MEMORY_MAP g_kmap;
 
+void access_grub_module(MULTIBOOT_INFO* mbi) {
+    if (!(mbi->flags & 0x00000008))
+    printf("NONE");
+        return; // Module information not available
+
+    uint32_t mods_count = mbi->mods_count;
+    uint32_t mods_addr = mbi->mods_addr;
+
+    struct module* modules = (struct module*)mods_addr;
+
+    // Assuming you want to access the first module loaded by Grub
+    if (mods_count >= 1) {
+        uint32_t mod_start = modules[0].mod_start;
+        uint32_t mod_end = modules[0].mod_end;
+        printf("ONE");
+
+        // Now you can access the data in the module using the addresses mod_start and mod_end.
+        // Be sure to check if the addresses are valid and properly aligned before accessing the data.
+    }
+}
+
 int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
     uint32 i;
 
@@ -86,6 +107,7 @@ void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
 
 void kmain(unsigned long magic, unsigned long addr) {
     MULTIBOOT_INFO *mboot_info;
+    
     char *shell = "User@SimpleOS ";
     char *cwd = malloc(sizeof(*cwd)); //Current working directory, in it's path
     cwd = "/";
@@ -163,6 +185,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         //run_once();
         // #define CUSTOM_FS 0
         // #if CUSTOM_FS
+        access_grub_module(mboot_info);
            
             
         //     //clean_fs_partition_table_main(46);

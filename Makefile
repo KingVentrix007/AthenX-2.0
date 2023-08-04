@@ -56,22 +56,13 @@ HackOS.bin:$(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
 iso: HackOS.bin
 	
 	make HackOS.bin
-	mkdir iso
-	mkdir iso/boot
-	mkdir iso/boot/grub
+# mkdir iso
+# mkdir iso/boot
+# mkdir iso/boot/grub
 	cp HackOS.bin iso/boot/HackOS.bin
 	
-	echo 'set timeout=0'                      > iso/boot/grub/grub.cfg
-	echo 'set default=0'                     >> iso/boot/grub/grub.cfg
-	
-	echo ''                                  >> iso/boot/grub/grub.cfg
-	echo 'menuentry "HackOS" {'            >> iso/boot/grub/grub.cfg
-	echo '  multiboot /boot/HackOS.bin'   >> iso/boot/grub/grub.cfg
-	
-	echo '  boot'                            >> iso/boot/grub/grub.cfg
-	echo '}'                                 >> iso/boot/grub/grub.cfg
 	grub-mkrescue --output=HackOS.iso iso
-	rm -rf iso
+#	rm -rf iso
 HackOS.bin2: $(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
 
 	
@@ -100,9 +91,9 @@ changlog-test:
 	./ update_changelog
 changlog:
 	./update_changelog
-run:
-	make iso
-	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=HDD.img -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
+run: iso
+	
+	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
 run-ext2:
 	
 	qemu-system-x86_64 -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
@@ -111,18 +102,18 @@ run-fat:
 #	make iso
 #	make fat32
 	qemu-system-x86_64 -drive format=raw,file=fat32.img,if=ide,index=0,media=disk -m 2G
-run-c:
-	make iso
-	qemu-system-x86_64 HackOS.iso -drive file=HDD.img -serial stdio
+# run-c:
+# 	make iso
+# 	qemu-system-x86_64 HackOS.iso -drive file=HDD.img -serial stdio
 
-run-nd:
-	make iso
-	qemu-system-x86_64 HackOS.iso -drive file=HDD.img
+# run-nd:
+# 	make iso
+# 	qemu-system-x86_64 HackOS.iso -drive file=HDD.img
 
-run-bin:
-	make clean
-	make os-image.bin
-	qemu-system-x86_64 os-image.bin -drive file=HDD.img
+# run-bin:
+# 	make clean
+# 	make os-image.bin
+# 	qemu-system-x86_64 os-image.bin -drive file=HDD.img
 
 HDD-SSFS:
 	qemu-img create HDD.img 1G

@@ -32,14 +32,14 @@ void cmd_handler(char *buffer[512])
        //cool_colors();
         
     }
-    else if(strlen(buffer) > 0 && strstr(buffer,"write(") != NULL)
+    else if(strlen(buffer) > 0 && strstr(buffer,"write --") != NULL)
     {
         
         char *parser;
         char string[8];
-        parser = strstr(buffer, "write(");
-        parser += strlen("write(");
-        parse_string(string, parser, ')');
+        parser = strstr(buffer, "write --");
+        parser += strlen("write --");
+        parse_string(string, parser, ' ');
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         //const uint32 LBA = atoi(string);
         
@@ -49,8 +49,13 @@ void cmd_handler(char *buffer[512])
       
         
         char out[MAX_FILE_SIZE];
-       printf("\nText:");
-       text_editor(MAX_FILE_SIZE,out);
+        clear_screen();
+        set_screen_x(87000000);
+        set_cursor_y(5656754);
+        cmd_handler("cls");
+        printf("\nPress ` to exit");
+        printf("\nWelcome to Text:\n");
+        text_editor(MAX_FILE_SIZE,out);
        //printf(out);
         //strcpy(buf, out);
 
@@ -100,7 +105,7 @@ void cmd_handler(char *buffer[512])
         
         draw_image(0,0,320,200);
     }
-    else if (strcmp(buffer,"list") == 0)
+    else if (strcmp(buffer,"ls") == 0)
     {
         printf("\n"); 
         list_files();//Lists all files

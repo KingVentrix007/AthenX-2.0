@@ -531,6 +531,11 @@ char* logo()
         {
             return s;
         }
+        else
+        {
+            return s;
+        }
+        
         //printf("%s",c);
         
     }
@@ -798,3 +803,86 @@ int ArtemisVision() {
 
 //     bresenham_line(start, end);
 // }
+
+
+void draw_line(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint8 color)
+{
+  if(y1 == y2){
+    for(uint16 i = x1; i <= x2; i++)
+      vbe_putpixel(i, y1, color);
+    return;
+  }
+
+  if(x1 == x2){
+    for(uint16 i = y1; i <= y2; i++){
+      vbe_putpixel(x1, i, color);
+    }
+    return;
+  }
+}
+
+void draw_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint8 color)
+{
+  draw_line(x, y, x, y + height, color);
+  draw_line(x, y, x + width, y, color);
+  draw_line(x + width, y, x + width, y + height, color);
+  draw_line(x, y + height, x + width, y + height, color);
+}
+
+void fill_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint8 color)
+{
+  draw_line(x, y, x, y + height, color);
+  draw_line(x, y, x + width, y, color);
+  draw_line(x + width, y, x + width, y + height, color);
+  draw_line(x, y + height, x + width, y + height, color);
+  for(int i = y; i < y + height; i++){
+    draw_line(x, i, x + width, i, color);
+  }
+}
+
+void draw_bresenham_circle(int xc, int yc, int x, int y, uint8 color) 
+{ 
+  vbe_putpixel(xc+x, yc+y, color); 
+  vbe_putpixel(xc-x, yc+y, color); 
+  vbe_putpixel(xc+x, yc-y, color); 
+  vbe_putpixel(xc-x, yc-y, color); 
+  vbe_putpixel(xc+y, yc+x, color); 
+  vbe_putpixel(xc-y, yc+x, color); 
+  vbe_putpixel(xc+y, yc-x, color); 
+  vbe_putpixel(xc-y, yc-x, color); 
+} 
+
+void draw_circle(uint16 x, uint16 y, uint16 radius, uint8 color)
+{
+  int x2 = 0, y2 = radius;
+  int d = 3 - 2 * radius;
+  draw_bresenham_circle(x, y, x2, y2, color);
+  while(y2 >= x2){
+    x2++;
+    if(d > 0){
+      y2--;
+      d = d + 4 * (x2 - y2) + 10;
+    }else{
+      d = d + 4 * x2 + 6;
+    } 
+    draw_bresenham_circle(x, y, x2, y2, color);
+  } 
+}
+
+void draw_diamond(uint16 x, uint16 y, uint16 radius, uint8 color)
+{
+  uint16 x2 = 0, y2 = radius;
+  uint16 d = 3 - 2 * radius;
+  draw_bresenham_circle(x, y, x2, y2, color);
+  while(y2 >= x2){
+    x2++;
+    if(d > 0){
+      y2--;
+      d = d + 4 * (x2 - y2) + 10;
+    }else{
+      d = d + 4 * x2 + 6;
+    } 
+    draw_bresenham_circle(x, y, x2, y2, color);
+  } 
+}
+

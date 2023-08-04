@@ -8,7 +8,8 @@
 
 #define VGA_WIDTH     80
 #define VGA_HEIGHT    24
-
+#define VGA_MAX_WIDTH 320
+#define VGA_MAX_HEIGHT 200
 typedef enum {
     COLOR_BLACK1,
     COLOR_BLUE1,

@@ -10,13 +10,14 @@ fi
 case "$1" in
   "disk")
     # Action for param1
-    echo "creating virtual disk"
-    
+    echo "creating virtual disk without format"
+    cd ..
+    make HDD-SSFS
     # Add your commands here
     ;;
-  "param2")
+  "fat32")
     # Action for param2
-    echo "Performing action for param2"
+    echo "creating virtual disk with FAT32"
     # Add your commands here
     ;;
   "param3")
