@@ -61,9 +61,13 @@ iso: HackOS.bin
 	mkdir iso/boot/grub
 	cp HackOS.bin iso/boot/HackOS.bin
 	
-	echo 'set timeout=0'                      > iso/boot/grub/grub.cfg
+	echo 'set timeout=100'                      > iso/boot/grub/grub.cfg
 	echo 'set default=0'                     >> iso/boot/grub/grub.cfg
 	
+	echo 'insmod vga' >> iso/boot/grub/grub.cfg
+	echo 'insmod png' >> iso/boot/grub/grub.cfg
+	echo 'set gfxpayload=keep' >> iso/boot/grub/grub.cfg
+	echo 'terminal_output gfxtern' >> iso/boot/grub/grub.cfg
 	echo ''                                  >> iso/boot/grub/grub.cfg
 	echo 'menuentry "HackOS" {'            >> iso/boot/grub/grub.cfg
 	echo '  multiboot /boot/HackOS.bin'   >> iso/boot/grub/grub.cfg
@@ -71,7 +75,7 @@ iso: HackOS.bin
 	echo '  boot'                            >> iso/boot/grub/grub.cfg
 	echo '}'                                 >> iso/boot/grub/grub.cfg
 	grub-mkrescue --output=HackOS.iso iso
-	rm -rf iso
+	
 HackOS.bin2: $(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
 
 	
