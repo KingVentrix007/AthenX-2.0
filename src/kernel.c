@@ -1,4 +1,4 @@
-
+#include "vfs.h"
 #include "maths.h"
 #include "fat_filelib.h"
 #include "kernel.h"
@@ -118,6 +118,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         //@ Gets screen size from memory
+        
         const int DRIVE = 0;
         const uint32 LBA = KERNEL_SECTOR_BASE+1;
         const uint8 NO_OF_SECTORS = 1;
@@ -130,7 +131,7 @@ void kmain(unsigned long magic, unsigned long addr) {
 
             struct screen_size sc_size;
          memset(buf, 0, sizeof(buf));
-        ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
+        //ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
         memcpy(&sc_size, buf, sizeof(sc_size));
         int x;
         int y;
@@ -147,6 +148,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         }
 
         int ret = display_init(0,x,y,32);
+        
         char* mode = logo();
         set_screen_x(0);
         set_screen_y(0);
@@ -156,35 +158,22 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("more boot options coming soon\n");
         }
         printf("%s\n",mode);
+        initialize_file_system(0);
         
         //run_once();
-        #define CUSTOM_FS 0
-        #if CUSTOM_FS
+        // #define CUSTOM_FS 0
+        // #if CUSTOM_FS
            
-            init_fs();
-            //clean_fs_partition_table_main(46);
-            //fs_partition_table_main_p();
-            //run_once();
-        #else
-            //printf("hello world");
-            //read_superblock();
-            //ext2_init();
-            fl_init();
-            if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
-            {
-                printf("ERROR: Failed to init file system\n");
-                
-                fl_format(900,"NAME");
-
-            }
-            else
-            {
-                printf("Success");
-            }
-   
-    // List the root directory
-            fl_listdirectory("/");
-        #endif
+            
+        //     //clean_fs_partition_table_main(46);
+        //     //fs_partition_table_main_p();
+        //     //run_once();
+        // #else
+        //     //printf("hello world");
+       
+            
+            
+        //#endif
         print_drives();
         // char *filedata = malloc(sizeof(*filedata));
         // char * path = "/test";

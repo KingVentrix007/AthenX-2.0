@@ -258,11 +258,13 @@ char* ext2_read_sector(int sector)
 	return file_buf;
 }
 
-void ext2_init(){
+int ext2_init(){
 	if(esb->magic != 0xEF53){
 		printf("Filesystem is Not EXT2!\n");
+		return -1;
 	}
 	else {
 		printf("Filesystem is EXT2!\n");
+		return 0;
 	}
 }

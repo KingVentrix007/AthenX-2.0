@@ -66,6 +66,7 @@ int init_fs()
     {
         // If the disk is not formatted, format the disk and create a new master table
         printf("Disk not formatted\n");
+        return -1;
         format_disk();
         run_once();
         printf("Formatted disk\n");

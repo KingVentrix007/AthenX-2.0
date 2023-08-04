@@ -92,7 +92,7 @@ typedef struct ext2_dirent
 ext2_superblock* esb;
 
 void read_superblock();
-void ext2_init();
+int ext2_init();
 void ext2_write_sector(int sector, uint32* data);
 char* ext2_read_sector(int sector);
 char* ext2_read_file(char* fpath);
