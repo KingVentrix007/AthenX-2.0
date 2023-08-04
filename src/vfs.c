@@ -1,4 +1,4 @@
-#include "fat_filelib.h"
+
 #include "fs.h"
 #include "ext2.h"
 #include "vfs.h"
@@ -14,22 +14,22 @@ int init_disk(int disk)
             init_fs_ret =  ext2_init();
             if(init_fs_ret != 0)
             {
-                printf("Disk %d is not formatted with ext2, trying FAT32\n",disk);
-                fl_init();
-                if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
-                {
-                   init_fs_ret = -1;
-                   printf("Disk %d is not formatted with FAT\n",disk);
-                   return 3;
+                // printf("Disk %d is not formatted with ext2, trying FAT32\n",disk);
+                // fl_init();
+                // if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
+                // {
+                //    init_fs_ret = -1;
+                //    printf("Disk %d is not formatted with FAT\n",disk);
+                //    return 3;
 
 
-                }
-                else
-                {
-                    printf("Disk %d is formatted with FAT\n",disk);
-                    printf("Type format('Desired format') to format the disk");
-                    return -1;
-                }
+                // }
+                // else
+                // {
+                //     printf("Disk %d is formatted with FAT\n",disk);
+                //     printf("Type format('Desired format') to format the disk");
+                //     return -1;
+                // }
             }
             else
             {

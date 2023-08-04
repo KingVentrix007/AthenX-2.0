@@ -8,6 +8,6 @@ void set_screen_x(int x);
 void set_screen_y(int y);
 int get_screen_x();
 int get_screen_y();
-
+int clear_display();
 void next_line();
 #endif

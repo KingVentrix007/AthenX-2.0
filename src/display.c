@@ -6,6 +6,7 @@
 #include "terminal.h"
 #include "bool.h"
 #include "vesa_display.h"
+#include "display.h"
 int display_mode_screen;
 size_t screen_x;
 size_t screen_y;
@@ -53,7 +54,7 @@ void next_line()
     else if (display_mode_screen == 1)
     {
         //printf("Coming soon");
-        //console_next_line();
+        printf("\n");
     }
     else if (display_mode_screen == 2)
     {
@@ -151,7 +152,13 @@ void set_font_color(uint32_t color)
 }
 
 
-
+int clear_display()
+{
+    if(display_mode_screen == 1)
+    {
+        console_clear(COLOR_BLACK1,COLOR_BLACK1);
+    }
+}
 
 
 static void print(const char *data, size_t data_length)

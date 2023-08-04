@@ -7,7 +7,7 @@
 
 1. at the top of your source file, specify if you will be using camelCase or snake_case.
 
-2. Proper function names should Always be used. e.g for a function that read from a disk: int disk_read() instead of int my_function.
+2. Proper function names should Always be used. e.g for a function that read from a disk: int ide_read_secotors() instead of int my_function.
 
 3. Variables: Use descriptive and meaningful names for variables, avoiding single-letter names unless they have a specific purpose (e.g., loop counters).
 

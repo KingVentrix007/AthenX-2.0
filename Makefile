@@ -91,7 +91,7 @@ changlog-test:
 	./ update_changelog
 changlog:
 	./update_changelog
-run: iso
+run:
 	
 	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
 run-ext2:

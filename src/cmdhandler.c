@@ -128,6 +128,7 @@ void parse_command(const char* command) {
         set_screen_x(0);
        set_screen_y(0);
         clear_screen();
+        clear_display();
     }
     else if(strcmp(arguments[0],"bg") == 0)
     {
@@ -149,7 +150,7 @@ void parse_command(const char* command) {
     {
         fs_partition_table_main_update();
     }
-    else if (strcmp(arguments[0],"set-xt") == 0)
+    else if (strcmp(arguments[0],"set-xy") == 0)
     {
         const int DRIVE = 0;//ata_get_drive_by_model("QEMU HARDDISK");
         const uint32 LBA = KERNEL_SECTOR_BASE+1;
@@ -194,7 +195,7 @@ void parse_command(const char* command) {
         
     }
     else {
-        printf("[!] %c is not a valid command\n",arguments[0]);
+        printf("[!] %s is not a valid command\n",arguments[0]);
         // Handle invalid or unknown commands
         // For example: display an error message
     }

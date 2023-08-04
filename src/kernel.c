@@ -1,7 +1,7 @@
 #include "vesa.h"
 #include "vfs.h"
 #include "maths.h"
-#include "fat_filelib.h"
+
 #include "kernel.h"
 #include "display.h"
 #include "panic.h"
@@ -166,8 +166,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         else
         {
             //cmd_handler("screen size");
-            x = 2560;
-            y = 1440;
+            x = 800;
+            y = 600;
         }
 
         int ret = display_init(0,x,y,32);
@@ -246,7 +246,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         if (ret < 0) {
             ERROR("failed to init vesa graphics\n");
             sleep(4);
-            display_init(2,0,0,0);
+            display_init(1,0,0,0);
             terminal_main();
             goto done;
         }
@@ -480,12 +480,12 @@ void terminal_main()
             {
                 //printf("\n");
                 cmd_handler(buffer);
-                buffer[0] = '\0';
+                memset(buffer, 0,sizeof(buffer));
                 next_line();
                 set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
-                printf("%s>");
+                printf(">");
                 //crude_song();
             }
             
