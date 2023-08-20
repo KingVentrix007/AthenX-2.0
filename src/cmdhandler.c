@@ -104,7 +104,7 @@ void parse_command(const char* command) {
         //strcpy(buf, out);
 
             write(arguments[1], arguments[2],out);
-
+            write_file_2(arguments[1],out);
         }
         else
         {
@@ -197,6 +197,21 @@ void parse_command(const char* command) {
     {
         main();
         
+    }
+    else if(strcmp(arguments[0],"fs") == 0)
+    {
+        clear_display();
+        // printf("SUPERBLOCK: %d\n",sizeof(SUPERBLOCK));
+        // printf("INODE_FILE: %d\n",sizeof(INODE_FILE));
+        // printf("INODE_DIR: %d\n",sizeof(INODE_DIR));
+        // printf("DATA_BLOCK: %d\n",sizeof(DATA_BLOCK));
+        // write_superblock(512);
+        // printf("CONE_BLOCK\n");
+        // read_superblock_al(512);
+        // printf("Done!\n");
+        //format_disk_v2(0);
+        size_test();
+
     }
     else if (strcmp(arguments[0],"exe") == 0)
     {

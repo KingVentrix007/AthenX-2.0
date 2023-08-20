@@ -77,4 +77,80 @@ delete_file(char *filename[8]);
 void clean_fs_partition_table_main(int num);
 int make_dir(char *dir_name[8]);
 int read_add(char filename[8],char* out);
+
+
+//# VERSION 2 
+typedef struct
+{
+    int version;
+    int magic1;
+    int lba_storage_location;
+    int sector_size;
+    int magic2;
+    int root_dir_inode;
+    int block_size;
+    int disk_size;
+    int magic3;
+    char drive_name[10];
+    int supports_readonly;
+    int secondary_partition_table_start_lba;
+    //char padding[512-60];
+    int magic4;
+}SUPERBLOCK;
+
+typedef struct
+{
+    int magic1;
+    char filename[10];
+    char filetype[3];
+    char dir[10];
+    int dir_inode_lba;
+    int extended_filename_lba;
+    int file_bock_lba_list[118];
+    int magic2;
+
+}INODE_FILE;
+typedef struct
+{
+    int magic1;
+    char dirname[10];
+    int lba_list_of_files;
+    int magic2;
+
+}INODE_DIR;
+
+typedef struct
+{
+    int magic1;
+    char data[512-4];
+
+}DATA_BLOCK;
+typedef struct
+{
+    int magic1;
+    int file_lba_list[127*2];
+    int magic2;
+    
+
+}MAIN_INODE;
+
+typedef struct
+{
+    int magic1;
+    int file_lba_list[127];
+
+}SECONDARY_MAIN_INODE;
+typedef struct
+{
+    int magic1;
+    int size[127];
+    int magic2;
+    int size2[127];
+}SIZE;
+int write_superblock(int superblock_pos);
+int read_superblock_al(int superblock_pos);
+int init_alega_fs(int disk);
+int format_disk_v2(int disk);
+int write_file_2(char filename[10],char data[1024+1024]);
+
 #endif

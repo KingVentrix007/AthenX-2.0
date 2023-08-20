@@ -184,6 +184,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         cmd_handler("cls");
         //vbe_print_available_modes();
         initialize_file_system(0);
+        init_alega_fs(0);
         
         //run_once();
         // #define CUSTOM_FS 0
@@ -468,9 +469,9 @@ void terminal_main()
                 if(backspace(buffer))
                 {
                     printf("\b");
-                    set_cursor_x(get_cursor_x()-2);
-                    printf("F");
-                    console_ungetchar();
+                    //set_cursor_x(get_cursor_x()-2);
+                    //printf(" ");
+                    //console_ungetchar();
                 }
                 else
                 {
