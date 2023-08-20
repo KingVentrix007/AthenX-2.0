@@ -14,6 +14,7 @@ struct format_table fs_format_table;
 char current_dir[8] = "root";
 SUPERBLOCK superblock;
 MAIN_INODE main_inode;
+
 int lba_inode_list[254] = { 0 }; //List of inodes
 // Function: init_fs
 // Description: Initializes the file system. It reads the format table and the master table from the disk.
