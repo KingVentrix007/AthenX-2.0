@@ -84,12 +84,14 @@ typedef struct
 {
     int version;
     int magic1;
-    int lba_storage_location;
+    int lba_storage_location_start;
+    int lba_storage_location_end;
     int sector_size;
     int magic2;
     int root_dir_inode;
     int block_size;
     int disk_size;
+    int num_blocks; // Lba_storage_location_end - Lba_storage_location_start
     int magic3;
     char drive_name[10];
     int supports_readonly;
@@ -121,14 +123,14 @@ typedef struct
 
 typedef struct
 {
-    int magic1;
-    char data[512-4];
+   
+    char data[512];
 
 }DATA_BLOCK;
 typedef struct
 {
     int magic1;
-    int file_lba_list[127*2];
+    int file_lba_list[127];
     int magic2;
     
 
@@ -147,7 +149,14 @@ typedef struct
     int magic2;
     int size2[127];
 }SIZE;
-int write_superblock(int superblock_pos);
+
+typedef struct
+{
+    int magic1;
+    int lba_list[120];
+}DISK_BLOCK;
+
+int write_superblock(int superblock_pos,int num_sectors);
 int read_superblock_al(int superblock_pos);
 int init_alega_fs(int disk);
 int format_disk_v2(int disk);

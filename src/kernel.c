@@ -166,8 +166,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         else
         {
             //cmd_handler("screen size");
-            x = 800;
-            y = 600;
+            x = 1280;
+            y = 1024;
         }
 
         int ret = display_init(0,x,y,32);

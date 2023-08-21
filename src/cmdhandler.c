@@ -103,7 +103,7 @@ void parse_command(const char* command) {
        //printf(out);
         //strcpy(buf, out);
 
-            write(arguments[1], arguments[2],out);
+            //write(arguments[1], arguments[2],out);
             write_file_2(arguments[1],out);
         }
         else
@@ -209,7 +209,7 @@ void parse_command(const char* command) {
         // printf("CONE_BLOCK\n");
         // read_superblock_al(512);
         // printf("Done!\n");
-        //format_disk_v2(0);
+        format_disk_v2(0);
         size_test();
 
     }
