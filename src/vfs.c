@@ -46,7 +46,7 @@ int init_disk(int disk)
 }
 FILES_SYSTEM file_system_info;
 int file_system_mode = -1;
-int initialize_file_system(int disk)
+int iinitialize_file_system(int disk)
 {
     int mode = init_disk(disk);
     file_system_info.mode = mode;

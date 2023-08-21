@@ -22,6 +22,7 @@
         "bitmap.h": "c",
         "limits": "c",
         "streambuf": "c",
-        "iosfwd": "c"
+        "iosfwd": "c",
+        "random": "c"
     }
 }

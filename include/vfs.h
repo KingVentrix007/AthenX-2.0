@@ -10,5 +10,5 @@ typedef struct
 
 
 
-int initialize_file_system(int disk);
+int iinitialize_file_system(int disk);
 #endif

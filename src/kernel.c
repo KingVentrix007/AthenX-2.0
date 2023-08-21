@@ -184,7 +184,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         cmd_handler("cls");
         //vbe_print_available_modes();
         initialize_file_system(0);
-        init_alega_fs(0);
+  
         
         //run_once();
         // #define CUSTOM_FS 0

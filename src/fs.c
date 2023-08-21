@@ -5,7 +5,7 @@
 #include "types.h"
 #include "fs.h"
 #include <stddef.h>
-
+#include "kheap.h"
 #define MAX_SIZE 100000000000000
 
 // Global Variables
@@ -13,9 +13,9 @@ struct fs_partition_table fs_partition_table_main;
 struct format_table fs_format_table;
 char current_dir[8] = "root";
 SUPERBLOCK superblock;
-MAIN_INODE main_inode;
 
-int *lba_inode_list = NULL; //List of inodes
+char *free_block_list = NULL; //List of inodes
+
 // Function: init_fs
 // Description: Initializes the file system. It reads the format table and the master table from the disk.
 //              If the disk is not formatted, it formats the disk, creates a new master table, and writes it to the disk.
@@ -23,6 +23,7 @@ int *lba_inode_list = NULL; //List of inodes
 int init_fs()
 {
     // Read format table from disk
+    
     int ret = 0;
     uint32 LBA = 5;
     char table[512];
@@ -644,250 +645,218 @@ int fs_partition_table_main_update()
 
 
 //# VERSION 2
-
-int read_superblock_al(int superblock_pos)
+// Function: read_superblock
+// Description: Reads the superblock
+// Parameters: drive - the drive to read from
+// returns: none
+int read_superblock(int drive)
 {
+    
+    char buffer[512];// buffer to hold the superblock value
+    memset(buffer, 0, sizeof(buffer)); // set the buffer to zero
+    ide_read_sectors(drive,1,10,(uint32)buffer); // read the superblock int the buffer
+    memcpy(&superblock,buffer,sizeof(superblock)); // copy the superblock data into the superblock struct
+     // allocate memory for the free block list
 
-    // printf("here");
-    // beep();
-    char buffer[512] = {0};
+}
+// Function: write_superblock
+// Description: writes the superblock
+// Parameters: 
+//  drive - the drive to write to
+//  superblock - the superblock to write
+// returns: none
+int write_superblock(int drive, SUPERBLOCK superblock_to_write)
+{
+    char buffer[512]; // buffer to hold the superblock data
+    memset(buffer, 0, sizeof(buffer)); // clear the buffer
+    memcpy(buffer, &superblock_to_write, sizeof(buffer)); // copy the superblock data into the buffer
+    ide_write_sectors(drive,1,10,(uint32)buffer); // write the superblock
+
+}
+int write_block(int drive, int pos, FREE_BLOCK_BITMAP block)
+{
+    char buffer[512] = { 0};
     memset(buffer, 0, sizeof(buffer));
-    ide_read_sectors(0, 1,superblock_pos,(uint32)buffer); 
-    memcpy(&superblock,buffer,sizeof(superblock));
-    //printf("here");
-    printf("Version: %d\n",superblock.version);
-    printf("Magic1: %d\n", superblock.magic1);
-    printf("Storage start: %d\n", superblock.lba_storage_location_start);
-    printf("Storage end: %d\n", superblock.lba_storage_location_end);
+    memcpy(buffer, &block, sizeof(buffer));
+    ide_write_sectors(drive,1,pos ,(uint32)buffer);
 
-    printf("Sector size: %d\n", superblock.sector_size);
-    printf("Magic2: %d\n", superblock.magic2);
-    printf("Dir inode: %d\n", superblock.root_dir_inode);
-    printf("Block size: %d\n", superblock.block_size);
-    printf("Disk size: %d\n", superblock.disk_size);
-    printf("Num blocks: %d\n", superblock.num_blocks);
-    printf("Magic3: %d\n", superblock.magic3);
-    printf("Drive name: %s\n", superblock.drive_name);
-    printf("Readonly: %d\n", superblock.supports_readonly);
-    printf("Second lba: %d\n", superblock.secondary_partition_table_start_lba);
-    printf("magic4: %d\n", superblock.magic4);
-    
 }
-
-int write_superblock(int superblock_pos,int num_sectors)
+int read_block(int drive, int pos, FREE_BLOCK_BITMAP block)
 {
-    int num_blocks = (num_sectors-200)/120;
-    superblock.version = 0;
-    superblock.magic1 = 555;
-    superblock.lba_storage_location_start = superblock_pos+1;
-    superblock.lba_storage_location_end = superblock.lba_storage_location_start+num_blocks;
-    superblock.num_blocks = num_blocks;
-    superblock.sector_size = ATA_SECTOR_SIZE;
-    superblock.magic2 = 678;
-    superblock.root_dir_inode = superblock_pos+2;
-    superblock.block_size = ATA_SECTOR_SIZE;
-    superblock.disk_size = 0;
-    superblock.magic3 = 987;
-    strcpy(superblock.drive_name,"DISK ONE");
-    superblock.supports_readonly = 0;
-    superblock.secondary_partition_table_start_lba = 0;
-     // for (size_t i = 0; i < 512-60; i++)
-    // {
-    //     padding[i] = "0";
-    // }
-    // strcpy(superblock.padding,padding);
-
-    
-    superblock.magic4 = 123;
-
-    char buffer[512];
+    char buffer[512] = { 0};
     memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer,&superblock,sizeof(superblock));
-    ide_write_sectors(0,1,superblock_pos,(uint32)buffer);
-    printf("%d\n",sizeof(superblock));
-    // read_superblock(superblock_pos);
-
-}
-
-int read_inode_al(int inode_pos, INODE_FILE inode_out)
-{
-    INODE_FILE inode;
-    char buffer[512] = {0};
-    memset(buffer,0,sizeof(buffer));
-    ide_read_sectors(0,1,inode_pos,(uint32)buffer);
-    memcpy(&inode_out,buffer,sizeof(inode_out));
     
-}
-int write_inode(INODE_FILE *inode, int inode_pos)
-{
-    INODE_FILE inode_to_write;
-    inode_to_write.magic1 = inode->magic1;
-    strcmp(inode_to_write.filename,inode->filename);
-    strcmp(inode_to_write.filetype,inode->filetype);
-    strcmp(inode_to_write.dir,inode->dir);
-    inode_to_write.dir_inode_lba = inode->dir_inode_lba;
-    inode_to_write.extended_filename_lba = inode->extended_filename_lba;
-    memset(&inode_to_write.file_bock_lba_list, inode->file_bock_lba_list, sizeof(inode_to_write.file_bock_lba_list));
-    inode_to_write.magic2 = inode->magic2;
-    char buffer[512] = {0};
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, &inode_to_write,sizeof(inode_to_write));
-    ide_write_sectors(0,1,inode_pos,(uint32)buffer);
-    printf("INode position %d\n", inode_pos);
-}
+    ide_read_sectors(drive,1,pos ,(uint32)buffer);
+    memcpy(&block,buffer, sizeof(block));
 
-int write_file_block(char data[512],int lba)
+}
+int format_drive(int drive)
 {
-    DATA_BLOCK block;
     
-    strcpy(block.data,data);
-    char buffer[512] = {0};
-    memcpy(buffer, &block,sizeof(block));
-    ide_write_sectors(0,1,lba,(uint32)buffer);
-
-
-
-}
-int read_file_block(char data_out[512-8],int lba)
-{
-    DATA_BLOCK block;
-    
-    char buffer[512] = {0};
-    
-    ide_read_sectors(0,1,lba,(uint32)buffer);
-    memcpy(&block,buffer,sizeof(block));
-    strcpy(data_out,block.data);
-}
-
-int write_file_2(char filename[10],char data[1024+1024])
-{
-   for (size_t postion_to_write = 10; postion_to_write < get_sectors(0); postion_to_write++)
-   {
-     if(postion_to_write == lba_inode_list[postion_to_write-10])
-     {
-        lba_inode_list[postion_to_write-10] == 0;
-        printf("%d\n",postion_to_write);
-        break;
-     }
-   }
+    superblock.block_size = 512;
+    superblock.disk_size = get_sectors(drive);
+    strcpy(superblock.drive_name,"ALEGA");
+    superblock.lba_storage_location_start = 30;
+    superblock.num_blocks = (int)get_sectors(drive)/508;
+    superblock.lba_storage_location_end = superblock.lba_storage_location_start+superblock.num_blocks ;
+    superblock.magic1 = 111;
+    superblock.magic2 = 111;
+    superblock.magic3 = 111;
+    superblock.magic4 = 111;
    
-}
-
-
-int write_master_inode(int lba_pos, MAIN_INODE *master)
-{
-    // char buffer[1204] = {0};
-    // memset(buffer,0,sizeof(buffer));
-    // memcpy(buffer, &master,sizeof(master));
-    // ide_write_sectors(0,2,lba_pos,(uint32)buffer);
-}
-int read_master_inode(int lba_pos,int lba_list[127])
-{
-    // int buffer[1024] = {0};
-    // memset(buffer,0,sizeof(buffer));
-    
-    // ide_read_sectors(0,2,lba_pos,(uint32)buffer);
-    // MAIN_INODE main_i;
-    // memcpy(&main_i,buffer,sizeof(main_i));
-    // memcpy(&lba_list,main_i.file_lba_list,sizeof(lba_list));
-}
-int format_disk_v2(int disk)
-{
-    write_superblock(0,get_sectors(0));
-    lba_inode_list = malloc(superblock.num_blocks*120);
-    int count = 0;
-    int lba = 10;
-    for (size_t block_pos = superblock.lba_storage_location_start; block_pos < superblock.lba_storage_location_end; block_pos++)
-    {
-        count = count + 1;
-        lba_inode_list[count] = block_pos;
-        DISK_BLOCK disk_block;
-        disk_block.magic1 = 555;
-       
-        for (size_t unused_lba = 0; unused_lba < 120; unused_lba++)
-        {
-            disk_block.lba_list[unused_lba] = lba;
-            lba = lba + 1;
-        }
-        
-        char buffer[512];
-        memset(buffer, 0, sizeof(buffer));
-        memcpy(buffer, &disk_block.magic1, sizeof(buffer));
-        ide_write_sectors(0,1,block_pos,(uint32)buffer);
-        // if(count == superblock.num_blocks/(1280*8))
-        // {
-        //     count = 0;
-        //     printf("#");
-        // };
-
-    }
-    printf("\nwritten\n");
-    
-    
-    
-
-
-}
-int init_alega_fs(int disk)
-{
-    read_superblock_al(0);
-    lba_inode_list = malloc(superblock.num_blocks*120);
-    for (size_t blcok_pos = superblock.lba_storage_location_start; blcok_pos < superblock.lba_storage_location_end; blcok_pos++)
-    {
-        DISK_BLOCK disk_block;
-        char buffer[512];
-        memset(buffer, 0, sizeof(buffer));
-        ide_read_sectors(0,1,blcok_pos,(uint32)buffer);
-        
-        memcpy(&disk_block, buffer, sizeof(disk_block));
-        for (size_t i = 0; i < 120; i++)
-        {
-            
-            lba_inode_list = disk_block.lba_list[i];
-            
-            lba_inode_list++;
-
-        }
-        
-    }
-    printf("\nLBa_list");
-    for (size_t q = 0; q < sizeof(lba_inode_list)/sizeof(int); q++)
-    {
-        printf("%d ", lba_inode_list[q]);
-       
-    }
-    
-    //printf("\n%d",lba_inode_list);
-    
-
-}
-
-
-int size_test()
-{
-    char buffer[1024] = {0};
+    superblock.sector_size = 512;
+    superblock.version = 1;
+    char buffer[512] = {0};
     memset(buffer, 0, sizeof(buffer));
-    SIZE test;
-    test.magic1 = 999;
-    test.magic2 = 111;
-    for (size_t i = 0; i < 127; i++)
+    memcpy(buffer, &superblock, sizeof(buffer));
+    ide_write_sectors(drive,1,10,(uint32)buffer);
+    char pre_allocated_block[superblock.num_blocks];
+    printf("sizeof(pre_allocated_block) = %d\n", sizeof(pre_allocated_block));
+    for (size_t i = 30; i < superblock.lba_storage_location_end; i++)
     {
-        test.size[i] = i; 
+        FREE_BLOCK_BITMAP block;
+        block.block_num = i-30;
+        for (size_t q = 0; q < 508; q++)
+        {
+            block.free_blocks[q] = '0';
+            
+        }
+        write_block(drive,superblock.lba_storage_location_start+i,block);
+        
     }
-    for (size_t q = 127; q < 127+127; q++)
+    printf("HEHE: %d\n",(int)(sizeof(pre_allocated_block))+10);
+    int end = (sizeof(pre_allocated_block)/508)+1;
+    for (size_t a = 0; a < end; a++)
     {
-        test.size[q-127] = q;
-    }
-    memcpy(buffer, &test,sizeof(test));
-    ide_write_sectors(0,2,900,(uint32)buffer);
-    memset(buffer, 0, sizeof(buffer));
-    SIZE get;
-    ide_read_sectors(0,2,900,(uint32)buffer);
-    memcpy(&get, buffer, sizeof(get));
-    if(get.magic1 == test.magic1 && get.magic2 == test.magic2)
-    {
-        printf("CORRECT");
+        printf("HERE");
+        FREE_BLOCK_BITMAP block;
+        block.block_num = a;
+
+        for (size_t w = 0; w < 508; w++)
+        {
+            block.free_blocks[w] = '1';
+        }
+        write_block(drive,superblock.lba_storage_location_start+a,block);
     }
     
+    
+    
+}    
+int initialize_file_system(int drive)
+{
+    free_block_list = kmalloc(superblock.num_blocks*508);
+    read_superblock(drive);
+    
+    if(strcmp(superblock.drive_name,"ALEGA") == 0)
+    {
+        printf("True");
+        get_free_sectors();
+    //printf("S\n%c",free_block_list);
+    }
+    else
+    {
+        printf("RUN format %d",drive);
+    }
+    
+    
+
+}
+
+
+
+
+
+
+
+
+
+
+int get_free_sectors()
+{
+    int start = superblock.lba_storage_location_start+1;
+    int end = superblock.lba_storage_location_end;
+    
+    for (size_t block = start; block < end; block++)
+    {
+        char buffer[512] ={0};
+        memset(buffer, 0, sizeof(buffer));
+        ide_read_sectors(0,1,block,(uint32)buffer);
+        FREE_BLOCK_BITMAP free_blocks;
+        memcpy(&free_blocks, buffer, sizeof(free_block_list));
+        int pos_in_list = 0;
+        for (size_t lba = 0; lba < 508; lba++)
+        {
+            free_block_list[pos_in_list] = free_blocks.free_blocks[lba];
+            pos_in_list = pos_in_list + 1;
+             printf("%c ", free_block_list[pos_in_list]);
+        }
+    }
+        
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int find_free_block()
+{
+    for (size_t pos_to_write_to = superblock.lba_storage_location_end+1; pos_to_write_to < get_sectors(0); pos_to_write_to++)
+    {
+        if(free_block_list[pos_to_write_to-(superblock.lba_storage_location_end+1)] == '0')
+        {
+            free_block_list[pos_to_write_to-(superblock.lba_storage_location_end+1)] = '1';
+            return pos_to_write_to+superblock.lba_storage_location_end+1;
+        }
+    }
+}
+int write_inode(int pos,INODE inode)
+{
+    char buffer[512] = {0};
+    memset(buffer, 0, sizeof(buffer));
+    memcpy(buffer, &inode, sizeof(buffer));
+    ide_write_sectors(0,1,pos,(uint32)buffer);
+    printf("inode pos: %d\n",pos);
+}
+void write_data_chunk(const char *input) {
     
 }
+int write_file(int drive, char *filename[20], char file_data[40*512])
+{
+    
+    int inode_postion = find_free_block();
+    INODE inode;
+    strcpy(inode.filename, filename);
+    inode.size = strlen(file_data)*8;
+    size_t len = strlen(file_data);
+    size_t chunk_size = 512;
+
+    // for (size_t i = 0; i < len; i += chunk_size) {
+        
+    //     size_t remaining = len - i;
+    //     size_t current_chunk_size = remaining < chunk_size ? remaining : chunk_size;
+
+    //     // Create a buffer for the current chunk
+    //     char chunk[current_chunk_size + 1];
+    //     strncpy(chunk, file_data + i, current_chunk_size);
+    //     chunk[current_chunk_size] = '\0';
+
+    //     // Process the chunk (print it in this example)
+    //     int data_pos = find_free_block();
+        
+    //     ide_write_sectors(drive,1,data_pos,(uint32)chunk);
+    //     inode.position_of_file_blocks[i] = data_pos;
+    // }
+    write_inode(inode_postion,inode);
+    
+
+}
+

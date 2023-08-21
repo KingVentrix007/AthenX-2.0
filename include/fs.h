@@ -96,70 +96,32 @@ typedef struct
     char drive_name[10];
     int supports_readonly;
     int secondary_partition_table_start_lba;
-    //char padding[512-60];
     int magic4;
+   
+    
 }SUPERBLOCK;
 
 typedef struct
 {
-    int magic1;
-    char filename[10];
-    char filetype[3];
-    char dir[10];
-    int dir_inode_lba;
-    int extended_filename_lba;
-    int file_bock_lba_list[118];
-    int magic2;
-
-}INODE_FILE;
-typedef struct
-{
-    int magic1;
-    char dirname[10];
-    int lba_list_of_files;
-    int magic2;
-
-}INODE_DIR;
-
-typedef struct
-{
-   
-    char data[512];
-
-}DATA_BLOCK;
-typedef struct
-{
-    int magic1;
-    int file_lba_list[127];
-    int magic2;
+    char filename[20];
+    int size;
+    int position_of_file_blocks[40];
     
 
-}MAIN_INODE;
+}INODE;
+typedef struct
+{
+    char file_data[512]
+}FILE_DATA;
 
 typedef struct
 {
-    int magic1;
-    int file_lba_list[127];
+    int block_num;
+    char free_blocks[508];
+    
+}FREE_BLOCK_BITMAP;
 
-}SECONDARY_MAIN_INODE;
-typedef struct
-{
-    int magic1;
-    int size[127];
-    int magic2;
-    int size2[127];
-}SIZE;
-
-typedef struct
-{
-    int magic1;
-    int lba_list[120];
-}DISK_BLOCK;
-
-int write_superblock(int superblock_pos,int num_sectors);
-int read_superblock_al(int superblock_pos);
-int init_alega_fs(int disk);
-int format_disk_v2(int disk);
-int write_file_2(char filename[10],char data[1024+1024]);
-
+int format_drive(int drive);
+int write_file(int drive, char *filename[20], char file_data[40*512]);
+int initialize_file_system(int drive);
 #endif

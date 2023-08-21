@@ -93,7 +93,7 @@ changlog:
 	./update_changelog
 run: iso
 	
-	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
+	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk -m 2G
 run-ext2:
 	
 	qemu-system-x86_64 -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
