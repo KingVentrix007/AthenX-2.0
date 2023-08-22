@@ -56,5 +56,6 @@ int text_editor(int max_letters,char *dest)
             }
     }
     memcpy(dest,out,sizeof(out));
+    return strlen(out);
 
 }

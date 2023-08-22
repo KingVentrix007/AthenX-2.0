@@ -184,12 +184,12 @@ void kmain(unsigned long magic, unsigned long addr) {
         cmd_handler("cls");
         //vbe_print_available_modes();
         initialize_file_system(0);
-  
+        printf("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
         
         //run_once();
         // #define CUSTOM_FS 0
         // #if CUSTOM_FS
-        access_grub_module(mboot_info);
+        //access_grub_module(mboot_info);
            
             
         //     //clean_fs_partition_table_main(46);

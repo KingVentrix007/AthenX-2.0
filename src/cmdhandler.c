@@ -99,11 +99,12 @@ void parse_command(const char* command) {
             cmd_handler("cls");
             printf("\nPress ` to exit");
             printf("\nWelcome to Text:\n");
-            text_editor(MAX_FILE_SIZE,out);
+            int size = text_editor(MAX_FILE_SIZE,out);
+            write_fs(arguments[1],size,out);
        //printf(out);
         //strcpy(buf, out);
 
-            write_file(0,arguments[1], out);
+            //write_file(0,arguments[1], out);
             
         }
         else
@@ -182,7 +183,7 @@ void parse_command(const char* command) {
     else if(strcmp(arguments[0],"format") == 0)
     {
         int disk = atoi(arguments[1]);
-        format_drive(disk);
+        //format_drive(disk);
     }
     else if(strcmp(arguments[0],"table") == 0)
     {
@@ -209,6 +210,7 @@ void parse_command(const char* command) {
         // printf("CONE_BLOCK\n");
         // read_superblock_al(512);
         // printf("Done!\n");
+        format_disk(0);
         
       
 

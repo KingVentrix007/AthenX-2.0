@@ -3,6 +3,13 @@
 #include "stdint.h"
 #include "types.h"
 #include "ide.h"
+
+#define MAGIC1 0x11
+#define MAGIC2 0x22
+#define MAGIC3 0x33
+#define MAGIC4 0x44
+
+
 typedef struct FILE
 {
     char filename[8];
@@ -43,7 +50,7 @@ typedef struct format_table
 //     char file_type[3];
 //     int next_sector;
 // };
-#define MAX_FILE_SIZE 1024 //max file size in bytes
+#define MAX_FILE_SIZE 41*512 //max file size in bytes
 typedef struct FILE_HEADER_V1
 {
     char filename[8];
@@ -84,18 +91,19 @@ typedef struct
 {
     int version;
     int magic1;
-    int lba_storage_location_start;
-    int lba_storage_location_end;
+    int disk_info_sector;
+    int disk_info_size; //size in bytes
+    int file_data_start;
     int sector_size;
     int magic2;
     int root_dir_inode;
     int block_size;
     int disk_size;
     int num_blocks; // Lba_storage_location_end - Lba_storage_location_start
+    int num_sectors; 
     int magic3;
     char drive_name[10];
     int supports_readonly;
-    int secondary_partition_table_start_lba;
     int magic4;
    
     
@@ -121,7 +129,15 @@ typedef struct
     
 }FREE_BLOCK_BITMAP;
 
+
+// typedef struct 
+// {
+//     char filename[50]
+// }INODE;
+
+
 int format_drive(int drive);
-int write_file(int drive, char *filename[20], char file_data[40*512]);
+//int write_file(int drive, char *filename[20], char file_data[40*512]);
 int initialize_file_system(int drive);
+int write_fs(char filename[20],int size, char file_contents[512-8-20]);
 #endif

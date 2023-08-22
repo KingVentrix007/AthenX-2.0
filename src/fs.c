@@ -301,7 +301,7 @@ void list_files()
 // Function: format_disk
 // Description: Formats the disk by writing the format table and initializing the master table.
 // Return: Integer - Returns 0 if successful.
-int format_disk(int drive)
+int format_disk_old(int drive)
 {
     struct format_table format;
     char buf[512];
@@ -649,14 +649,16 @@ int fs_partition_table_main_update()
 // Description: Reads the superblock
 // Parameters: drive - the drive to read from
 // returns: none
-int read_superblock(int drive)
+int read_superblock_al(int drive)
 {
     
     char buffer[512];// buffer to hold the superblock value
     memset(buffer, 0, sizeof(buffer)); // set the buffer to zero
-    ide_read_sectors(drive,1,10,(uint32)buffer); // read the superblock int the buffer
+    ide_read_sectors(drive,1,0,(uint32)buffer); // read the superblock int the buffer
     memcpy(&superblock,buffer,sizeof(superblock)); // copy the superblock data into the superblock struct
      // allocate memory for the free block list
+     printf("Superblock.block_size = %d\n",superblock.block_size); 
+    
 
 }
 // Function: write_superblock
@@ -670,95 +672,453 @@ int write_superblock(int drive, SUPERBLOCK superblock_to_write)
     char buffer[512]; // buffer to hold the superblock data
     memset(buffer, 0, sizeof(buffer)); // clear the buffer
     memcpy(buffer, &superblock_to_write, sizeof(buffer)); // copy the superblock data into the buffer
-    ide_write_sectors(drive,1,10,(uint32)buffer); // write the superblock
+    ide_write_sectors(drive,1,0,(uint32)buffer); // write the superblock
 
 }
-int write_block(int drive, int pos, FREE_BLOCK_BITMAP block)
-{
-    char buffer[512] = { 0};
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, &block, sizeof(buffer));
-    ide_write_sectors(drive,1,pos ,(uint32)buffer);
+// int write_block(int drive, int pos, FREE_BLOCK_BITMAP block)
+// {
+//     char buffer[512] = {0};
+//     memset(buffer, 0, sizeof(buffer));
+//     memcpy(buffer, &block, sizeof(buffer));
+//     ide_write_sectors(drive,1,pos ,(uint32)buffer);
 
-}
-int read_block(int drive, int pos, FREE_BLOCK_BITMAP block)
-{
-    char buffer[512] = { 0};
-    memset(buffer, 0, sizeof(buffer));
+// }
+// int read_block(int drive, int pos, FREE_BLOCK_BITMAP block)
+// {
+//     char buffer[512] = { 0};
+//     memset(buffer, 0, sizeof(buffer));
     
-    ide_read_sectors(drive,1,pos ,(uint32)buffer);
-    memcpy(&block,buffer, sizeof(block));
+//     ide_read_sectors(drive,1,pos ,(uint32)buffer);
+//     memcpy(&block,buffer, sizeof(block));
 
-}
-int format_drive(int drive)
-{
+// }
+// int format_drive(int drive)
+// {
     
-    superblock.block_size = 512;
-    superblock.disk_size = get_sectors(drive);
-    strcpy(superblock.drive_name,"ALEGA");
-    superblock.lba_storage_location_start = 30;
-    superblock.num_blocks = (int)get_sectors(drive)/508;
-    superblock.lba_storage_location_end = superblock.lba_storage_location_start+superblock.num_blocks ;
-    superblock.magic1 = 111;
-    superblock.magic2 = 111;
-    superblock.magic3 = 111;
-    superblock.magic4 = 111;
+//     superblock.block_size = 512;
+//     superblock.disk_size = get_sectors(drive);
+//     strcpy(superblock.drive_name,"ALEGA");
+//     superblock.lba_storage_location_start = 3;
+//     superblock.num_blocks = (int)get_sectors(drive)/508;
+//     printf("Num blocks: %d",superblock.num_blocks);
+//     superblock.lba_storage_location_end = superblock.lba_storage_location_start+superblock.num_blocks ;
+//     superblock.file_data_start = superblock.lba_storage_location_end+1;
+//     superblock.magic1 = 111;
+//     superblock.magic2 = 111;
+//     superblock.magic3 = 111;
+//     superblock.magic4 = 111;
    
-    superblock.sector_size = 512;
-    superblock.version = 1;
-    char buffer[512] = {0};
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, &superblock, sizeof(buffer));
-    ide_write_sectors(drive,1,10,(uint32)buffer);
-    char pre_allocated_block[superblock.num_blocks];
-    printf("sizeof(pre_allocated_block) = %d\n", sizeof(pre_allocated_block));
-    for (size_t i = 30; i < superblock.lba_storage_location_end; i++)
-    {
-        FREE_BLOCK_BITMAP block;
-        block.block_num = i-30;
-        for (size_t q = 0; q < 508; q++)
-        {
-            block.free_blocks[q] = '0';
+//     superblock.sector_size = 512;
+//     superblock.version = 1;
+//     char buffer[512] = {0};
+//     write_superblock(0,superblock);
+//     char pre_allocated_block[superblock.num_blocks];
+//     printf("sizeof(pre_allocated_block) = %d\n", sizeof(pre_allocated_block));
+//     for (size_t i = superblock.lba_storage_location_start; i < superblock.lba_storage_location_end; i++)
+//     {
+//         FREE_BLOCK_BITMAP block;
+//         block.block_num = i-3;
+//         for (size_t q = 0; q < 508; q++)
+//         {
+//             block.free_blocks[q] = '0';
             
+//         }
+//         write_block(drive,superblock.lba_storage_location_start+i,block);
+        
+//     }
+//     printf("HEHE: %d\n",(int)(sizeof(pre_allocated_block))+10);
+//     int end = (sizeof(pre_allocated_block)/508)+1;
+//     for (size_t a = 0; a < end; a++)
+//     {
+//         printf("HERE");
+//         FREE_BLOCK_BITMAP block;
+//         block.block_num = a;
+
+//         for (size_t w = 0; w < 508; w++)
+//         {
+//             block.free_blocks[w] = '1';
+//         }
+//         write_block(drive,superblock.lba_storage_location_start+a,block);
+//     }
+    
+    
+    
+// }    
+// int initialize_file_system(int drive)
+// {
+//     free_block_list = kmalloc(superblock.num_blocks*508);
+    
+//     read_superblock_al(drive);
+//     get_free_sectors();
+//     if(strcmp(superblock.drive_name,"ALEGA") == 0)
+//     {
+//         printf("True");
+//         get_free_sectors();
+//     //printf("S\n%c",free_block_list);
+//     }
+//     else
+//     {
+//         printf("RUN format %d",drive);
+//     }
+    
+    
+
+// }
+
+
+
+
+
+
+
+
+
+
+// int get_free_sectors()
+// {
+//     int start = superblock.lba_storage_location_start;
+//     int end = superblock.lba_storage_location_end;
+//     printf("init\n");
+//     printf("Start: %d\n", start);
+//     printf("End: %d\n", end);
+//     for (size_t block = start; block < end; block++)
+//     {
+//         char buffer[512] ={0};
+//         memset(buffer, 0, sizeof(buffer));
+//         ide_read_sectors(0,1,block,(uint32)buffer);
+//         FREE_BLOCK_BITMAP free_blocks;
+//         memcpy(&free_blocks, buffer, sizeof(free_blocks));
+//         int pos_in_list = 0;
+//         for (size_t lba = 0; lba < 508; lba++)
+//         {
+//             free_block_list[pos_in_list] = free_blocks.free_blocks[lba];
+//             pos_in_list = pos_in_list + 1;
+//             //printf("C%c ", free_block_list[pos_in_list]);
+//         }
+//     }
+        
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// int find_free_block()
+// {
+    
+//     int end = superblock.num_blocks*512;
+//     //printf("\nend: %d",end);
+//     int numb = superblock.num_blocks*508;
+//     //printf("\nNumb %d",numb);
+//     for (size_t pos_to_write_to = 0; pos_to_write_to < end ; pos_to_write_to++)
+//     {
+//         //printf("pos_to_write_to %c: ", free_block_list[pos_to_write_to]);
+//         if(strcmp(free_block_list[pos_to_write_to],'0') == 0)
+//         {
+//             free_block_list[pos_to_write_to] = '1';
+//             int offset = pos_to_write_to+numb;
+//             printf("\n:offset%d",offset);
+//             return offset;
+//         }
+        
+//     }
+// }
+// int write_inode(int pos,INODE inode)
+// {
+//     char buffer[512] = {0};
+//     memset(buffer, 0, sizeof(buffer));
+//     memcpy(buffer, &inode, sizeof(buffer));
+//     ide_write_sectors(0,1,pos,(uint32)buffer);
+//     printf("inode pos: %d\n",pos);
+// }
+// void write_data_chunk(const char *input) {
+    
+// }
+// int write_file(int drive, char *filename[20], char file_data[40*512])
+// {
+//      int numb = superblock.num_blocks*508;
+    
+//     int inode_postion = find_free_block();
+//     INODE inode;
+//     strcpy(inode.filename, filename);
+//     inode.size = strlen(file_data)*8;
+//     size_t len = strlen(file_data);
+//     size_t chunk_size = 512;
+
+//     for (size_t i = 0; i < len; i += chunk_size) {
+        
+//         size_t remaining = len - i;
+//         size_t current_chunk_size = remaining < chunk_size ? remaining : chunk_size;
+
+//         // Create a buffer for the current chunk
+//         char chunk[current_chunk_size + 1];
+//         strncpy(chunk, file_data + i, current_chunk_size);
+//         chunk[current_chunk_size] = '\0';
+
+//         // Process the chunk (print it in this example)
+//         int data_pos = find_free_block();
+        
+//         ide_write_sectors(drive,1,data_pos,(uint32)chunk);
+//         inode.position_of_file_blocks[i] = data_pos;
+//         update_bitmap(drive,data_pos-numb);
+//     }
+//     write_inode(inode_postion,inode);
+   
+//     //update_bitmap(drive,inode.size+1);
+
+    
+
+// }
+// int update_bitmap(int drive,int count)
+// {
+//     size_t len = strlen(free_block_list);
+//     size_t chunk_size = 508;
+
+//     for (size_t i = 0; i < len; i += chunk_size) {
+        
+//         size_t remaining = len - i;
+//         size_t current_chunk_size = remaining < chunk_size ? remaining : chunk_size;
+
+//         // Create a buffer for the current chunk
+//         char chunk[current_chunk_size + 1];
+//         strncpy(chunk, free_block_list + i, current_chunk_size);
+//         chunk[current_chunk_size] = '\0';
+
+//         //Process the chunk (print it in this example)
+//         int inner_count = 0;
+//         for (size_t i = superblock.lba_storage_location_start; i < superblock.lba_storage_location_end; i++)
+//         {
+//             FREE_BLOCK_BITMAP block;
+//             block.block_num = i-3;
+//             for (size_t q = 0; q < 508; q++)
+//             {
+//                 if(strcmp(chunk[q],'1') == 0 && inner_count < count)
+//                 {
+//                     block.free_blocks[q] = '1';
+//                     inner_count = inner_count + 1;
+//                 }
+//                 else
+//                 {
+//                     block.free_blocks[q] = '0';
+//                 }
+                
+//             }
+//             write_block(drive,superblock.lba_storage_location_start+i,block);
+        
+//      }
+        
+//         //ide_write_sectors(drive,1,data_pos,(uint32)chunk);
+        
+        
+//     }
+// }
+
+
+//#define MAX_SECTORS 1000 // Maximum number of sectors
+
+typedef struct {
+    char disk_info[10];
+    char *available_sectors;
+    int num_sectors;
+} DiskInfo;
+DiskInfo *disk_info_main;
+
+// void initialize_disk_fs(DiskInfo *disk) {
+//     printf("")
+//     for (int i = 0; i < disk->num_sectors; i++) {
+//         disk->available_sectors[i] = 1; // 1 represents available, 0 represents in use
+//     }
+// }
+
+int find_free_sector(DiskInfo *disk) {
+    for (int i = 0; i < disk->num_sectors; i++) {
+        if (strcmp(disk->available_sectors[i],'0') == 0) {
+            disk->available_sectors[i] = '1'; // Mark as in use
+            return i; // Return the index of the free sector
         }
-        write_block(drive,superblock.lba_storage_location_start+i,block);
+    }
+    return -1; // No free sectors available
+}
+
+void release_sector(DiskInfo *disk, int sector) {
+    if (sector >= 0 && sector < disk->num_sectors) {
+        disk->available_sectors[sector] = '0'; // Mark as available
+    }
+}
+
+
+
+
+void write_disk_info_to_sector(DiskInfo *disk, int sector) {
+    //ide_write_sectors(0, 1,sector, disk);
+}
+int sectors_read = 0; // Current number of sectors read
+
+//int screen_width = 80; // Width of the screen in characters
+int char_width = 8;    // Width of a single character in pixels
+// void progress_bar_inc(int screen_width,int total_sectors) {
+//     // Global variables
+//        // Total number of sectors to read
+    
+//     sectors_read++;
+    
+//     // Calculate the percentage of completion
+//     double completion = (double)sectors_read / total_sectors;
+    
+//     // Calculate the number of characters to print for the progress bar
+//     int bar_width = (screen_width * char_width) - 2; // Subtract 2 for the brackets
+//     int num_chars = completion * bar_width;
+    
+//     // Print the progress bar
+//     printf("[");
+//     for (int i = 0; i < num_chars; i++) {
+//         printf("#");
+//     }
+//     // for (int i = num_chars; i < bar_width; i++) {
+//     //     printf(" ");
+//     // }
+//     printf("]"); // \r to overwrite the line
+    
+//     //fflush(stdout); // Flush the output buffer
+// }
+int calculate_draw_intervals(int total_sectors,int screen_width) {
+    int bar_width = (screen_width * char_width) - 2; // Subtract 2 for the brackets
+    
+    int interval = total_sectors / bar_width; // Calculate the interval
+    
+    // Adjust the interval if the total sectors is not divisible evenly by the bar width
+    if (total_sectors % bar_width != 0) {
+        interval++;
+    }
+
+    printf("Draw '#' every %d sectors\n", interval);
+    return interval;
+}
+void initialize_disk_fs(DiskInfo *disk) {
+    printf("\nInitializing disk filesystem");
+    printf("\nAvailable sectors %d",disk->num_sectors);
+   
+    char *bitmap = (char *)(sizeof(char)*superblock.num_sectors);
+    printf("\n%d sectors",(int)(superblock.disk_info_size/512)+1);
+    //calculate_draw_intervals((int)(superblock.disk_info_size/512)+1,1280);
+    int count = 0;
+    for (size_t i = 1; i < (int)(superblock.disk_info_size/512)+1; i++)
+    {
+        char temp[512];
+        // memset(temp, 0, sizeof(temp));
+        ide_read_sectors(0,1,i,(uint32)temp);
+        strcat(bitmap, temp);
+        if((i % 10) == 0)
+        {
+            printf("#");
+        }
+        
+        //progress_bar_inc(1280,(int)(superblock.disk_info_size/512)+1);
         
     }
-    printf("HEHE: %d\n",(int)(sizeof(pre_allocated_block))+10);
-    int end = (sizeof(pre_allocated_block)/508)+1;
-    for (size_t a = 0; a < end; a++)
-    {
-        printf("HERE");
-        FREE_BLOCK_BITMAP block;
-        block.block_num = a;
-
-        for (size_t w = 0; w < 508; w++)
-        {
-            block.free_blocks[w] = '1';
-        }
-        write_block(drive,superblock.lba_storage_location_start+a,block);
-    }
+    memcpy(disk->available_sectors, bitmap,sizeof(bitmap));
+    printf("strlen bitmap %x",sizeof(bitmap));
+    cmd_handler("cls");
+    printf("Fs loaded %d sectors successfully", (int)(superblock.disk_info_size/512)+1);
+    //printf("\n%s",bitmap);
+    // memset(buffer, 0, sizeof(buffer));
+    // ide_read_sectors(0,1,0,(uint32)buffer);
+    // memcpy(&superblock, buffer, sizeof(superblock));
+    // printf("Read superblock");
+    // memset(buffer, 0, sizeof(buffer));
+    // ide_read_sectors(0,1,superblock.disk_info_sector,(uint32)buffer);
+    // memcpy(&disk, buffer,sizeof(buffer));
+    // printf("\nRead disk info\n");
+    // for (size_t i = 0; i < 512; i++)
+    // {
+    //     printf("%d:",disk->available_sectors[i]);
+    // }
     
-    
-    
-}    
-int initialize_file_system(int drive)
+   
+}
+int format_disk(int drive)
 {
-    free_block_list = kmalloc(superblock.num_blocks*508);
-    read_superblock(drive);
-    
-    if(strcmp(superblock.drive_name,"ALEGA") == 0)
+    superblock.block_size = 512;
+    superblock.disk_info_sector = 1;
+    superblock.disk_info_size = get_sectors(0);
+    superblock.disk_size = get_sectors(0)*512;
+    superblock.file_data_start = (get_sectors(0)/512)+1;
+    superblock.magic1 = MAGIC1;
+    superblock.magic2 = MAGIC2;
+    superblock.magic3 = MAGIC3;
+    superblock.magic4 = MAGIC4;
+    superblock.num_blocks = 1;
+    superblock.num_sectors = get_sectors(0);
+    superblock.root_dir_inode = 0;
+    superblock.sector_size = 512;
+    superblock.version = 1;
+    superblock.supports_readonly = 1;
+    strcpy(superblock.drive_name,"ALEGA");
+    char buffer[512] = {0};
+    memset(buffer, 0, sizeof(buffer));
+    memcpy(buffer, &superblock,sizeof(superblock));
+    ide_write_sectors(0,1,0,(uint32)buffer);
+    printf("\nsuperblock written\n");
+    DiskInfo *disk;
+    char *bitmap = (char *)(sizeof(char)*superblock.num_sectors);
+    for (size_t i = 0; i < superblock.num_sectors; i++)
     {
-        printf("True");
-        get_free_sectors();
-    //printf("S\n%c",free_block_list);
+        bitmap[i] = '0';
+    }
+    printf("\nstrlen : %d\n",strlen(bitmap));
+    int sectors_to_write = (strlen(bitmap)/512)+1;
+    printf("Sectors to write: %d\n",sectors_to_write);
+    int count = 0;
+    size_t len = strlen(bitmap);
+    size_t chunk_size = 512;
+
+    for (size_t i = 0; i < len; i += chunk_size) {
+        size_t remaining = len - i;
+        size_t current_chunk_size = remaining < chunk_size ? remaining : chunk_size;
+
+        // Create a buffer for the current chunk
+        char chunk[current_chunk_size + 1];
+        strncpy(chunk, bitmap + i, current_chunk_size);
+        chunk[current_chunk_size] = '\0';
+        if(count >= sectors_to_write)
+        {
+            break;
+        }
+        else
+        {
+             ide_write_sectors(0,1,count+1,(uint32)chunk);
+             count = count + 1;
+        }
+       
+        // Process the chunk (print it in this example)
+        //printf("Chunk %zu: %s\n", i / chunk_size + 1, chunk);
+    }
+}
+
+
+int parse_superblock()
+{
+    char buffer[512] = {0};
+    memset(buffer,0,sizeof(buffer));
+    ide_read_sectors(0,1,0,(uint32)buffer);
+    memcpy(&superblock,buffer,sizeof(superblock));
+    if(superblock.magic1 == MAGIC1 && superblock.magic2 == MAGIC2 && superblock.magic3 == MAGIC3 && superblock.magic4 == MAGIC4)
+    {
+        return 0;
     }
     else
     {
-        printf("RUN format %d",drive);
+        return 1;
     }
-    
-    
 
 }
 
@@ -766,97 +1126,131 @@ int initialize_file_system(int drive)
 
 
 
+// Function to increment the progress bar
 
 
-
-
-
-int get_free_sectors()
-{
-    int start = superblock.lba_storage_location_start+1;
-    int end = superblock.lba_storage_location_end;
+// int main() {
+//     int total_sectors = 100; // Set the total number of sectors
     
-    for (size_t block = start; block < end; block++)
-    {
-        char buffer[512] ={0};
-        memset(buffer, 0, sizeof(buffer));
-        ide_read_sectors(0,1,block,(uint32)buffer);
-        FREE_BLOCK_BITMAP free_blocks;
-        memcpy(&free_blocks, buffer, sizeof(free_block_list));
-        int pos_in_list = 0;
-        for (size_t lba = 0; lba < 508; lba++)
-        {
-            free_block_list[pos_in_list] = free_blocks.free_blocks[lba];
-            pos_in_list = pos_in_list + 1;
-             printf("%c ", free_block_list[pos_in_list]);
-        }
-    }
+//     // Simulate reading sectors (you would replace this with your actual code)
+//     for (int i = 0; i < total_sectors; i++) {
+//         // Simulate reading a sector
+//         // ...
         
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int find_free_block()
-{
-    for (size_t pos_to_write_to = superblock.lba_storage_location_end+1; pos_to_write_to < get_sectors(0); pos_to_write_to++)
-    {
-        if(free_block_list[pos_to_write_to-(superblock.lba_storage_location_end+1)] == '0')
-        {
-            free_block_list[pos_to_write_to-(superblock.lba_storage_location_end+1)] = '1';
-            return pos_to_write_to+superblock.lba_storage_location_end+1;
-        }
-    }
-}
-int write_inode(int pos,INODE inode)
-{
-    char buffer[512] = {0};
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, &inode, sizeof(buffer));
-    ide_write_sectors(0,1,pos,(uint32)buffer);
-    printf("inode pos: %d\n",pos);
-}
-void write_data_chunk(const char *input) {
+//         // Call the progress_bar_inc() function to update the progress bar
+//         progress_bar_inc();
+//     }
     
-}
-int write_file(int drive, char *filename[20], char file_data[40*512])
-{
+//     printf("\nLoading complete!\n");
     
-    int inode_postion = find_free_block();
-    INODE inode;
-    strcpy(inode.filename, filename);
-    inode.size = strlen(file_data)*8;
-    size_t len = strlen(file_data);
-    size_t chunk_size = 512;
+//     return 0;
+// }
 
-    // for (size_t i = 0; i < len; i += chunk_size) {
-        
-    //     size_t remaining = len - i;
-    //     size_t current_chunk_size = remaining < chunk_size ? remaining : chunk_size;
+int initialize_file_system(int drive) {
+    printf("initializing filesystem");
+    int total_sectors = get_sectors(drive);
 
-    //     // Create a buffer for the current chunk
-    //     char chunk[current_chunk_size + 1];
-    //     strncpy(chunk, file_data + i, current_chunk_size);
-    //     chunk[current_chunk_size] = '\0';
-
-    //     // Process the chunk (print it in this example)
-    //     int data_pos = find_free_block();
-        
-    //     ide_write_sectors(drive,1,data_pos,(uint32)chunk);
-    //     inode.position_of_file_blocks[i] = data_pos;
+    DiskInfo disk;
+    disk.num_sectors = total_sectors;
+    // initialize_disk(&disk);
+    // if (disk.available_sectors == NULL) {
+    //     printf( "Memory allocation failed\n");
+    //     return 1;
     // }
-    write_inode(inode_postion,inode);
-    
+    int ret = parse_superblock();
+    if(ret != 0)
+    {
+        printf("Superblock not found\n");
+        return ret;
+    }
+    initialize_disk_fs(&disk);
+    //printf("\nInitialized at %s . %d . %s \n",__FILE__,__LINE__,__FUNCTION__);
+    //printf("next line: %d\n",__LINE__);
+    // Write DiskInfo structure to sector 1 (LBA 1)
+    //write_disk_info_to_sector(&disk, 20);
+
+    //int sector1 = find_free_sector(&disk);
+    // int sector2 = find_free_sector(&disk);
+    memcpy(&disk_info_main,&disk, sizeof(disk));
+
+    // // Do something with sector1 and sector2
+
+    // // Simulate writing to the sectors
+    // // char data[512] = "Hello, World!";
+    // // ide_write_sectors(0, 1,sector1, data);
+
+    // // Simulate reading from the sectors
+    // char read_data[512];
+    // ide_read_sectors(0, 1,sector1, read_data);
+    // printf("\nRead data from sector %d: %s\n", sector1, read_data);
+
+
+    // release_sector(&disk, sector1);
+    // release_sector(&disk, sector2);
+
+    //kfree(disk.available_sectors);
+    //printf("\nEND");
+
+}
+int mount()
+{
+
+}
+int unmount()
+{
 
 }
 
+int update_bitmap()
+{
+    char *bitmap = (char *)(sizeof(char)*superblock.num_sectors);
+    for (size_t q = 0; q < get_sectors(0); q++)
+    {
+        bitmap[q] = disk_info_main->available_sectors[q];
+        //printf("%s",bitmap[q]);
+    }
+    
+    int count = 0;
+    size_t len = strlen(bitmap);
+    size_t chunk_size = 512;
+    int sectors_to_write = (strlen(bitmap)/512)+1;
+    for (size_t i = 0; i < len; i += chunk_size) {
+        size_t remaining = len - i;
+        size_t current_chunk_size = remaining < chunk_size ? remaining : chunk_size;
+        
+
+        // Create a buffer for the current chunk
+        char chunk[current_chunk_size + 1];
+        strncpy(chunk, bitmap + i, current_chunk_size);
+        chunk[current_chunk_size] = '\0';
+        if(count >= sectors_to_write)
+        {
+            break;
+        }
+        else
+        {
+                ide_write_sectors(0,1,count+1,(uint32)chunk);
+                count = count + 1;
+        }
+       
+        // Process the chunk (print it in this example)
+        //printf("Chunk %zu: %s\n", i / chunk_size + 1, chunk);
+    }
+}
+int write_fs(char filename[20],int size, char file_contents[512-8-20])
+{
+    int inode_lba = find_free_sector(&disk_info_main);
+    printf("size = %d\n",size);
+    printf("inode_pos = %d\n", inode_lba);
+    int data_block_needed = (size/512)+1;
+    INODE *inode;
+    for (size_t file_block_lba = 0; file_block_lba < data_block_needed; file_block_lba++)
+    {
+        inode->position_of_file_blocks[file_block_lba] = find_free_sector(&disk_info_main);
+        printf("file block %d pos = %d\n",file_block_lba,inode->position_of_file_blocks[file_block_lba]);
+    }
+    //update_bitmap();
+    
+    
+
+}
