@@ -183,7 +183,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         printf("%s\n",mode);
         cmd_handler("cls");
         //vbe_print_available_modes();
-        initialize_file_system(0);
+        //initialize_file_system(0);
         printf("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
         
         //run_once();
@@ -252,6 +252,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             goto done;
         }
         if (ret == 1) {
+            terminal_main();
             // scroll to top
             // for(int i = 0; i < MAXIMUM_PAGES; i++)
             //     console_scroll(SCROLL_UP);
@@ -489,7 +490,7 @@ void terminal_main()
                 set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
-                printf(">");
+                printf(">>");
                 //crude_song();
             }
             

@@ -6,4 +6,7 @@
 #define ERROR(...) do {display_init(1,0,0,0);printf("ERROR at %s@%d (%s): ", __FILE__, __LINE__, __FUNCTION__); \
                      printf(__VA_ARGS__); } while (0)
 
+#define DEBUG_O(...) do {printf("HERE at %s@%d (%s): ", __FILE__, __LINE__, __FUNCTION__); \
+                     printf(__VA_ARGS__); } while (0)
+
 #endif

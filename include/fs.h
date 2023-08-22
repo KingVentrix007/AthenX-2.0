@@ -79,65 +79,31 @@ int update_table();
 void list_files();
 int fs_partition_table_main_update();
 int fs_partition_table_main_p();
-int format_disk(int disk);
+///int format_disk(int disk);
 delete_file(char *filename[8]);
 void clean_fs_partition_table_main(int num);
 int make_dir(char *dir_name[8]);
 int read_add(char filename[8],char* out);
-
+int format_disk();
+int write_fs();
 
 //# VERSION 2 
 typedef struct
 {
-    int version;
-    int magic1;
-    int disk_info_sector;
-    int disk_info_size; //size in bytes
-    int file_data_start;
-    int sector_size;
-    int magic2;
-    int root_dir_inode;
-    int block_size;
-    int disk_size;
-    int num_blocks; // Lba_storage_location_end - Lba_storage_location_start
-    int num_sectors; 
-    int magic3;
-    char drive_name[10];
-    int supports_readonly;
-    int magic4;
-   
-    
+    char drive_name[20]; // drive name
+    int num_sectors; // the total number of sectors in the disk
+    int sector_size; // the size of each sector in bytes
+    int num_blocks; // the number of blocks
+    int block_size; // the size of each block in bytes
+    int first_block; // the first blocks position LBA
+    int last_block; // the last blocks position LBA
+    int magic1; // the magic number for verification
+
 }SUPERBLOCK;
-
-typedef struct
-{
-    char filename[20];
-    int size;
-    int position_of_file_blocks[40];
-    
-
-}INODE;
-typedef struct
-{
-    char file_data[512]
-}FILE_DATA;
-
 typedef struct
 {
     int block_num;
-    char free_blocks[508];
-    
-}FREE_BLOCK_BITMAP;
-
-
-// typedef struct 
-// {
-//     char filename[50]
-// }INODE;
-
-
-int format_drive(int drive);
-//int write_file(int drive, char *filename[20], char file_data[40*512]);
-int initialize_file_system(int drive);
-int write_fs(char filename[20],int size, char file_contents[512-8-20]);
+    char sectors[504];
+    int num_free_sectors;
+}BLOCK;
 #endif

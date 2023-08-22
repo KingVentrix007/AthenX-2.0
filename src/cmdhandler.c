@@ -100,7 +100,7 @@ void parse_command(const char* command) {
             printf("\nPress ` to exit");
             printf("\nWelcome to Text:\n");
             int size = text_editor(MAX_FILE_SIZE,out);
-            write_fs(arguments[1],size,out);
+            write_fs();
        //printf(out);
         //strcpy(buf, out);
 
@@ -183,6 +183,7 @@ void parse_command(const char* command) {
     else if(strcmp(arguments[0],"format") == 0)
     {
         int disk = atoi(arguments[1]);
+        format_disk();
         //format_drive(disk);
     }
     else if(strcmp(arguments[0],"table") == 0)
