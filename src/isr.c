@@ -3,6 +3,8 @@
 #include "8259_pic.h"
 #include "console.h"
 #include "terminal.h"
+#include "debug.h"
+#include "display.h"
 // For both exceptions and irq interrupt
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
 
@@ -84,9 +86,17 @@ static void print_registers(REGISTERS *reg) {
  */
 void isr_exception_handler(REGISTERS reg) {
     //cls_screen(COLOR_BLUE);
+    screen_of_death();
+    clear_display();
+    set_screen_x(0);
+    set_screen_y(0);
     if (reg.int_no < 32) {
         printf("EXCEPTION: %s\n", exception_messages[reg.int_no]);
         print_registers(&reg);
+        uint32_t *adder;
+        unwind_stack(&reg, &adder);
+        printf("\nFunction address: 0x%x\n", adder);
+
         for (;;)
             ;
     }
@@ -94,4 +104,21 @@ void isr_exception_handler(REGISTERS reg) {
         ISR handler = g_interrupt_handlers[reg.int_no];
         handler(&reg);
     }
+}
+
+void unwind_stack(REGISTERS *reg, uint32_t *addr)
+{
+    uint32_t* esp = reg->esp; // Retrieve saved ESP
+    uint32_t* eip = reg->eip;
+    uint32_t return_addr = *(esp + 1);
+
+        // Resolve symbol for the return address
+    //uint32_t* function_name = resolve_symbol(return_addr);
+    addr = return_addr;
+    
+}
+
+uint32_t *resolve_symbol(uint32_t* addr)
+{
+    //return addr;
 }

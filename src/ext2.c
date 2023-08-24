@@ -117,7 +117,7 @@ ext2_dirent ext2_read_dirent(uint32* data, uint32 index){
 char **ext2_ls(uint32 inode_num){
 	char **return_names = kmalloc(sizeof(**return_names));
 	ext2_inode *inode = read_inode(inode_num);
-	uint32* dir = malloc(sizeof(*dir));
+	uint32* dir = kmalloc(sizeof(*dir));
 	uint32 datablock0 = inode->direct_block_pointers[0];
 	ide_read_sectors(DRIVE, 6, 2 * datablock0, dir);
 	int curr = 0;
@@ -233,6 +233,7 @@ char* ext2_read_file(char* fpath){
 	uint32 file_inode = ext2_path_to_inode(fpath);
 	printf("\nFile Inode: %d", file_inode);
 	file_buf = ext2_get_filedata(file_inode);
+	printf("%c\n", file_buf);
 	return file_buf;
 }
 

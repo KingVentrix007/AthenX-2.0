@@ -16,6 +16,7 @@
 #include "display.h"
 #include "keyboard.h"
 #include "fs.h"
+#include "ext2.h"
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
@@ -118,11 +119,16 @@ void parse_command(const char* command) {
         {
              read(arguments[1]);
         }
+      
        
     }
     else if(strcmp(arguments[0],"ls") == 0)
     {
-        list_files();
+        //char *cwd = kmalloc(sizeof(*cwd)); //Current working directory, in it's path
+        char *cwd = "/";
+        uint32 ino = ext2_path_to_inode(cwd);
+        char **names = ext2_ls(ino);
+        printf("\n");
     }
     else if(strcmp(arguments[0],"rm") == 0)
     {

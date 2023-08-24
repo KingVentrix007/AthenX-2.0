@@ -108,23 +108,13 @@ void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
 
 void kmain(unsigned long magic, unsigned long addr) {
     MULTIBOOT_INFO *mboot_info;
-    
-    char *shell = "User@SimpleOS ";
-    char *cwd = malloc(sizeof(*cwd)); //Current working directory, in it's path
-    cwd = "/";
-    char *pwd = "/"; //Previous working directory absolute path
+     
     gdt_init();
     idt_init();
    
     //
     //ata_get_drive_by_model
     display_init(1,0,0,32);
-     //timer_init();
-     ata_init();
-     //mouse_init();
-    //console_init(COLOR_WHITE, COLOR_BLACK);
-
-    keyboard_init();
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         mboot_info = (MULTIBOOT_INFO *)addr;
         memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
@@ -137,39 +127,15 @@ void kmain(unsigned long magic, unsigned long addr) {
         // initialize atleast 1MB blocks of memory for our heap
         pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
         // initialize heap 256 blocks(1MB)
-        void *start = pmm_alloc_blocks(256);
+        void *start = pmm_alloc_blocks(256*2);
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         //@ Gets screen size from memory
         
-        const int DRIVE = 0;
-        const uint32 LBA = KERNEL_SECTOR_BASE+1;
-        const uint8 NO_OF_SECTORS = 1;
-        char buf[ATA_SECTOR_SIZE] = {0};
-        struct screen_size{
-            char checksum[32];
-            int x;
-            int y;
-        };
-
-            struct screen_size sc_size;
-         memset(buf, 0, sizeof(buf));
-        ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        memcpy(&sc_size, buf, sizeof(sc_size));
-        int x;
-        int y;
-        if(strcmp(sc_size.checksum,"True") == 0)
-        {
-            x = sc_size.x;
-            y = sc_size.y;
-        }
-        else
-        {
-            //cmd_handler("screen size");
-            x = 1280;
-            y = 1024;
-        }
-
+        ata_init();
+        int x = 1280;
+        int y = 1024;
+        keyboard_init();
         int ret = display_init(0,x,y,32);
         
         char* mode = logo();
@@ -182,64 +148,9 @@ void kmain(unsigned long magic, unsigned long addr) {
         }
         printf("%s\n",mode);
         cmd_handler("cls");
-        //vbe_print_available_modes();
-        //initialize_file_system(0);
-        printf("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
+        //printf("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
         
-        //run_once();
-        // #define CUSTOM_FS 0
-        // #if CUSTOM_FS
-        //access_grub_module(mboot_info);
-           
-            
-        //     //clean_fs_partition_table_main(46);
-        //     //fs_partition_table_main_p();
-        //     //run_once();
-        // #else
-        //     //printf("hello world");
-       
-            
-            
-        //#endif
         print_drives();
-        // char *filedata = malloc(sizeof(*filedata));
-        // char * path = "/test";
-        // filedata = ext2_read_file(path);
-        // printf("%s\n", filedata);
-        // uint32 ino = ext2_path_to_inode(cwd);
-        // char **names = ext2_ls(ino);
-        // printf("\n");
-        //fs_partition_table_main_p();
-    //     fl_init();
-
-    // // Attach media access functions to library
-    // if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
-    // {
-    //     printf("ERROR: Failed to init file system\n");
-    //     int i = fl_format(100,"file");
-    //     //printf("\nI: %d", i);
-    //     //return -1;
-    // }
-    // fl_listdirectory("/");
-        //run_once();
-        //kernel_command_handler("login set");
-         //printf("X: %d, Y: %d",sc_size.x,sc_size.y);
-        // for (size_t f1 = 0; f1 < 4; f1++)
-        // {
-        //     printf("%d",buf[f1]-'0');
-        //     x[f1] = buf[f1]-'0';
-        // }
-        //  for (size_t f2 = 0; f2 < 4; f2++)
-        // {
-        //     printf("%d",buf[f2+5]-'0');
-        //     y[f2] = buf[f2+5]-'0';
-        // }
-        // printf("\n");
-        // printf("%d",x);
-        // printf("\n");
-        // printf("%d",y);
-        
-        
         timer_init();//!DO NOT PUT BEFORE INIT VESA
         
         
@@ -281,6 +192,9 @@ void kmain(unsigned long magic, unsigned long addr) {
 
     //         printf("Screen size: %dx%d\n", cols, rows);
             fpu_enable();
+            //initialize_file_system(0);
+            // read_superblock();
+            // ext2_init();
             terminal_main();
             // uint32 x = 0;
             // for (uint32 c = 0; c < 267; c++) {
@@ -427,86 +341,117 @@ int login(int skip)
     else{kernel_command_handler("login set");}
     
 }
+void getstr_bound(char *buffer, uint8 bound) {
+    if (!buffer) return;
+    while(1) {
+        char ch = kb_getchar();
+        if (ch == '\n') {
+            printf("\n");
+            return ;
+        } else if(ch == '\b') {
+            backspace(buffer);
+            printf("\b");
+            buffer--;
+            *buffer = '\0';
+        } else {
+            *buffer++ = ch;
+            printf("%c", ch);
+        }
+    }
+}
+
+
 void terminal_main()
 {
-   
+    //printf("0x%x",&terminal_main);
+    while(1)
+    {
+        char buffer[512];
+        char *shell = "\nUser@AthenX-2.0 ";
+        printf(shell);
+        //printf(cwd);
+        printf(">");
+        memset(buffer, 0, sizeof(buffer));
+        getstr_bound(buffer, strlen(shell));
+        cmd_handler(buffer);
+    }
     //login(1);
-    #define LOGIN 0
-    #if LOGIN
-        printf("Login:\n");
-        while (1 == 1)
-        {
-            if(login(0) == 1)
-            {
-                printf("Login successful\n");
-                break;
-            }
-            else{printf("Invalid login\n");}
+    // #define LOGIN 0
+    // #if LOGIN
+    //     printf("Login:\n");
+    //     while (1 == 1)
+    //     {
+    //         if(login(0) == 1)
+    //         {
+    //             printf("Login successful\n");
+    //             break;
+    //         }
+    //         else{printf("Invalid login\n");}
             
-        }
+    //     }
     
 
-    #endif
+    // #endif
     
-     printf(">");
-    //sleep(10);
-    //printV("\nHeight%s\n",vbe_get_height());
-    uint8_t byte;
-    char *buffer[512];
-     buffer[0] = '\0';
-    // int posx = 0;
-    // int posy = 0;
+    //  printf(">");
+    // //sleep(10);
+    // //printV("\nHeight%s\n",vbe_get_height());
+    // uint8_t byte;
+    // char *buffer[512];
+    //  buffer[0] = '\0';
+    // // int posx = 0;
+    // // int posy = 0;
     
-        // printChar(posx,posy,'h');
-        //       posx = posx +1;
-        //       posy = posy +0;
-    while(1 == 1)
-    {    
-            //beep();
-            char c = kb_getchar();
-            if(c == '\b')
-            {
-                //crude_song();
-                if(backspace(buffer))
-                {
-                    printf("\b");
-                    //set_cursor_x(get_cursor_x()-2);
-                    //printf(" ");
-                    //console_ungetchar();
-                }
-                else
-                {
-                    beep();
-                }
+    //     // printChar(posx,posy,'h');
+    //     //       posx = posx +1;
+    //     //       posy = posy +0;
+    // while(1 == 1)
+    // {    
+    //         //beep();
+    //         char c = kb_getchar();
+    //         if(c == '\b')
+    //         {
+    //             //crude_song();
+    //             if(backspace(buffer))
+    //             {
+    //                 printf("\b");
+    //                 //set_cursor_x(get_cursor_x()-2);
+    //                 //printf(" ");
+    //                 //console_ungetchar();
+    //             }
+    //             else
+    //             {
+    //                 beep();
+    //             }
                 
-                //printf("\b");
-            }
-            else if (c == '\n')
-            {
-                //printf("\n");
-                cmd_handler(buffer);
-                memset(buffer, 0,sizeof(buffer));
-                next_line();
-                set_screen_x(0);
-                //set_terminal_colum(get_terminal_col()+16);
-                //set_terminal_row(0);
-                printf(">>");
-                //crude_song();
-            }
+    //             //printf("\b");
+    //         }
+    //         else if (c == '\n')
+    //         {
+    //             //printf("\n");
+    //             cmd_handler(buffer);
+    //             memset(buffer, 0,sizeof(buffer));
+    //             next_line();
+    //             set_screen_x(0);
+    //             //set_terminal_colum(get_terminal_col()+16);
+    //             //set_terminal_row(0);
+    //             printf(">");
+    //             //crude_song();
+    //         }
             
-            else
-            {
+    //         else
+    //         {
                 
-                char* s;
-                s = ctos(s, c);
-                //printf(s);
-                printf(s);
-                //printf(s);
+    //             char* s;
+    //             s = ctos(s, c);
+    //             //printf(s);
+    //             printf(s);
+    //             //printf(s);
                 
-                append(buffer,c);
-            }
+    //             append(buffer,c);
+    //         }
             
             
-    }
+    // }
     
 }
