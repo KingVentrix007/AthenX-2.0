@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "string.h"
 #include "vga.h"
 #include "vesa.h"
@@ -24,8 +25,10 @@ int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
         }
         else
         {
+            //asm("cli");
             ret_int = vesa_init(width,height,bpp);
             display_mode_screen = 0;
+            //asm("sti");
         }
         
     }
@@ -49,7 +52,17 @@ void next_line()
 {
     if(display_mode_screen == 0)
     {
-        set_screen_y(get_screen_y()+16);
+        if(get_cursor_y() <= vbe_get_height())
+        {
+            set_screen_y(get_screen_y()+16);
+        }
+        else if(get_screen_y() >= vbe_get_height())
+        {
+            clear_display();
+            cls_screen(VBE_RGB(0,0,0));
+        }
+        
+
     }
     else if (display_mode_screen == 1)
     {
@@ -166,6 +179,7 @@ static void print(const char *data, size_t data_length)
     if(display_mode_screen == 0)
     {
         print_vesa_d(data, data_length);
+        
         // size_t i;
         // for (i = 0; i < data_length; i++)
         //     vga_putchar((int)((const unsigned char *)data)[i]);
@@ -362,7 +376,7 @@ int normalize_v(double *val)
 }
 int printf(const char *format, ...)
 {
-    
+    //FUNC_ADDR_NAME(&printf);
     va_list parameters;
     va_start(parameters, format);
     int written = 0;
@@ -453,6 +467,30 @@ int printf(const char *format, ...)
     return written;
 }
 
+int kassert(int ret,int expected_ret,int level)
+{
+    if(ret != expected_ret)
+    {
+        if(level == 1)
+        {
+            return 1;
+        }
+        else if (level == 2)
+        {
+            printf("WANING");
+        }
+        else if (level >= 3);
+        {
+            __asm__("int $3");
+        }
+        
+        
+    }
+    if(ret == expected_ret)
+    {
+        return 0;
+    }
+}
 
 
 

@@ -1,3 +1,6 @@
+#include "vesa_display.h"
+#include "serial.h"
+#include "debug.h"
 #include "vesa.h"
 #include "vfs.h"
 #include "maths.h"
@@ -22,6 +25,19 @@
 #include "fpu.h"
 #include "ext2.h"
 KERNEL_MEMORY_MAP g_kmap;
+
+// void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
+//     if (mb_info->flags & (1 << 3)) {
+//         uint32_t initramfs_start = mb_info->initramfs_start;
+//         uint32_t initramfs_end = mb_info->initramfs_end;
+
+//         // Print the initramfs location
+//         printf("Initramfs is loaded at addresses: 0x%X - 0x%X\n", initramfs_start, initramfs_end);
+//     } else {
+//         printf("Initramfs location not found in Multiboot info\n");
+//     }
+// }
+
 
 void access_grub_module(MULTIBOOT_INFO* mbi) {
     if (!(mbi->flags & 0x00000008))
@@ -105,7 +121,10 @@ void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
     printf("  start_adddr: 0x%x\n  end_addr: 0x%x\n  size: %d\n",
            kmap->available.start_addr, kmap->available.end_addr, kmap->available.size);
 }
-
+void get_map(KERNEL_MEMORY_MAP *out)
+{
+    memcpy(&out, &g_kmap, sizeof(out));
+}
 void kmain(unsigned long magic, unsigned long addr) {
     MULTIBOOT_INFO *mboot_info;
      
@@ -114,12 +133,13 @@ void kmain(unsigned long magic, unsigned long addr) {
    
     //
     //ata_get_drive_by_model
-    display_init(1,0,0,32);
+    kassert(display_init(1,0,0,32),0,1);
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         mboot_info = (MULTIBOOT_INFO *)addr;
         memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
         if (get_kernel_memory_map(&g_kmap, mboot_info) < 0) {
             printf("error: failed to get kernel memory map\n");
+            kassert(1,0,4);
             return;
         }
         // put the memory bitmap at the start of the available memory
@@ -127,7 +147,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // initialize atleast 1MB blocks of memory for our heap
         pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
         // initialize heap 256 blocks(1MB)
-        void *start = pmm_alloc_blocks(256*2);
+        void *start = pmm_alloc_blocks(256);
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         //@ Gets screen size from memory
@@ -135,8 +155,10 @@ void kmain(unsigned long magic, unsigned long addr) {
         ata_init();
         int x = 1280;
         int y = 1024;
+        
         keyboard_init();
-        int ret = display_init(0,x,y,32);
+        kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
+        int ret = kassert(display_init(0,x,y,32),0,1);
         
         char* mode = logo();
         set_screen_x(0);
@@ -146,12 +168,18 @@ void kmain(unsigned long magic, unsigned long addr) {
         {
             printf("more boot options coming soon\n");
         }
+        
         printf("%s\n",mode);
         cmd_handler("cls");
         //printf("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
-        
-        print_drives();
         timer_init();//!DO NOT PUT BEFORE INIT VESA
+        print_drives();
+        // FUNC_ADDR_NAME(&kmain);
+        // ADDER_NAME_LIST test;
+        // get_name_addr(&test);
+        // printf("\n%s : 0x%x",test.names,test.addr);
+        
+        
         
         
 
@@ -164,57 +192,11 @@ void kmain(unsigned long magic, unsigned long addr) {
         }
         if (ret == 1) {
             terminal_main();
-            // scroll to top
-            // for(int i = 0; i < MAXIMUM_PAGES; i++)
-            //     console_scroll(SCROLL_UP);
-
-            // while (1) {
-            //     // add scrolling to view all modes
-            //     char c = kb_get_scancode();
-            //     if (c == SCAN_CODE_KEY_UP)
-            //         console_scroll(SCROLL_UP);
-            //     if (c == SCAN_CODE_KEY_DOWN)
-            //         console_scroll(SCROLL_DOWN);
-            // }
         } else {
-            // fill some colors
-    //          int rows, cols;
-    
-    // // Inline assembly to get the screen size using INT 10h BIOS interrupt
-    //         asm("mov $0x13, %%ah \n"    // AH = 0x13 (function 13h - Get Video Mode Information)
-    //             "int $0x10 \n"         // Call BIOS interrupt 0x10
-    //             "mov %%ax, %0 \n"      // Store the number of rows in 'rows' variable
-    //             "mov %%bx, %1"         // Store the number of columns in 'cols' variable
-    //             : "=r" (rows), "=r" (cols) // Outputs
-    //             :                        // Inputs (none)
-    //             : "%ax", "%bx"           // Clobbered registers
-    //         );
-
-    //         printf("Screen size: %dx%d\n", cols, rows);
+ 
             fpu_enable();
-            //initialize_file_system(0);
-            // read_superblock();
-            // ext2_init();
+
             terminal_main();
-            // uint32 x = 0;
-            // for (uint32 c = 0; c < 267; c++) {
-            //     for (uint32 i = 0; i < 600; i++) {
-            //         vbe_putpixel(x, i, VBE_RGB(c % 255, 0, 0));
-            //     }
-            //     x++;
-            // }
-            // for (uint32 c = 0; c < 267; c++) {
-            //     for (uint32 i = 0; i < 600; i++) {
-            //         vbe_putpixel(x, i, VBE_RGB(0, c % 255, 0));
-            //     }
-            //     x++;
-            // }
-            // for (uint32 c = 0; c < 267; c++) {
-            //     for (uint32 i = 0; i < 600; i++) {
-            //         vbe_putpixel(x, i, VBE_RGB(0, 0, c % 255));
-            //     }
-            //     x++;
-            // }
         }
 
 done:
@@ -349,10 +331,12 @@ void getstr_bound(char *buffer, uint8 bound) {
             printf("\n");
             return ;
         } else if(ch == '\b') {
-            backspace(buffer);
-            printf("\b");
-            buffer--;
-            *buffer = '\0';
+            if(backspace(*buffer))
+            {
+                printf("\b");
+                
+            }
+
         } else {
             *buffer++ = ch;
             printf("%c", ch);
@@ -363,18 +347,23 @@ void getstr_bound(char *buffer, uint8 bound) {
 
 void terminal_main()
 {
-    //printf("0x%x",&terminal_main);
-    while(1)
-    {
-        char buffer[512];
-        char *shell = "\nUser@AthenX-2.0 ";
-        printf(shell);
-        //printf(cwd);
-        printf(">");
-        memset(buffer, 0, sizeof(buffer));
-        getstr_bound(buffer, strlen(shell));
-        cmd_handler(buffer);
-    }
+    DEBUG("terminal_main");
+    FUNC_ADDR_NAME(&terminal_main);
+    // ADDER_NAME_LIST test;
+    // get_name_addr(&test);
+    // printf("\n%s : 0x%x",test.names,test.addr);
+    // //printf("0x%x",&terminal_main);
+    // while(1)
+    // {
+    //     char buffer[512];
+    //     char *shell = "\nUser@AthenX-2.0 ";
+    //     printf(shell);
+    //     //printf(cwd);
+    //     printf(">");
+    //     memset(buffer, 0, sizeof(buffer));
+    //     getstr_bound(buffer, strlen(shell));
+    //     cmd_handler(buffer);
+    // }
     //login(1);
     // #define LOGIN 0
     // #if LOGIN
@@ -393,65 +382,73 @@ void terminal_main()
 
     // #endif
     
-    //  printf(">");
-    // //sleep(10);
-    // //printV("\nHeight%s\n",vbe_get_height());
-    // uint8_t byte;
-    // char *buffer[512];
-    //  buffer[0] = '\0';
-    // // int posx = 0;
-    // // int posy = 0;
+     printf(">");
+    //sleep(10);
+    //printV("\nHeight%s\n",vbe_get_height());
+    uint8_t byte;
+    char *buffer[512];
+     buffer[0] = '\0';
     
-    //     // printChar(posx,posy,'h');
-    //     //       posx = posx +1;
-    //     //       posy = posy +0;
-    // while(1 == 1)
-    // {    
-    //         //beep();
-    //         char c = kb_getchar();
-    //         if(c == '\b')
-    //         {
-    //             //crude_song();
-    //             if(backspace(buffer))
-    //             {
-    //                 printf("\b");
-    //                 //set_cursor_x(get_cursor_x()-2);
-    //                 //printf(" ");
-    //                 //console_ungetchar();
-    //             }
-    //             else
-    //             {
-    //                 beep();
-    //             }
+    while(1)
+    {    
+            //beep();
+            draw_square_cursor(get_screen_x(),get_screen_y(),VBE_RGB(255, 255, 255));
+            char c = kb_getchar();
+            undraw_square(get_screen_x(),get_screen_y());
+           
+            if(c == '\b')
+            {
+                //crude_song();
+                if(backspace(buffer))
+                {
+                    printf("\b");
+                    //set_cursor_x(get_cursor_x()-2);
+                    //printf(" ");
+                    //console_ungetchar();
+                }
+                else
+                {
+                    beep();
+                }
                 
-    //             //printf("\b");
-    //         }
-    //         else if (c == '\n')
-    //         {
-    //             //printf("\n");
-    //             cmd_handler(buffer);
-    //             memset(buffer, 0,sizeof(buffer));
-    //             next_line();
-    //             set_screen_x(0);
-    //             //set_terminal_colum(get_terminal_col()+16);
-    //             //set_terminal_row(0);
-    //             printf(">");
-    //             //crude_song();
-    //         }
-            
-    //         else
-    //         {
+                //printf("\b");
+            }
+            else if (c == '\n')
+            {
+                //printf("\n");
+                cmd_handler(buffer);
+                memset(buffer, 0,sizeof(buffer));
+                next_line();
+                set_screen_x(0);
+                //set_terminal_colum(get_terminal_col()+16);
+                //set_terminal_row(0);
+                printf(">");
                 
-    //             char* s;
-    //             s = ctos(s, c);
-    //             //printf(s);
-    //             printf(s);
-    //             //printf(s);
+                //crude_song();
+            }
+            
+            else
+            {
                 
-    //             append(buffer,c);
-    //         }
+                char* s;
+                s = ctos(s, c);
+                //printf(s);
+                
+                printf(s);
+                //undraw_square(get_screen_x()-10,get_screen_y());
+                printf(s);
+                 
+                 //printf(s);
+                //printf(s);
+                
+                append(buffer,c);
+                
+            }
+            //undraw_square(get_screen_x(),get_screen_y());
+            
+             //printf("CAY");
             
             
-    // }
+    }
     
 }

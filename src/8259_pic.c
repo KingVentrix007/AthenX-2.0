@@ -7,7 +7,7 @@
 #include "idt.h"
 #include "io_ports.h"
 #include "8259_pic.h"
-
+#include "serial.h"
 /**
  * initialize 8259 PIC with default IRQ's defined in isr.h
  */
@@ -47,6 +47,8 @@ void pic8259_init() {
 void pic8259_eoi(uint8 irq) {
     if(irq >= 0x28)
         outportb(PIC2, PIC_EOI);
+        write_serial(irq,DEFAULT_COM_DEBUG_PORT);
+        
     outportb(PIC1, PIC_EOI);
 }
 

@@ -55,7 +55,8 @@ struct module {
     // Other fields
     // ...
 };
-
+void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap);
+void get_map(KERNEL_MEMORY_MAP *out);
 #endif
 
 

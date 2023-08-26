@@ -23,6 +23,11 @@
         "limits": "c",
         "streambuf": "c",
         "iosfwd": "c",
-        "random": "c"
+        "random": "c",
+        "debug.h": "c",
+        "isr.h": "c",
+        "timer.h": "c",
+        "serial.h": "c",
+        "fonts.h": "c"
     }
 }

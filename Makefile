@@ -2,9 +2,12 @@ CC=gcc
 AS=as
 ASM = nasm
 CONFIG = ./config
-GCCPARAMS = -m32 -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore
+GCCPARAMS = -m32 -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+            -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
+            -Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
+            -Wconversion -Wstrict-prototypes
 ASPARAMS = --32
-LDPARAMS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib --allow-multiple-definition
+LDPARAMS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib --allow-multiple-definition -Map LDout.map
 
 SRC_DIR=src
 HDR_DIR=include/
@@ -92,8 +95,8 @@ changlog-test:
 changlog:
 	./update_changelog
 run: iso
-	
-	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=ext2.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk -m 2G
+	truncate -s 0 pipe
+	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=ext2.img,format=raw -serial pipe:pipe -vga std -device sb16 -soundhw pcspk -m 2G
 run-ext2:
 	
 	qemu-system-x86_64 -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk

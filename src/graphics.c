@@ -63,10 +63,10 @@ void print_null(int x, int y)
     
 }
 
-void draw_char(unsigned char c,int fgcolor, int bgcolor, int x, int y, int base_address){
+void draw_char_g(unsigned char c,int fgcolor, int bgcolor, int x, int y, int base_address){
 	
 	
-    char *bitmap = arr_8x8_font;
+    char *bitmap = font8x16;
     int x_char,y_char;
     static unsigned mask[] = {
         1u << 0u, //            1
@@ -411,6 +411,7 @@ void cool_colors()
 // }
 void plot_pixel(int x, int y, char* pixel_color){
     //VGA_address_13 = 
+    vbe_putpixel(x,y,VBE_RGB(0,255,0));
   int pixel_location = (y*320) + x;
   //putpixel(x,y,pixel_color);
    unsigned char* location = (VGA_address_13+pixel_location);

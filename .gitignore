@@ -9,3 +9,6 @@ FAT32_IMG/
 *.img
 serial.log
 serial.log
+LDout.map
+.vscode/*.json
+pipe

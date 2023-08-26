@@ -15,12 +15,11 @@
  */
 #define PRINT(...) do {kprintf(__VA_ARGS__); } while (0)
 
-/*
- * Similar to PRINT, but output is enhanced by some
- * debugging information
- */
-#define DEBUG(...) do {if (__loglevel > 0 ) { kprintf("DEBUG at %s@%d (%s): ", __FILE__, __LINE__, __FUNCTION__); \
-                     kprintf(__VA_ARGS__); }} while (0)
+
+// #define DEBUG(...) do {if (1 == 1 ) { kprintf("DEBUG at %s@%d (%s): ", __FILE__, __LINE__, __FUNCTION__); \
+//                      kprintf(__VA_ARGS__); }} while (0)
+// #define DEBUG(...) do {if (__loglevel > 0 ) { kprintf("DEBUG at %s@%d (%s): ", __FILE__, __LINE__, __FUNCTION__); \
+//                      kprintf(__VA_ARGS__); }} while (0)
 
 /*
  * Similar to PRINT, but output is enhanced by some

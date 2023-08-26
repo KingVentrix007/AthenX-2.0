@@ -19,6 +19,9 @@ void cls_screen(char *color);
 int set_vesa_row(int row);
 int set_vesa_colum(int col);
 void print_vesa_d(const char *data, size_t data_length);
+void draw_char(unsigned char c, int x, int y);
 static enum vga_color default_font_color = COLOR_RED1;
 static enum vga_color default_bg_color = COLOR_BLACK1;
+void undraw_square(int x, int y);
+void draw_square_cursor(int x, int y, int color);
 #endif

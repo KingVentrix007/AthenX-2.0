@@ -1,3 +1,5 @@
+#include "string.h"
+#include "kheap.h"
 #include "isr.h"
 #include "idt.h"
 #include "8259_pic.h"
@@ -78,8 +80,23 @@ static void print_registers(REGISTERS *reg) {
     printf("eax=0x%x, ebx=0x%x, ecx=0x%x, edx=0x%x\n", reg->eax, reg->ebx, reg->ecx, reg->edx);
     printf("edi=0x%x, esi=0x%x, ebp=0x%x, esp=0x%x\n", reg->edi, reg->esi, reg->ebp, reg->esp);
     printf("eip=0x%x, cs=0x%x, ss=0x%x, eflags=0x%x, useresp=0x%x\n", reg->eip, reg->ss, reg->eflags, reg->useresp);
-}
 
+}
+uint32_t *unwind_stack(REGISTERS *reg)
+{
+    uint32_t* esp = reg->esp; // Retrieve saved ESP
+    uint32_t* eip = reg->eip;
+    uint32_t* ebp = reg->ebp;
+    uint32_t return_addr = *(eip);
+    //memcpy(&addr, eip, sizeof(eip));
+    //printf("addr = 0x%x\n",return_addr);
+    return return_addr;
+        // Resolve symbol for the return address
+    //uint32_t* function_name = resolve_symbol(return_addr);
+    
+
+    
+}
 /**
  * invoke exception routine,
  * being called in exception.asm
@@ -94,9 +111,25 @@ void isr_exception_handler(REGISTERS reg) {
         printf("EXCEPTION: %s\n", exception_messages[reg.int_no]);
         print_registers(&reg);
         uint32_t *adder;
-        unwind_stack(&reg, &adder);
-        printf("\nFunction address: 0x%x\n", adder);
-
+        adder = unwind_stack(&reg);
+        printf("\nAddress of fault: 0x%x\n",reg.eip);
+        //printf("\nFunction address: 0x%x\n", adder);
+        ADDER_NAME_LIST function_addr_list;
+        get_name_addr(&function_addr_list);
+       // printf("Last registered function called: \n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
+        //printf("\n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
+        uint32_t *targetAddress = reg.eip;
+        if (find_by_address(targetAddress)) {
+            printf("Address 0x%x found in the list.\n", targetAddress);
+        } else {
+            //printf("Address 0x%x not found in the list.\n", targetAddress);
+        }
+        print_list(reg.eip);
+        kheap_print_blocks();
+        print_stack_trace(reg.ebp);
+        asm("sti");
+        debug_terminal();
+        ERROR("EXITED FROM DEBUG TERMINAL");
         for (;;)
             ;
     }
@@ -106,19 +139,10 @@ void isr_exception_handler(REGISTERS reg) {
     }
 }
 
-void unwind_stack(REGISTERS *reg, uint32_t *addr)
-{
-    uint32_t* esp = reg->esp; // Retrieve saved ESP
-    uint32_t* eip = reg->eip;
-    uint32_t return_addr = *(esp + 1);
 
-        // Resolve symbol for the return address
-    //uint32_t* function_name = resolve_symbol(return_addr);
-    addr = return_addr;
-    
-}
 
 uint32_t *resolve_symbol(uint32_t* addr)
 {
     //return addr;
+    
 }

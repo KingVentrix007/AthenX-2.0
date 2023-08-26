@@ -1,4 +1,5 @@
-
+#include "ext2.h"
+#include "debug.h"
 #include "rle.h"
 #include "editor.h"
 #include "cmdhandler.h"
@@ -16,7 +17,7 @@
 #include "display.h"
 #include "keyboard.h"
 #include "fs.h"
-#include "ext2.h"
+#include "serial.h"
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
@@ -46,6 +47,7 @@ void display_available_commands() {
     printf("edit <filename> - edit a file\n");
 }
 void parse_command(const char* command) {
+    FUNC_ADDR_NAME(&parse_command);
     char command_copy[MAX_COMMAND_LENGTH];
     strcpy(command_copy, command);
 
@@ -89,6 +91,20 @@ void parse_command(const char* command) {
         }
     
     } 
+    else if (strcmp(arguments[0],"com") == 0)
+    {
+        char out = "C";
+        printf("\nCOM output: ");
+        out = read_serial();
+        printf("C%c", out);
+        // while(out != NULL)
+        // {
+        //     out = read_serial();
+        //     printf("%c", out);
+        // }
+         
+       
+    }
     else if (strcmp(arguments[0], "write") == 0)
     {
         if(arg_count == 3)
@@ -271,6 +287,7 @@ void cmd_handler(char *buffer[512])
 
 void kernel_command_handler(char *buffer[512])
 {
+    
     if(strcmp(buffer,"login set")==0)
     {
         //beep();

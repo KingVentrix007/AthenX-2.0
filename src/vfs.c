@@ -1,6 +1,7 @@
 
-#include "fs.h"
 #include "ext2.h"
+#include "fs.h"
+
 #include "vfs.h"
 #include "ide.h"
 int init_disk(int disk)

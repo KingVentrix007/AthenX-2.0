@@ -3,6 +3,7 @@
 #include "bool.h"
 #include "types.h"
 #include "stddef.h"
+#include "debug.h"
 
 #define INT_MAX 2147483647
 #define INT_MIN -2147483648
@@ -59,6 +60,7 @@ char* strtok(char* str, const char* delimiters) {
     return current_token;
 }
 void *memcpy(void *dst, const void *src, uint32 n) {
+    //FUNC_ADDR_NAME(&memcpy);
     char *ret = dst;
     char *p = dst;
     const char *q = src;
@@ -129,10 +131,11 @@ int strcpy(char *dst, const char *src) {
         i++;
     return i;
 }
-bool backspace(char buffer[]) {
+bool backspace(char *buffer) {
     int len = string_length(buffer);
     if (len > 0) {
         buffer[len - 1] = '\0';
+        buffer--;
         return true;
     } else {
         return false;

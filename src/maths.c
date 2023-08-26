@@ -434,3 +434,13 @@ int small_rand()
 
     return ((seed = (seed * 1103515245 + 12345) & RAND_MAX) * NORM)/89585;
 }
+
+
+double fabs(double x) {
+    return (x < 0) ? -x : x;
+}
+
+// Custom implementation of the fmax function
+double fmax(double x, double y) {
+    return (x > y) ? x : y;
+}

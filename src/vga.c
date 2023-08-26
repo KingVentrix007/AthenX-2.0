@@ -347,7 +347,7 @@ void vga_putentryat(char c, uint8_t color, size_t x, size_t y)
         break;
     }
      
-    draw_char(c,COLOR_WHITE,COLOR_BLACK,x,y,0);
+    //draw_char(c,COLOR_WHITE,COLOR_BLACK,x,y,0);
     
 }
 

@@ -62,4 +62,6 @@ double log10(double x);
 double log(double x, double y);
 int fac(unsigned int x);
 int small_rand();
+double fmax(double x, double y);
+double fabs(double x);
 #endif

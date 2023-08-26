@@ -1,7 +1,7 @@
 #include "graphics.h"
 #include "string.h"
 #include "rle.h"
-#include "logos.h"
+
 // Function to perform RLE encoding on a 2D input array and return the encoded array size
 
 int rle_encode(int** input_array, int rows, int cols, int* output_array) {
@@ -51,7 +51,7 @@ int main() {
     int cols = 200;
 
     // Create a sample 2D input array (matrix)
-    int** input_array = logo_img;
+    int** input_array = {" "};//logo_img;
     // for (int i = 0; i < rows; i++) {
     //     input_array[i] = (int*)malloc(cols * sizeof(int));
     // }

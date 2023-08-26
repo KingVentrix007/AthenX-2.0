@@ -24,7 +24,7 @@ int isspace(char c);
 int isalpha(char c);
 char upper(char c);
 char lower(char c);
-bool backspace(char buffer[]);
+bool backspace(char *buffer);
 
 void itoa(char *buf, int base, int d);
 int strncmp(const char *s1, const char *s2, size_t n);

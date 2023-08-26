@@ -2,7 +2,7 @@
 #include "vesa.h"
 #include "bitmap.h"
 #include "string.h"
-
+#include "fonts.h"
 // 16 x 16 bitmap font size
 
 uint32 ASCII_BITMAPS[127][BITMAP_SIZE] = {
@@ -1839,10 +1839,10 @@ uint32 ASCII_BITMAPS[127][BITMAP_SIZE] = {
 void bitmap_draw_char(char ch, int x, int y, int color) {
     int temp = 0, pix_data = 0;
 
-    for (int i = 0; i < BITMAP_SIZE; i++) {
+    for (int i = 0; i < 8; i++) {
         temp = x;
-        x += BITMAP_SIZE;
-        pix_data = ASCII_BITMAPS[(int)ch][i];
+        x += 8;
+        pix_data = font8x16[(int)ch][i];
         while (pix_data > 0) {
             if (pix_data & 1) {
                 vbe_putpixel(x, y, color);

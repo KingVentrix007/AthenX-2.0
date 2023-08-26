@@ -48,6 +48,7 @@ typedef struct {
     /* kernel command line, present if flags[2] is set(CMDLINE in entry.asm) */
     uint32 cmdline;
 
+    
     /* no of modules loaded, present if flags[3] is set(MODULECOUNT in entry.asm) */
     uint32 modules_count;
     uint32 modules_addr;
