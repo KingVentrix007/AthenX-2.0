@@ -51,11 +51,11 @@ void write_string_serial(char *string, int port)
 }
 
 int serial_received() {
-   return inportb(PORT + 5) & 1;
+   return inportb(PORT + 5) & 0x01;
 }
  
 char read_serial() {
-   //while (serial_received() == 0) printf("1");
+   while (serial_received() == 0);
  
    return input_bytes(PORT);
 }

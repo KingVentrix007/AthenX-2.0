@@ -5,7 +5,7 @@ CONFIG = ./config
 GCCPARAMS = -m32 -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
             -Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-            -Wconversion -Wstrict-prototypes
+            -Wconversion
 ASPARAMS = --32
 LDPARAMS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib --allow-multiple-definition -Map LDout.map
 

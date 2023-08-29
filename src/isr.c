@@ -9,7 +9,7 @@
 #include "display.h"
 // For both exceptions and irq interrupt
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
-
+int isr_count = 0;
 // for more details, see Intel manual -> Interrupt & Exception Handling
 char *exception_messages[32] = {
     "Division By Zero",
@@ -108,30 +108,39 @@ void isr_exception_handler(REGISTERS reg) {
     set_screen_x(0);
     set_screen_y(0);
     if (reg.int_no < 32) {
+        isr_count++;
         printf("EXCEPTION: %s\n", exception_messages[reg.int_no]);
         print_registers(&reg);
-        uint32_t *adder;
-        adder = unwind_stack(&reg);
-        printf("\nAddress of fault: 0x%x\n",reg.eip);
-        //printf("\nFunction address: 0x%x\n", adder);
-        ADDER_NAME_LIST function_addr_list;
-        get_name_addr(&function_addr_list);
-       // printf("Last registered function called: \n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
-        //printf("\n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
-        uint32_t *targetAddress = reg.eip;
-        if (find_by_address(targetAddress)) {
-            printf("Address 0x%x found in the list.\n", targetAddress);
-        } else {
-            //printf("Address 0x%x not found in the list.\n", targetAddress);
+        if(isr_count<=5){
+             uint32_t *adder;
+            adder = unwind_stack(&reg);
+            printf("\nAddress of fault: 0x%x\n",reg.eip);
+            //printf("\nFunction address: 0x%x\n", adder);
+            ADDER_NAME_LIST function_addr_list;
+            get_name_addr(&function_addr_list);
+        // printf("Last registered function called: \n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
+            //printf("\n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
+            uint32_t *targetAddress = reg.eip;
+            if (find_by_address(targetAddress)) {
+                printf("Address 0x%x found in the list.\n", targetAddress);
+            } else {
+                //printf("Address 0x%x not found in the list.\n", targetAddress);
+            }
+            print_list(reg.eip);
+            kheap_print_blocks();
+            print_stack_trace(reg.ebp);
+            asm("sti");
+            debug_terminal();
+            ERROR("EXITED FROM DEBUG TERMINAL");
         }
-        print_list(reg.eip);
-        kheap_print_blocks();
-        print_stack_trace(reg.ebp);
-        asm("sti");
-        debug_terminal();
-        ERROR("EXITED FROM DEBUG TERMINAL");
-        for (;;)
+       else
+       {
+            printf("Max exceptions reached, hanging now\n");
+            printf("Please restart computer");
+            for (;;)
             ;
+       }
+        
     }
     if (g_interrupt_handlers[reg.int_no] != NULL) {
         ISR handler = g_interrupt_handlers[reg.int_no];

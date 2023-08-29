@@ -127,10 +127,18 @@ void keyboard_init() {
 
 // a blocking character read
 char kb_getchar() {
+    int count = 0;
     //printf("HERE");
     char c;
-
-    while(g_ch <= 0);
+    
+    while(g_ch <= 0)
+    {
+        count++;
+        if(count >= 100)
+        {
+           break; 
+        }
+    };
     c = g_ch;
     g_ch = 0;
     g_scan_code = 0;

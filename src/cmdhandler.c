@@ -271,7 +271,9 @@ void parse_command(const char* command) {
         text_editor(1024,data);
     }
     else {
+        printf("{/330:255,0,0}{/331:0,200,0}");
         printf("\n[!] %s is not a valid command",arguments[0]);
+        printf("{/330:0,255,0}{/331:0,0,0}");
         // Handle invalid or unknown commands
         // For example: display an error message
     }

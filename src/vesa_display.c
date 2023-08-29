@@ -1,3 +1,6 @@
+// #define SSFN_IMPLEMENTATION 
+// #define SSFN_CONSOLEBITMAP_TRUECOLOR  
+// #include "ssfn.h"
 #include "graphics.h"
 #include "fonts.h"
 #include "serial.h"
@@ -5,6 +8,7 @@
 #include "string.h"
 #include "bitmap.h"
 #include "font.h"
+#include "display.h"
 size_t vesa_row;
 size_t vesa_column;
 //static uint16_t *const VGA_MEMORY = (uint16_t *)0xb8000;
@@ -48,16 +52,6 @@ void vesa_scroll()
 
 void vesa_putentryat(char c, uint8_t color, size_t x, size_t y)
 {
-    //draw_char(c,color,COLOR_WHITE,y,x,0);
-    // if(strcmp(c," ") == 0)
-    // {
-    //     //printf("HERE");
-    // }
-    //draw_char(c,color,Default_screen_color,y,x,0);
-    // const size_t index = y * VGA_WIDTH + x;
-    // vesa_buffer[index] = vga_item_entry(c,COLOR_BRIGHT_GREEN1,COLOR_WHITE1);
-    //cool_colors();
-    //vbe_putpixel(x,y+50,VBE_RGB(255,0,0));
     switch (color) 
     {
     case COLOR_BLACK:
@@ -76,7 +70,7 @@ void vesa_putentryat(char c, uint8_t color, size_t x, size_t y)
         color = VBE_RGB(255,0,0);
         break;
     }
-     draw_char(c,x,y);
+     drawchar(c,x,y);
     //bitmap_draw_char(c,x,y,VBE_RGB(0,255,0));
     
 }
@@ -87,8 +81,12 @@ void vesa_putchar(char c)
     {
         vesa_column = vesa_column+16;
         vesa_row = 0;
-        if (vesa_column == VGA_HEIGHT)
-            vesa_scroll();
+        if (vesa_column >= vbe_get_height())
+        //  set_screen_x(0);
+        // set_screen_y(0);
+        //     clear_screen();
+        //     clear_display();
+             vesa_scroll();
         return;
     }
     else if (c == '\t')
@@ -107,23 +105,20 @@ void vesa_putchar(char c)
            }
            
         }
-        vesa_row = vesa_row - 10;
+        vesa_row = vesa_row - 8;
         vesa_putentryat(' ', vesa_color, vesa_row, vesa_column);
         vesa_putentryat(' ', vesa_color, vesa_row, vesa_column);
-        //cls_screen
-         //printf(" ");
+
+
         return;
     }
     vesa_putentryat(c, default_font_color, vesa_row,vesa_column);
-    vesa_row = vesa_row +10;
-    //vesa_column = vesa_column;
+    vesa_row = vesa_row +8;
    if(vesa_row >= vbe_get_width()-16)
    {
         vesa_column = vesa_column+16;
         vesa_row = 0;
-        //printf("90023");
-        //write_serial("Q",DEFAULT_COM_DEBUG_PORT);
-        
+
 
    }
     //vesa_column = vesa_column -1;
@@ -151,7 +146,7 @@ void cls_screen(char *color)
         {
             const size_t index = y * VGA_WIDTH + x;
             vesa_buffer[index] = vga_item_entry(' ', COLOR_BRIGHT_RED1,COLOR_BLACK1);
-            bitmap_draw_char(' ',x,y,VBE_RGB(0,0,255));
+            drawchar(' ',x,y);
         }
         
     }
@@ -195,54 +190,9 @@ void vesa_set_colors(enum vga_color font_color, enum vga_color background_color)
     vesa_color = make_color(font_color, background_color);
     default_font_color = font_color;
     default_bg_color = background_color;
-    // vesa_buffer = VGA_MEMORY;
-    // size_t y;
-    // for (y = 0; y < VGA_HEIGHT; y++)
-    // {
-    //     size_t x;
-    //     for (x = 0; x < VGA_WIDTH; x++)
-    //     {
-    //         const size_t index = y * VGA_WIDTH + x;
-    //         vesa_buffer[index] = make_vgaentry('\0', vesa_color);
-    //     }
-    // }
 }
 
 
-
-void draw_char(unsigned char c, int x, int y){
-    drawchar(c, x, y);
-	// if(strcmp("normal","normal")==0)
-	// {
-	// 	char *bitmap = arr_8x16_font;
-	// 	int x_char,y_char;
-	// 	static unsigned mask[] = {
-	// 		1u << 0u, //            1
-	// 		1u << 1u, //            2
-	// 		1u << 2u, //            4
-	// 		1u << 3u, //            8
-	// 		1u << 4u, //           16
-	// 		1u << 5u, //           32
-	// 		1u << 6u, //           64
-	// 		1u << 7u, //          128
-	// 		1u << 8u, //          256
-	// 	};
-	// 	unsigned char *gylph=bitmap+(int)c*16;
-	// 	for(y_char=0;y_char<8;++y_char){
-	// 		for(x_char=0;x_char<16;++x_char){
-	// 			//plot_pixel(x+(FONT_WIDTH-x_char),y+y_char,base_address,gylph[y_char]&mask[x_char]?fgcolor:bgcolor);
-    //             vbe_putpixel(x+(16-x_char),y+y_char,VBE_RGB(0,255,0));
-	// 		}
-	// 	}
-
-	// }
-	// else if (strcmp("fooooood","small") == 0)
-	// {
-	// 	//printChar(x,y,c);
-	// }
-	
-	
-}
 
 void drawchar(char character, int x, int y) {
     if (character < 0 || character >= sizeof(font8x16) / sizeof(font8x16[0])) {
@@ -258,7 +208,13 @@ void drawchar(char character, int x, int y) {
             if ((pixel >> (7 - col)) & 0x01) {
                 // Draw the pixel at position (x + col, y + row)
                 // Use your custom draw_pixel function here
-                vbe_putpixel(x + col, y + row,VBE_RGB(0,255,0));
+                uint32 color = get_font_color();
+                vbe_putpixel(x + col, y + row,color);
+            }
+            else
+            {
+                uint32 color = get_bg_color();
+                vbe_putpixel(x + col, y + row,color);
             }
         }
     }
@@ -276,6 +232,26 @@ void undraw_square(int x, int y) {
     for (int i = x; i < x + 10; i++) {
         for (int j = y; j < y + 12; j++) {
             vbe_putpixel(i, j, VBE_RGB(0,0,0));  // Set pixel to black (assuming 0 represents black)
+        }
+    }
+}
+
+void draw_character_1d(char character, int x, int y, int font_width, int font_height) {
+    if (character < 0 || character >= sizeof(arr_8x16_font) / (font_width * font_height)) {
+        // Character not in font, handle error or return
+        return;
+    }
+    
+    const unsigned char *font_data = &arr_8x16_font[character * font_width * font_height];
+    
+    for (int row = 0; row < font_height; ++row) {
+        for (int col = 0; col < font_width; ++col) {
+            unsigned char pixel = font_data[row * font_width + col];
+            if (pixel) {
+                // Draw the pixel at position (x + col, y + row)
+                // Use your custom draw_pixel function here
+                vbe_putpixel(x + col, y + row,VBE_RGB(255,0,255));
+            }
         }
     }
 }

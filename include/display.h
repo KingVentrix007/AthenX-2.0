@@ -10,6 +10,9 @@ int get_screen_x();
 int get_screen_y();
 int clear_display();
 void next_line();
-
+uint32 get_font_color();
+uint32 get_bg_color();
+uint32 set_background_color(int r, int g, int b);
+int set_font_c(int r, int g, int b);
 int draw_png_image();
 #endif

@@ -21,7 +21,8 @@ static int lba_to_ext2_block(int block_num_LBA)
 
 uint32 determine_blk_group(uint32 inode){
 	FUNC_ADDR_NAME(&determine_blk_group);
-	//DEBUG("");
+	printf("\nINODES PER GROUP: %d\n", esb->inodes_per_group);
+	printf("INODES-1: %d\n", inode-1);
     uint32 block_group = (inode - 1) / esb->inodes_per_group;
 	//DEBUG("");
     return block_group;
@@ -302,3 +303,21 @@ int ext2_init(){
 }
 
 
+int read_root_directory_inode()
+{
+	ext2_inode* root_inode;
+	root_inode = read_inode(2);
+	
+	for (size_t i = 0; i < 12; i++)
+	{
+		int block = root_inode->direct_block_pointers[i];
+		if(block > 0)
+		{
+			
+			printf("%d: ", block);
+
+		}
+	}
+	
+	
+}

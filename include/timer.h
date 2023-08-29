@@ -31,9 +31,9 @@ typedef struct {
 
 void timer_init();
 void sleep(double sec);
-
+int get_ticks();
 void timer_register_function(TIMER_FUNCTION function, TIMER_FUNC_ARGS *args);
-
+int reset_ticks();
 
 #endif
 

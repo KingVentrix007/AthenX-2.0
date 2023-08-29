@@ -1,3 +1,4 @@
+
 #include "vesa_display.h"
 #include "serial.h"
 #include "debug.h"
@@ -24,6 +25,7 @@
 #include "graphics.h"
 #include "fpu.h"
 #include "ext2.h"
+#include "acpi.h"
 KERNEL_MEMORY_MAP g_kmap;
 
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
@@ -130,7 +132,7 @@ void kmain(unsigned long magic, unsigned long addr) {
      
     gdt_init();
     idt_init();
-   
+    
     //
     //ata_get_drive_by_model
     kassert(display_init(1,0,0,32),0,1);
@@ -174,6 +176,10 @@ void kmain(unsigned long magic, unsigned long addr) {
         //printf("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
         timer_init();//!DO NOT PUT BEFORE INIT VESA
         print_drives();
+        read_superblock();
+        ext2_init();
+        read_root_directory_inode();
+
         // FUNC_ADDR_NAME(&kmain);
         // ADDER_NAME_LIST test;
         // get_name_addr(&test);
@@ -194,8 +200,21 @@ void kmain(unsigned long magic, unsigned long addr) {
             terminal_main();
         } else {
  
+            printf("Terminal initialization (%d)",ret);
             fpu_enable();
+            unsigned char* bios_start = (unsigned char*)0xE0000;
+            unsigned int bios_length = 0x20000;  // 128 KB
 
+            struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
+
+            if (rsdp) {
+                printf("RSDP found at address: 0x%p\n", rsdp);
+                printf("Version: %d\n",rsdp->Revision);
+            
+                // Access other information in the RSDP as needed
+            } else {
+                printf("RSDP not found.\n");
+            }
             terminal_main();
         }
 
@@ -343,12 +362,24 @@ void getstr_bound(char *buffer, uint8 bound) {
         }
     }
 }
+bool cursor_visible = true;
 
+void toggle_cursor_visibility() {
+    cursor_visible = !cursor_visible;
+}
 
 void terminal_main()
 {
     DEBUG("terminal_main");
     FUNC_ADDR_NAME(&terminal_main);
+    // WINDOW *test_win;
+    // test_win->color = VBE_RGB(0,255,125);
+    // test_win->start_x = 500;
+    // test_win->start_y = 10;
+    // test_win->width = 300;
+    // test_win->height = 100;
+    // test_win->filled = false;
+    //init_window(test_win);
     // ADDER_NAME_LIST test;
     // get_name_addr(&test);
     // printf("\n%s : 0x%x",test.names,test.addr);
@@ -383,6 +414,7 @@ void terminal_main()
     // #endif
     
      printf(">");
+     //printf("{/330:0,255,0");
     //sleep(10);
     //printV("\nHeight%s\n",vbe_get_height());
     uint8_t byte;
@@ -392,9 +424,22 @@ void terminal_main()
     while(1)
     {    
             //beep();
-            draw_square_cursor(get_screen_x(),get_screen_y(),VBE_RGB(255, 255, 255));
+           
             char c = kb_getchar();
-            undraw_square(get_screen_x(),get_screen_y());
+            int ticks = get_ticks();
+            // if(ticks >= 500)
+            // {
+
+            //     undraw_square(get_screen_x(),get_screen_y());
+            //     reset_ticks();
+            // }
+             if (ticks >= 50) {
+                toggle_cursor_visibility();
+                reset_ticks();
+    }
+             
+            //printf("%d",c);
+            
            
             if(c == '\b')
             {
@@ -413,9 +458,11 @@ void terminal_main()
                 
                 //printf("\b");
             }
+            
             else if (c == '\n')
             {
                 //printf("\n");
+                undraw_square(get_screen_x(),get_screen_y());
                 cmd_handler(buffer);
                 memset(buffer, 0,sizeof(buffer));
                 next_line();
@@ -426,24 +473,36 @@ void terminal_main()
                 
                 //crude_song();
             }
-            
+            else if (c == '\0')
+            {
+                
+            }
             else
             {
                 
                 char* s;
                 s = ctos(s, c);
                 //printf(s);
-                
+                //undraw_square(get_screen_x(),get_screen_y());
+                // printf(s);
+                undraw_square(get_screen_x(),get_screen_y());
                 printf(s);
+                //printf("X{}");
                 //undraw_square(get_screen_x()-10,get_screen_y());
-                printf(s);
+                //printf(s);
                  
                  //printf(s);
                 //printf(s);
                 
                 append(buffer,c);
+               
                 
             }
+             if (cursor_visible) {
+                 draw_square_cursor(get_screen_x(),get_screen_y(),VBE_RGB(255, 255, 255));
+            } else {
+                undraw_square(get_screen_x(),get_screen_y());
+    }
             //undraw_square(get_screen_x(),get_screen_y());
             
              //printf("CAY");

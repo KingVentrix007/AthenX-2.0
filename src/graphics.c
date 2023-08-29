@@ -807,7 +807,7 @@ int ArtemisVision() {
 // }
 
 
-void draw_line(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint8 color)
+void draw_line(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint32 color)
 {
   if(y1 == y2){
     for(uint16 i = x1; i <= x2; i++)
@@ -823,7 +823,7 @@ void draw_line(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint8 color)
   }
 }
 
-void draw_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint8 color)
+void draw_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint32 color)
 {
   draw_line(x, y, x, y + height, color);
   draw_line(x, y, x + width, y, color);
@@ -950,4 +950,10 @@ int draw_png_image()
        
     }
     
+}
+
+
+int init_window(WINDOW *win)
+{
+    draw_rect(win->start_x,win->start_y,win->width,win->height,win->color);
 }

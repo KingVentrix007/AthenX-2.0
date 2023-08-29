@@ -98,4 +98,5 @@ char* ext2_read_sector(int sector);
 char* ext2_read_file(char* fpath);
 char** ext2_ls(uint32 inode_num);
 uint32 ext2_path_to_inode(char* path);
+int read_root_directory_inode();
 #endif

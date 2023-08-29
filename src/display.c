@@ -1,3 +1,5 @@
+#include "vesa_display.h"
+//#include "vtconsole.h"
 #include "debug.h"
 #include "string.h"
 #include "vga.h"
@@ -11,6 +13,8 @@
 int display_mode_screen;
 size_t screen_x;
 size_t screen_y;
+uint32 font_color;
+uint32 background_color;
 int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
 {
     int ret_int;
@@ -26,6 +30,7 @@ int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
         else
         {
             //asm("cli");
+            set_font_c(0,255,0);
             ret_int = vesa_init(width,height,bpp);
             display_mode_screen = 0;
             //asm("sti");
@@ -47,6 +52,24 @@ int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
     return ret_int;
     
     
+}
+int set_font_c(int r,int g,int b)
+{
+   font_color = VBE_RGB(r,g,b);
+    // beep();
+    // printf("set_font_c(%d,%d,%d)",r,g,b);
+}
+uint32 get_font_color()
+{
+    return font_color;
+}
+uint32 get_bg_color()
+{
+    return background_color;
+}
+uint32 set_background_color(int r, int g, int b)
+{
+    background_color = VBE_RGB(r,g,b);
 }
 void next_line()
 {
@@ -163,7 +186,12 @@ void set_font_color(uint32_t color)
       
     }
 }
-
+// int set_font_c(int r,int g,int b)
+// {
+//    font_color = VBE_RGB(r,g,b);
+//     // beep();
+//     // printf("set_font_c(%d,%d,%d)",r,g,b);
+// }
 
 int clear_display()
 {
@@ -384,6 +412,79 @@ int printf(const char *format, ...)
     int rejected_bad_specifier = 0;
     while (*format != '\0')
     {
+        if (*format == '{')
+        {
+            // Parse RGB values
+            if (*(format + 1) == '/' && *(format + 2) == '3' && *(format + 3) == '3' && *(format + 4) == '0' && *(format + 5) == ':')
+            {
+                int r = 0, g = 0, b = 0;
+                const char *rgb_start = format + 6;
+                while (*rgb_start >= '0' && *rgb_start <= '9')
+                {
+                    r = r * 10 + (*rgb_start - '0');
+                    rgb_start++;
+                }
+                if (*rgb_start != ',')
+                    goto print_c;
+
+                rgb_start++;
+                const char *g_start = rgb_start;
+                while (*g_start >= '0' && *g_start <= '9')
+                {
+                    g = g * 10 + (*g_start - '0');
+                    g_start++;
+                }
+                if (*g_start != ',')
+                    goto print_c;
+
+                g_start++;
+                const char *b_start = g_start;
+                while (*b_start >= '0' && *b_start <= '9')
+                {
+                    b = b * 10 + (*b_start - '0');
+                    b_start++;
+                }
+
+                set_font_c(r, g, b);
+                format = b_start+1;
+                continue;
+            }
+            else if (*(format + 1) == '/' && *(format + 2) == '3' && *(format + 3) == '3' && *(format + 4) == '1' && *(format + 5) == ':')
+            {
+                int r = 0, g = 0, b = 0;
+                const char *rgb_start = format + 6;
+                while (*rgb_start >= '0' && *rgb_start <= '9')
+                {
+                    r = r * 10 + (*rgb_start - '0');
+                    rgb_start++;
+                }
+                if (*rgb_start != ',')
+                    goto print_c;
+
+                rgb_start++;
+                const char *g_start = rgb_start;
+                while (*g_start >= '0' && *g_start <= '9')
+                {
+                    g = g * 10 + (*g_start - '0');
+                    g_start++;
+                }
+                if (*g_start != ',')
+                    goto print_c;
+
+                g_start++;
+                const char *b_start = g_start;
+                while (*b_start >= '0' && *b_start <= '9')
+                {
+                    b = b * 10 + (*b_start - '0');
+                    b_start++;
+                }
+
+                set_background_color(r, g, b);
+                format = b_start+1;
+                continue;
+            }
+            
+        }
         if (*format != '%')
         {
         print_c:
@@ -496,4 +597,12 @@ int kassert(int ret,int expected_ret,int level)
 
 
 
-
+// vtconsole_t* vtc;
+// void init_vtc()
+// {
+//     vtc = vtconsole(vbe_get_width(), vbe_get_height(), ter, cursor_move_callback);
+// }
+// void print_vtc(const char* s)
+// {
+//     vtconsole_write(vtc, s, strlen(s));
+// }

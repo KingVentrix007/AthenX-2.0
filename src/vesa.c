@@ -100,7 +100,7 @@ int * find_biggest_mode()
     while (mode != 0xffff) {
         get_vbe_mode_info(mode, &modeinfoblock);
         printf("Mode: %d, X: %d, Y: %d\n", mode, modeinfoblock.XResolution, modeinfoblock.YResolution);
-        if(x < modeinfoblock.XResolution && y < modeinfoblock.YResolution)
+        if(x > modeinfoblock.XResolution && y > modeinfoblock.YResolution)
         {
             x = modeinfoblock.XResolution;
             y = modeinfoblock.YResolution;

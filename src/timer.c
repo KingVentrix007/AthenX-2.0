@@ -66,3 +66,11 @@ void sleep(double sec) {
     while (g_ticks < end);
 }
 
+int get_ticks()
+{
+    return g_ticks;
+}
+int reset_ticks()
+{
+    g_ticks = 0;
+}

@@ -28,6 +28,16 @@
         "isr.h": "c",
         "timer.h": "c",
         "serial.h": "c",
-        "fonts.h": "c"
+        "fonts.h": "c",
+        "font.h": "c",
+        "cmdhandler.h": "c",
+        "kernel.h": "c",
+        "multiboot.h": "c",
+        "fs.h": "c",
+        "vtconsole.h": "c",
+        "stdint.h": "c",
+        "cstdint": "c",
+        "stdint-gcc.h": "c",
+        "trap.h": "c"
     }
 }
