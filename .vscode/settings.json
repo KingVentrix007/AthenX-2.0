@@ -38,6 +38,14 @@
         "stdint.h": "c",
         "cstdint": "c",
         "stdint-gcc.h": "c",
-        "trap.h": "c"
+        "trap.h": "c",
+        "printf.h": "c",
+        "keyboardmap.h": "c",
+        "maths.h": "c",
+        "stdarg.h": "c",
+        "functional": "c",
+        "ethernet.h": "c",
+        "pci.h": "c",
+        "cstdio": "c"
     }
 }

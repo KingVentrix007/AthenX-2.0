@@ -101,7 +101,7 @@ void vesa_putchar(char c)
         {
            for (size_t y = vesa_column; y < vesa_column+20; y++)
            {
-             vbe_putpixel(x,y,VBE_RGB(0,0,0));
+             vbe_putpixel(x,y,get_bg_color());
            }
            
         }

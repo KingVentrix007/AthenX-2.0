@@ -1,3 +1,4 @@
+
 #include "vesa.h"
 #include "bios32.h"
 #include "console.h"
@@ -84,7 +85,12 @@ void vbe_print_available_modes() {
     uint16 mode = *mode_list++;
     while (mode != 0xffff) {
         get_vbe_mode_info(mode, &modeinfoblock);
-        printf("Mode: %d, X: %d, Y: %d\n", mode, modeinfoblock.XResolution, modeinfoblock.YResolution);
+        if(modeinfoblock.BitsPerPixel >= 32)
+        {
+            printf_("Mode: %d, X: %d, Y: %d, Bpp: %d\n", mode, modeinfoblock.XResolution, modeinfoblock.YResolution,modeinfoblock.BitsPerPixel);
+        }
+        
+        
         mode = *mode_list++;
     }
 }
@@ -99,7 +105,7 @@ int * find_biggest_mode()
     uint16 mode = *mode_list++;
     while (mode != 0xffff) {
         get_vbe_mode_info(mode, &modeinfoblock);
-        printf("Mode: %d, X: %d, Y: %d\n", mode, modeinfoblock.XResolution, modeinfoblock.YResolution);
+        printf_("Mode: %d, X: %d, Y: %d\n", mode, modeinfoblock.XResolution, modeinfoblock.YResolution);
         if(x > modeinfoblock.XResolution && y > modeinfoblock.YResolution)
         {
             x = modeinfoblock.XResolution;
@@ -122,9 +128,13 @@ uint32 vbe_rgb(uint8 red, uint8 green, uint8 blue) {
     color |= blue;
     return color;
 }
-
+uint32_t vbe_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    // Combine the R, G, B, and A values into a single 32-bit pixel value
+    uint32_t pixel_value = ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+    return pixel_value;
+}
 // put the pixel on the given x,y point
-void vbe_putpixel(int x, int y, int color) {
+void vbe_putpixel(int x, int y, uint32 color) {
     uint32 i = y * g_width + x;
     *(g_vbe_buffer + i) = color;
 }
@@ -137,25 +147,25 @@ void vbe_putpixel_v2(int x, int y,int color, unsigned char *buffer)
 
 int vesa_init(uint32 width, uint32 height, uint32 bpp) {
     bios32_init();
-    printf("initializing vesa vbe 2.0\n");
+    printf_("initializing vesa vbe 2.0\n");
     if (!get_vbe_info()) {
-        printf("No VESA VBE 2.0 detected\n");
+        printf_("No VESA VBE 2.0 detected\n");
         return -1;
     }
     // set this to 1 to print all available modes to console
     #define PRINT_MODES 0
     #if PRINT_MODES
-        printf("Press UP and DOWN arrow keys to scroll\n");
-        printf("Modes:\n");
+        printf_("Press UP and DOWN arrow keys to scroll\n");
+        printf_("Modes:\n");
         vbe_print_available_modes();
         return 1;
     #else
         g_selected_mode = vbe_find_mode(width, height, bpp);
         if (g_selected_mode == -1) {
-            printf("failed to find mode for %d-%d\n", width, height);
+            printf_("failed to find mode for %d-%d\n", width, height);
             return -1;
         }
-        printf("\nselected mode: %d \n", g_selected_mode);
+        printf_("\nselected mode: %d \n", g_selected_mode);
         // set selection resolution to width & height
         g_width = g_vbe_modeinfoblock.XResolution;
         g_height = g_vbe_modeinfoblock.YResolution;
@@ -164,6 +174,6 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp) {
         // set the mode to start graphics window
         vbe_set_mode(g_selected_mode);
     #endif
-    
+    printf_("END\n");
     return 0;
 }

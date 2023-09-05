@@ -1,3 +1,4 @@
+
 #include "string.h"
 #include "kheap.h"
 #include "isr.h"
@@ -50,7 +51,7 @@ char *exception_messages[32] = {
  * register given handler to interrupt handlers at given num
  */
 void isr_register_interrupt_handler(int num, ISR handler) {
-    printf("IRQ %d registered\n", num);
+    printf_("IRQ %d registered\n", num);
     if (num < NO_INTERRUPT_HANDLERS)
         g_interrupt_handlers[num] = handler;
 }
@@ -75,11 +76,11 @@ void isr_irq_handler(REGISTERS *reg) {
 }
 
 static void print_registers(REGISTERS *reg) {
-    printf("REGISTERS:\n");
-    printf("err_code=%d\n", reg->err_code);
-    printf("eax=0x%x, ebx=0x%x, ecx=0x%x, edx=0x%x\n", reg->eax, reg->ebx, reg->ecx, reg->edx);
-    printf("edi=0x%x, esi=0x%x, ebp=0x%x, esp=0x%x\n", reg->edi, reg->esi, reg->ebp, reg->esp);
-    printf("eip=0x%x, cs=0x%x, ss=0x%x, eflags=0x%x, useresp=0x%x\n", reg->eip, reg->ss, reg->eflags, reg->useresp);
+    printf_("REGISTERS:\n");
+    printf_("err_code=%d\n", reg->err_code);
+    printf_("eax=0x%x, ebx=0x%x, ecx=0x%x, edx=0x%x\n", reg->eax, reg->ebx, reg->ecx, reg->edx);
+    printf_("edi=0x%x, esi=0x%x, ebp=0x%x, esp=0x%x\n", reg->edi, reg->esi, reg->ebp, reg->esp);
+    printf_("eip=0x%x, cs=0x%x, ss=0x%x, eflags=0x%x, useresp=0x%x\n", reg->eip, reg->ss, reg->eflags, reg->useresp);
 
 }
 uint32_t *unwind_stack(REGISTERS *reg)
@@ -89,7 +90,7 @@ uint32_t *unwind_stack(REGISTERS *reg)
     uint32_t* ebp = reg->ebp;
     uint32_t return_addr = *(eip);
     //memcpy(&addr, eip, sizeof(eip));
-    //printf("addr = 0x%x\n",return_addr);
+    //printf_("addr = 0x%x\n",return_addr);
     return return_addr;
         // Resolve symbol for the return address
     //uint32_t* function_name = resolve_symbol(return_addr);
@@ -107,36 +108,41 @@ void isr_exception_handler(REGISTERS reg) {
     clear_display();
     set_screen_x(0);
     set_screen_y(0);
+    printf_("Software Failed Successfully\n");
     if (reg.int_no < 32) {
         isr_count++;
-        printf("EXCEPTION: %s\n", exception_messages[reg.int_no]);
+        printf_("EXCEPTION: %s\n", exception_messages[reg.int_no]);
         print_registers(&reg);
         if(isr_count<=5){
              uint32_t *adder;
             adder = unwind_stack(&reg);
-            printf("\nAddress of fault: 0x%x\n",reg.eip);
-            //printf("\nFunction address: 0x%x\n", adder);
+            printf_("\nAddress of fault: 0x%x\n",reg.eip);
+            //printf_("\nFunction address: 0x%x\n", adder);
             ADDER_NAME_LIST function_addr_list;
             get_name_addr(&function_addr_list);
-        // printf("Last registered function called: \n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
-            //printf("\n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
+        // printf_("Last registered function called: \n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
+            //printf_("\n%s : 0x%x\n",function_addr_list.names,function_addr_list.addr);
             uint32_t *targetAddress = reg.eip;
             if (find_by_address(targetAddress)) {
-                printf("Address 0x%x found in the list.\n", targetAddress);
+                printf_("Address 0x%x found in the list.\n", targetAddress);
             } else {
-                //printf("Address 0x%x not found in the list.\n", targetAddress);
+                //printf_("Address 0x%x not found in the list.\n", targetAddress);
             }
             print_list(reg.eip);
             kheap_print_blocks();
             print_stack_trace(reg.ebp);
-            asm("sti");
-            debug_terminal();
+            //asm("sti");
+            //debug_terminal();
+             for (;;)
+            ;
             ERROR("EXITED FROM DEBUG TERMINAL");
         }
        else
        {
-            printf("Max exceptions reached, hanging now\n");
-            printf("Please restart computer");
+            printf_("Max exceptions reached, hanging now\n");
+            printf_("Please restart computer");
+            // asm("sti");
+            // debug_terminal();
             for (;;)
             ;
        }

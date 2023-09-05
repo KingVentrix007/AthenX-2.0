@@ -1,3 +1,4 @@
+
 #include <string.h>
 #include <vesa.h>
 #include <isr.h>
@@ -8,12 +9,14 @@
 #include "display.h"
 #include "keyboard.h"
 #include "kernel.h"
+#include "graphics.h"
 ADDER_NAME_LIST addr_name;
 List myList;
 
 int screen_of_death()
 {
     //sleep(10);
+    set_background_color(0,51,187);
     for (size_t y = 0; y < 1024; y++)
     {
         for (size_t x = 0; x < 1280; x++)
@@ -22,7 +25,7 @@ int screen_of_death()
         }
         
     }
-    
+    draw_error_image();
 }
 bool is_in_list(List* list, ADDER_NAME_LIST item) {
     for (int i = 0; i < list->size; i++) {
@@ -81,12 +84,12 @@ void print_list(uint32 num) {
    
     if(num == 0)
     {
-        printf("List Contents:\n");
-        printf("Function name:      Function Address:\n");
+        printf_("List Contents:\n");
+        printf_("Function name:      Function Address:\n");
         for (int i = 0; i < myList.size; i++) {
         //printf("Item %d:    ", i + 1);
-        printf("%s  ", myList.nodes[i].data.names);
-        printf("0x%x\n", myList.nodes[i].data.addr);
+        printf_("%s  ", myList.nodes[i].data.names);
+        printf_("0x%x\n", myList.nodes[i].data.addr);
         }
     }
     else
@@ -100,7 +103,7 @@ void print_list(uint32 num) {
                  double perc_2 = check_similarity(100.0, perc);
                  if(perc_2 >= 99.99)
                  {
-                    printf("Course of error: %s in %s at line %d. Address : 0x%x  : %f%% probability\n",myList.nodes[i].data.names,myList.nodes[i].data.file_name,myList.nodes[i].data.line,myList.nodes[i].data.addr,perc);
+                    printf_("Course of error: %s in %s at line %d. Address : 0x%x  : %f%% probability\n",myList.nodes[i].data.names,myList.nodes[i].data.file_name,myList.nodes[i].data.line,myList.nodes[i].data.addr,perc);
             }
                  }
                 
@@ -127,11 +130,11 @@ void print_stack_trace(void *ebp) {
     void *return_address;
     uint32* address_list;
 
-    printf("Stack Trace:\n");
+    printf_("Stack Trace:\n");
 
     while (current_ebp) {
         return_address = *(current_ebp + 1);
-        printf("  0x%p\n", return_address);
+        printf_("  0x%p\n", return_address);
         address_list = current_ebp;
         address_list++;
         current_ebp = *current_ebp;
@@ -228,7 +231,7 @@ void parse_command_debug(const char* command) {
     }
     else
     {
-        printf("%s is not a valid command", arguments[0]);
+        printf_("%s is not a valid command", arguments[0]);
     }
     
 }
@@ -238,12 +241,12 @@ void parse_command_debug(const char* command) {
 void debug_terminal()
 {
     //keyboard_init();
-    printf("Debug terminal started");
+    printf_("Debug terminal started");
     char *buffer[512];
      uint8_t byte;
     //char *buffer[512];
      buffer[0] = '\0';
-    printf("\n@DEBUG>");
+    printf_("\n@DEBUG>");
     while(1)
     {    
             
@@ -255,7 +258,7 @@ void debug_terminal()
                 //crude_song();
                 if(backspace(buffer))
                 {
-                    printf("\b");
+                    printf_("\b");
                     //set_cursor_x(get_cursor_x()-2);
                     //printf(" ");
                     //console_ungetchar();
@@ -276,7 +279,7 @@ void debug_terminal()
                 set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
-                printf("@DEBUG>");
+                printf_("@DEBUG>");
                 //crude_song();
             }
             
@@ -286,7 +289,7 @@ void debug_terminal()
                 char* s;
                 s = ctos(s, c);
                 //printf(s);
-                printf(s);
+                printf_(s);
                 //printf(s);
                 
                 append(buffer,c);

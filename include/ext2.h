@@ -89,7 +89,7 @@ typedef struct ext2_dirent
 	char* name;
 } ext2_dirent;
 
-ext2_superblock* esb;
+
 
 void read_superblock();
 int ext2_init();

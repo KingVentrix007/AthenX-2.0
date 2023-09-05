@@ -1,3 +1,4 @@
+#include "background.h"
 #include "image.h"
 #include "bitmap.h"
 #include "vesa.h"
@@ -318,7 +319,7 @@ void cool_colors()
 //         putchar((int)((const unsigned char *)data)[i]);
 //         //bitmap_draw_char((int)((const unsigned char *)data)[i],50,70,VBE_RGB(0,35,200));
 // }
-// int printf(const char *format, ...)
+// int printf_(const char *format, ...)
 // {
 //     va_list parameters;
 //     va_start(parameters, format);
@@ -464,7 +465,7 @@ void draw_logo(int start_x, int start_y)
 	}
     set_screen_x(350);
     set_screen_y(0);
-    printf("Size of image in sectors %d", sizeof(logo_img)/512);
+    printf_("Size of image in sectors %d", sizeof(logo_img)/512);
     
 }
 
@@ -496,12 +497,12 @@ void draw_image(int x, int y, int rows, int cols) {
             square_x = x + (i * square_size);
             square_y = y + (j * square_size);
             if(strcmp(logo_img[j][i],'#') == 0){
-                draw_square(square_x, square_y,VBE_RGB(0,255,0),0);
+                draw_square(square_x, square_y,VBE_RGBA(0,255,0,255),0);
                 sleep(10000);
             }
             else
             {
-                draw_square(square_x, square_y,VBE_RGB(0,0,0),0);
+                draw_square(square_x, square_y,VBE_RGBA(0,0,0,255),0);
                 sleep(1000);
             }
             
@@ -510,7 +511,7 @@ void draw_image(int x, int y, int rows, int cols) {
     //vese_mem(Buffer_2, sizeof(Buffer_2));
     set_screen_x((square_x/2)-100);
     set_screen_y(square_y+square_size*3);
-    printf("A T H E N X");
+    printf_("A T H E N X");
     //pmm_free_blocks(Buffer_2,14400);
 }
 
@@ -535,10 +536,10 @@ char* logo()
         }
         else
         {
-            return s;
+            // return s;
         }
         
-        //printf("%s",c);
+        //printf_("%s",c);
         
     }
 }
@@ -557,7 +558,7 @@ void vbe_drawline(int x1, int y1, int x2, int y2, int color) {
 
     while (1) {
         vbe_putpixel(x1, y1, color);
-        //printf("X:%fY:%f||",x1,y1);
+        //printf_("X:%fY:%f||",x1,y1);
         if (x1 == x2 && y1 == y2)
             break;
         
@@ -599,7 +600,7 @@ void draw3DShape(Point3D* shape, int numVertices, Point3D viewpoint) {
     }
 
     // Draw lines between the vertices to form the shape
-    //printf("Draw lines number of vertices %d\n", numVertices);
+    //printf_("Draw lines number of vertices %d\n", numVertices);
     int pos;
     for (int i = 0; i < numVertices; i++) {
         
@@ -619,8 +620,8 @@ void draw3DShape(Point3D* shape, int numVertices, Point3D viewpoint) {
         //vbe_drawline(screenX1, screenY1, screenX2, screenY2, VBE_RGB(0,0,255)); // Assuming white color (adjust as needed)
         Point start = {vertices[i][0], vertices[i][1]};
         Point end = {vertices[i+1][0],vertices[i+1][1]};
-        // printf("SSX: %d, SSY: %d\n",start.x, start.y);
-        // printf("EEX: %d, EEY: %d\n",end.x, end.y);
+        // printf_("SSX: %d, SSY: %d\n",start.x, start.y);
+        // printf_("EEX: %d, EEY: %d\n",end.x, end.y);
         bresenham_line(start, end);
 
 
@@ -646,7 +647,7 @@ int demo_3D()
     Point3D viewpoint = {320.0, 240.0, 0.0}; // Assuming the screen is 640x480
 
     // Draw the 3D shape on the 2D plane
-    printf("Number of vertices: %d\n", numVertices);
+    printf_("Number of vertices: %d\n", numVertices);
     
     draw3DShape(shape, numVertices, viewpoint);
     //vbe_drawline(0,0,12,12, VBE_RGB(0,255,0));
@@ -671,9 +672,9 @@ void bresenham_line(Point start, Point end) {
     }
     int x = start.x;
     int y = start.y;
-    // printf("SX: %d, SY: %d\n",start.x, start.y);
-    // printf("EX: %d, EY: %d\n",end.x, end.y);
-    // printf("DX:%d DY:%d\n", dx, dy);
+    // printf_("SX: %d, SY: %d\n",start.x, start.y);
+    // printf_("EX: %d, EY: %d\n",end.x, end.y);
+    // printf_("DX:%d DY:%d\n", dx, dy);
     // sleep(2);
     
     int inc_x = end.x >= start.x ? 1 : -1;
@@ -936,24 +937,108 @@ void draw_window(int x, int y, int length)
     drawEmptySquare(x, y, length);
     
 }
+#define IMAGE_WIDTH  320
+#define IMAGE_HEIGHT 308
+void draw_error_image() {
+    for (int y = 0; y < IMAGE_HEIGHT; y++) {
+        for (int x = 0; x < IMAGE_WIDTH; x++) {
+            // Calculate the index in the image_data array
+            int index = (y * IMAGE_WIDTH + x) * 1;  // Assuming each pixel is represented by 1 byte
 
-int draw_png_image()
-{
-    for (size_t x = 0; x < vbe_get_width(); x++)
-    {
-        for (size_t y = 0; y < vbe_get_height(); y++)
-        {
-             vbe_putpixel(x,y,athenx[x*vbe_get_width()+y]);
+            // Extract the pixel value
+            uint8_t pixel_value = error_skull[index];
+
+            // Extract color components using bit manipulation
+            int r = (pixel_value >> 5) & 0x07;  // 3 bits for Red
+            int g = (pixel_value >> 2) & 0x07;  // 3 bits for Green
+            int b = pixel_value & 0x03;         // 2 bits for Blue
+
+            // Convert color components to 8-bit values (assuming they are 3-bit and 2-bit)
+            r = r * 255 / 7;
+            g = g * 255 / 7;
+            b = b * 255 / 3;
+
+            // Convert RGB values to a color
+           // int color = rgb_to_color(r, g, b);
+
+            // Draw the pixel using the vbe_putpixel function
+            vbe_putpixel(x+900, y, VBE_RGB(r, g, b));
         }
-        
-
-       
     }
-    
 }
 
+void draw_low_res_img(IMAGE img_header)
+{
+    int h = img_header.height;
+    int w = img_header.width;
+    
 
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            // Calculate the index in the image_data array
+            int index = (y * w + x) *1;  // Assuming each pixel is represented by 1 byte
+
+            // Extract the pixel value
+            if(img_header.Bpp == 8)
+            {
+                uint8_t* img = img_header.ptrs.ptr;
+                 uint8_t pixel_value = img[index];
+
+                // Extract color components using bit manipulation
+                int r = (pixel_value >> 5) & 0x07;  // 3 bits for Red
+                int g = (pixel_value >> 2) & 0x07;  // 3 bits for Green
+                int b = pixel_value & 0x03;         // 2 bits for Blue
+
+                // Convert color components to 8-bit values (assuming they are 3-bit and 2-bit)
+                r = r * 255 / 7;
+                g = g * 255 / 7;
+                b = b * 255 / 3;
+
+                // Convert RGB values to a color
+            // int color = rgb_to_color(r, g, b);
+
+                // Draw the pixel using the vbe_putpixel function
+                vbe_putpixel(x, y, VBE_RGB(r,g,b));
+            }
+           
+        }
+    }
+}
+int rgb_to_color(int r, int g, int b) {
+    return (r << 16) | (g << 8) | b;  // Simple RGB color composition (assuming 8-bit per channel)
+}
+void draw_hi_res_img(int w, int h)
+{
+     for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            // Calculate the index in the image_data array
+            int index = (y * w + x)*3;  // Assuming each pixel is represented by 4 bytes
+
+            // Extract the pixel value
+            //uint8_t pixel_value = [index];
+            //uint32_t pixel_value = background_img[index];
+            // Extract color components using bit manipulation
+            //uint32_t color_value = test[index];
+
+
+            // Convert color components to 8-bit values (assuming they are 3-bit and 2-bit)
+            // r = r * 255 / 7;
+            // g = g * 255 / 7;
+            // b = b * 255 / 3;
+        //     uint8_t b = background_img[index];         // Blue component
+        //     uint8_t g = background_img[index + 1];     // Green component
+        //     uint8_t r = background_img[index + 2];     // Red component
+
+        //     // Convert RGB values to a color
+        //    // int color = rgb_to_color(r, g, b);
+        //     // int color = rgb_to_color(r, g, b);
+        //     // Draw the pixel using the vbe_putpixel function
+        //     vbe_putpixel(x, y, VBE_RGB(r, g, b));
+        }
+    }
+}
 int init_window(WINDOW *win)
 {
     draw_rect(win->start_x,win->start_y,win->width,win->height,win->color);
 }
+

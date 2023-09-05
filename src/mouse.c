@@ -13,6 +13,7 @@
 #include "string.h"
 #include "types.h"
 #include "display.h"
+#include "printf.h"
 int g_mouse_x_pos = 0, g_mouse_y_pos = 0;
 MOUSE_STATUS g_status;
 

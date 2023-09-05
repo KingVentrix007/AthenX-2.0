@@ -128,7 +128,7 @@ void keyboard_init() {
 // a blocking character read
 char kb_getchar() {
     int count = 0;
-    //printf("HERE");
+    //printf_("HERE");
     char c;
     
     while(g_ch <= 0)

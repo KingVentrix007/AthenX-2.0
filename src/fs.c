@@ -1,3 +1,4 @@
+
 #include "panic.h"
 #include "cmdhandler.h"
 #include "ide.h"
@@ -41,7 +42,7 @@ int init_fs()
     if (strcmp(fs_format_table.is_format, "True") == 0)
     {
         // Read the master table from disk
-        printf("File format: %s\n", fs_format_table.format);
+        printf_("File format: %s\n", fs_format_table.format);
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
         ret = ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
@@ -52,8 +53,8 @@ int init_fs()
         memcpy(&fs_partition_table_main, buf, sizeof(fs_partition_table_main));
 
         
-        //printf("Size of int --> %d\n",sizeof(fs_partition_table_main.used_sectors));
-        //printf("Size of unsigned int --> %d\n",sizeof(unsigned int));
+        //printf_("Size of int --> %d\n",sizeof(fs_partition_table_main.used_sectors));
+        //printf_("Size of unsigned int --> %d\n",sizeof(unsigned int));
 
         // FALSE_STUFF: Print used sectors in the master table
         #define FILE_OUT 0
@@ -62,7 +63,7 @@ int init_fs()
             {
                 if (fs_partition_table_main.used_sectors[i] != 0)
                 {
-                    printf("\nUsed sectors: %d", fs_partition_table_main.used_sectors[i]);
+                    printf_("\nUsed sectors: %d", fs_partition_table_main.used_sectors[i]);
                 }
             }
         #endif
@@ -70,11 +71,11 @@ int init_fs()
     else
     {
         // If the disk is not formatted, format the disk and create a new master table
-        printf("Disk not formatted\n");
+        printf_("Disk not formatted\n");
         return -1;
         format_disk(0);
         run_once();
-        printf("Formatted disk\n");
+        printf_("Formatted disk\n");
         char buf[900] = {0};
         memset(buf, 0, sizeof(buf));
         ret = ide_read_sectors(0, 1, KERNEL_SECTOR_BASE + 2, (uint32)buf);
@@ -91,7 +92,7 @@ int init_fs()
             {
                 if (fs_partition_table_main.used_sectors[i] != 0)
                 {
-                    printf("\nUsed sectors: %d", fs_partition_table_main.used_sectors[i]);
+                    printf_("\nUsed sectors: %d", fs_partition_table_main.used_sectors[i]);
                 }
             }
         #endif
@@ -143,7 +144,7 @@ int make_dir(char *dir_name[8])
         uint32 LBA = i;
         #define FALSE_STUFF
         #ifdef FALSE_STUFF
-            printf("%d : ", fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1]);
+            printf_("%d : ", fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1]);
         #endif
 
         // Check if the sector is available for use
@@ -159,7 +160,7 @@ int make_dir(char *dir_name[8])
             memset(buf, 0, sizeof(buf));
             memcpy(buf, &d, sizeof(d));
             ide_write_sectors(0, 1, LBA, buf);
-            printf("\nYour directory is stored in LBA %d", LBA);
+            printf_("\nYour directory is stored in LBA %d", LBA);
             fs_partition_table_main_update();
             return LBA;
         }
@@ -204,7 +205,7 @@ void addIfNotInArray(int num, int *arr, int *size)
         }
         else
         {
-            printf("Error: Array is full. Cannot add more elements.\n");
+            printf_("Error: Array is full. Cannot add more elements.\n");
         }
     }
 }
@@ -240,11 +241,11 @@ void removeIntFromArray(int *arr, int *size, int num)
             arr[i] = arr[i + 1];
         }
         (*size)--;
-        printf("Number %d has been removed from the list.\n", num);
+        printf_("Number %d has been removed from the list.\n", num);
     }
     else
     {
-        printf("Number %d is not in the list.\n", num);
+        printf_("Number %d is not in the list.\n", num);
     }
 }
 
@@ -286,9 +287,9 @@ void list_files()
         if (isInArray(LBA, fs_partition_table_main.used_sectors, 128) == 0 &&
             strcmp(f.is_file, "True") == 0 && strcmp(f.dictionary, current_dir) == 0)
         {
-            printf("\nFile name: %s", f.filename);
-            printf("\nDirectory name: %s", f.dictionary);
-            printf("\nLBA %d", LBA);
+            printf_("\nFile name: %s", f.filename);
+            printf_("\nDirectory name: %s", f.dictionary);
+            printf_("\nLBA %d", LBA);
 
             // Clean up master table if necessary
             if (strcmp(f.is_file, "True") != 0 && isInArray(LBA, fs_partition_table_main.used_sectors, sizeof(fs_partition_table_main.used_sectors) / 8) == 0)
@@ -331,12 +332,12 @@ int format_disk_old(int drive)
 // Return: None
 int fs_partition_table_main_p()
 {
-    printf("\n");
+    printf_("\n");
     clear_screen();
-    printf("%d\n", sizeof(fs_partition_table_main));
+    printf_("%d\n", sizeof(fs_partition_table_main));
     for (size_t i = 0; i < 128; i++)
     {
-        printf("%d|", fs_partition_table_main.used_sectors[i]);
+        printf_("%d|", fs_partition_table_main.used_sectors[i]);
     }
     return 0;
 }
@@ -362,13 +363,13 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
     char buf[512] = {0};
     memset(buf, 0, sizeof(buf));
     int ret = 0;
-    //printf("\nData: %d\n",sizeof(data));
+    //printf_("\nData: %d\n",sizeof(data));
     for (uint32 i = FILE_SECTOR_BASE + 1; i < 900; i++)
     {
         uint32 LBA = i;
         #define FALSE_STUFF 0
         #if FALSE_STUFF
-            printf("\n%d : ", fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1]);
+            printf_("\n%d : ", fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 1]);
         #endif
 
         // Check if the sector is available for use
@@ -387,13 +388,13 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
             
             struct BLOCK fs_data;
             int count = 0;
-            //printf("\n");
+            //printf_("\n");
             for (size_t x = 0; x < (strlen(data)/512)+1; x++)
             {
-                //printf("Write: f.data[%d] = %d\n",x,LBA+x+1);
+                //printf_("Write: f.data[%d] = %d\n",x,LBA+x+1);
                 f.file_data_lbas[x] = LBA+x+1;
                 count = count + 1;
-                //printf("Count: %d\n",count);
+                //printf_("Count: %d\n",count);
                 
 
             }
@@ -404,7 +405,7 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
             strcpy(f.is_file, "True");
             strcpy(f.dictionary, current_dir);
             f.file_size = strlen(data);
-            //printf("\nBuf: %d\n",sizeof(buf));
+            //printf_("\nBuf: %d\n",sizeof(buf));
             memset(buf, 0, sizeof(buf));
             memcpy(buf, &f, sizeof(f));
             ret = ide_write_sectors(0, 1, LBA, (uint32)buf);
@@ -416,14 +417,14 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
             for (size_t w = 0; w < count; w++)
             {
                 
-                //printf("W");
+                //printf_("W");
                 memset(fs_data.data,0,sizeof(fs_data.data));
                 memset(buf, 0, sizeof(buf));
                 for (size_t e = start; e < start+512; e++)
                 {
                     if(strlen(data) <= start)
                     {
-                       printf("%d ", e);
+                       printf_("%d ", e);
                     }
                      append(buf, data[e]);
                     
@@ -438,20 +439,20 @@ int write(char filename[8], char file_type[3], char data[MAX_FILE_SIZE])
                 {
                     return ret;
                 }
-                // printf("Data at LBA+1+w: %d\n",f.file_data_lbas[w]);
-                // printf("%s\n",buf);
+                // printf_("Data at LBA+1+w: %d\n",f.file_data_lbas[w]);
+                // printf_("%s\n",buf);
                 start = start + 512;
                 
-                //printf("\n fs_data.data: %s",buf);
+                //printf_("\n fs_data.data: %s",buf);
                 fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2+w] = f.file_data_lbas[w];
             }
             
             // memset(buf, 0, sizeof(buf));
             // memcpy(buf, &fs_data, sizeof(fs_data));
             // ide_write_sectors(0,1,LBA+1,(uint32)buf);
-            //printf("\n fs_data.data: %s",buf);
+            //printf_("\n fs_data.data: %s",buf);
              //fs_partition_table_main.used_sectors[i - FILE_SECTOR_BASE + 2] = LBA+1;
-            //printf("\nYour file is stored in LBA %d", LBA);
+            //printf_("\nYour file is stored in LBA %d", LBA);
             fs_partition_table_main_update();
             return 0;
         }
@@ -485,24 +486,24 @@ int read(char buffer[8])
     //     {
     //         // if(f.next_sector != 0)
     //         // {
-    //         //     printf("here: %d",f.next_sector);
+    //         //     printf_("here: %d",f.next_sector);
     //         // }
     //          memset(buf, 0, sizeof(buf));
              
     //          char data_out[MAX_FILE_SIZE] = {0};
     //          memset(data_out, 0, sizeof(data_out));
-    //          //+printf("\n");
+    //          //+printf_("\n");
     //          for (size_t x = 0; x < f.num_sectors; x++)
     //          {
     //             struct BLOCK fs_data;
     //             if(f.file_data_lbas[x] != 0)
     //             {
-    //                 //printf("Read: f.data[%d] = %d\n",x,f.data[x]);
+    //                 //printf_("Read: f.data[%d] = %d\n",x,f.data[x]);
     //                 char inner_buf[512] = {0};
     //                 memset(inner_buf, 0, sizeof(inner_buf));
     //                 ide_read_sectors(0,1,f.file_data_lbas[x],(uint32)inner_buf);
     //                 memcpy(&fs_data, inner_buf, sizeof(fs_data));
-    //                 //printf("strlen(%d)",strlen(fs_data.data));
+    //                 //printf_("strlen(%d)",strlen(fs_data.data));
     //                 for (size_t q = 0; q < 512; q++)
     //                 {
     //                     if(fs_data.data[q] != 0 && strlen(data_out) <= f.file_size-1)
@@ -510,12 +511,12 @@ int read(char buffer[8])
     //                         append(data_out,fs_data.data[q]);
     //                     }
                        
-    //                    //printf("fs_data.data[%d] = %s ",q,fs_data.data[q]);
+    //                    //printf_("fs_data.data[%d] = %s ",q,fs_data.data[q]);
     //                 }
-    //                 //printf("Data at: %d\n",f.data[x]);
-    //                 //printf("%s\n",fs_data.data);
+    //                 //printf_("Data at: %d\n",f.data[x]);
+    //                 //printf_("%s\n",fs_data.data);
                    
-    //                  //printf("\nFile data in loop\n%s", data_out);
+    //                  //printf_("\nFile data in loop\n%s", data_out);
                     
                     
     //             }
@@ -527,7 +528,7 @@ int read(char buffer[8])
 
     //          }
              
-    //         printf("\nFile data\n%s", data_out);
+    //         printf_("\nFile data\n%s", data_out);
     //         return LBA;
     //     }
     //}
@@ -537,15 +538,15 @@ int read(char buffer[8])
     filepath = buffer + 4;
     if(filepath[0] == '/'){ // Is it an absolute path?
         filedata = ext2_read_file(filepath);
-        printf("\nFS:\n%s", filedata);
+        printf_("\nFS:\n%s", filedata);
     }
     else { //No, its a relative path
         char *absolute = kcalloc(255, 1);
         memcpy(absolute, cwd, strlen(cwd));
         strcat(absolute, filepath);
-        printf("\nAbsolute: %s", absolute);
+        printf_("\nAbsolute: %s", absolute);
         filedata = ext2_read_file(absolute);
-        printf("\n%s", filedata);
+        printf_("\n%s", filedata);
         cwd = pwd;
     }
     return -1;
@@ -568,24 +569,24 @@ int read_add(char filename[8],char* out)
         {
             // if(f.next_sector != 0)
             // {
-            //     printf("here: %d",f.next_sector);
+            //     printf_("here: %d",f.next_sector);
             // }
              memset(buf, 0, sizeof(buf));
              
              char data_out[MAX_FILE_SIZE] = {0};
              memset(data_out, 0, sizeof(data_out));
-             //+printf("\n");
+             //+printf_("\n");
              for (size_t x = 0; x < f.num_sectors; x++)
              {
                 struct BLOCK fs_data;
                 if(f.file_data_lbas[x] != 0)
                 {
-                    //printf("Read: f.data[%d] = %d\n",x,f.data[x]);
+                    //printf_("Read: f.data[%d] = %d\n",x,f.data[x]);
                     char inner_buf[512] = {0};
                     memset(inner_buf, 0, sizeof(inner_buf));
                     ide_read_sectors(0,1,f.file_data_lbas[x],(uint32)inner_buf);
                     memcpy(&fs_data, inner_buf, sizeof(fs_data));
-                    //printf("strlen(%d)",strlen(fs_data.data));
+                    //printf_("strlen(%d)",strlen(fs_data.data));
                     for (size_t q = 0; q < 512; q++)
                     {
                         if(fs_data.data[q] != 0 && strlen(data_out) <= f.file_size-1)
@@ -593,12 +594,12 @@ int read_add(char filename[8],char* out)
                             append(data_out,fs_data.data[q]);
                         }
                        
-                       //printf("fs_data.data[%d] = %s ",q,fs_data.data[q]);
+                       //printf_("fs_data.data[%d] = %s ",q,fs_data.data[q]);
                     }
-                    //printf("Data at: %d\n",f.data[x]);
-                    //printf("%s\n",fs_data.data);
+                    //printf_("Data at: %d\n",f.data[x]);
+                    //printf_("%s\n",fs_data.data);
                    
-                     //printf("\nFile data in loop\n%s", data_out);
+                     //printf_("\nFile data in loop\n%s", data_out);
                     
                     
                 }
@@ -610,7 +611,7 @@ int read_add(char filename[8],char* out)
 
              }
              memcpy(out, data_out, sizeof(data_out));
-            //printf("\nFile data\n%s", data_out);
+            //printf_("\nFile data\n%s", data_out);
             return LBA;
         }
     }
@@ -636,7 +637,7 @@ int delete_file(char *filename[8])
         {
             // if(f.num_sectors != 0)
             // {
-            //     printf("here: %d",f.num_sectors);
+            //     printf_("here: %d",f.num_sectors);
             // }
             memset(buf, 0, sizeof(buf));
             ide_write_sectors(0, 1, i, (uint32)buf);
@@ -709,11 +710,11 @@ int find_free_sector()
         int true_false = is_sector_free_(lba);
         if(true_false == 0)
         {
-            printf("LBA %d is free\n", lba);
+            printf_("LBA %d is free\n", lba);
         }
         else
         {
-            printf("LBA %d is not free\n", lba);
+            printf_("LBA %d is not free\n", lba);
         }
     }
     
@@ -751,5 +752,5 @@ void calculate_block_and_position(uint32_t lba, uint32_t *block_index, uint32_t 
 int write_fs()
 {
     int lba = find_free_sector();
-    printf("LBA: %d\n", lba);
+    printf_("LBA: %d\n", lba);
 }

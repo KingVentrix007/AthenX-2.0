@@ -1,4 +1,9 @@
 
+#include "pci.h"
+#include "ethernet.h"
+#include "background.h"
+#include "image.h"
+#include "printf.h"
 #include "vesa_display.h"
 #include "serial.h"
 #include "debug.h"
@@ -34,17 +39,49 @@ KERNEL_MEMORY_MAP g_kmap;
 //         uint32_t initramfs_end = mb_info->initramfs_end;
 
 //         // Print the initramfs location
-//         printf("Initramfs is loaded at addresses: 0x%X - 0x%X\n", initramfs_start, initramfs_end);
+//         printf_("Initramfs is loaded at addresses: 0x%X - 0x%X\n", initramfs_start, initramfs_end);
 //     } else {
-//         printf("Initramfs location not found in Multiboot info\n");
+//         printf_("Initramfs location not found in Multiboot info\n");
 //     }
 // }
+void print_mac_address(const MacAddress* mac) {
+    printf("%02X:%02X:%02X:%02X:%02X:%02X\n",
+        mac->bytes[0], mac->bytes[1], mac->bytes[2],
+        mac->bytes[3], mac->bytes[4], mac->bytes[5]);
+}
 
+int mac_cmp() {
+    // MAC address obtained from QEMU command line
+    beep();
+    const char* qemuMac = "52:54:00:12:34:56";
+    
+    // Read the MAC address from your custom OS
+    MacAddress osMac = read_mac_address();
+     print_mac_address(&osMac);
+    // Compare the MAC addresses
+    // if (compare_mac_addresses(qemuMac, &osMac)) {
+    //    // beep();
+    //     printf_("MAC addresses match!\n");
+    // } else {
+        
+    //     printf("MAC addresses do not match!\n");
+    //     printf("MAC address of card:");
+       
+    //     printf("\n");
+    //     printf("MAC address of set: %s\n ",qemuMac);
+    // }
+
+    return 0;
+}
 
 void access_grub_module(MULTIBOOT_INFO* mbi) {
+    printf_("HERE\n");
     if (!(mbi->flags & 0x00000008))
-    printf("No Grub modules\n");
+    {
+        printf_("No Grub modules\n");
         return; // Module information not available
+    }
+    
 
     uint32_t mods_count = mbi->mods_count;
     uint32_t mods_addr = mbi->mods_addr;
@@ -55,7 +92,7 @@ void access_grub_module(MULTIBOOT_INFO* mbi) {
     if (mods_count >= 1) {
         uint32_t mod_start = modules[0].mod_start;
         uint32_t mod_end = modules[0].mod_end;
-        printf("There are %d modules", mods_count);
+        printf_("There are %d modules", mods_count);
 
         // Now you can access the data in the module using the addresses mod_start and mod_end.
         // Be sure to check if the addresses are valid and properly aligned before accessing the data.
@@ -106,21 +143,21 @@ int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
 }
 
 void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
-    printf("kernel:\n");
-    printf("  kernel-start: 0x%x, kernel-end: 0x%x, TOTAL: %d bytes\n",
+    printf_("kernel:\n");
+    printf_("  kernel-start: 0x%x, kernel-end: 0x%x, TOTAL: %d bytes\n",
            kmap->kernel.k_start_addr, kmap->kernel.k_end_addr, kmap->kernel.k_len);
-    printf("  text-start: 0x%x, text-end: 0x%x, TOTAL: %d bytes\n",
+    printf_("  text-start: 0x%x, text-end: 0x%x, TOTAL: %d bytes\n",
            kmap->kernel.text_start_addr, kmap->kernel.text_end_addr, kmap->kernel.text_len);
-    printf("  data-start: 0x%x, data-end: 0x%x, TOTAL: %d bytes\n",
+    printf_("  data-start: 0x%x, data-end: 0x%x, TOTAL: %d bytes\n",
            kmap->kernel.data_start_addr, kmap->kernel.data_end_addr, kmap->kernel.data_len);
-    printf("  rodata-start: 0x%x, rodata-end: 0x%x, TOTAL: %d\n",
+    printf_("  rodata-start: 0x%x, rodata-end: 0x%x, TOTAL: %d\n",
            kmap->kernel.rodata_start_addr, kmap->kernel.rodata_end_addr, kmap->kernel.rodata_len);
-    printf("  bss-start: 0x%x, bss-end: 0x%x, TOTAL: %d\n",
+    printf_("  bss-start: 0x%x, bss-end: 0x%x, TOTAL: %d\n",
            kmap->kernel.bss_start_addr, kmap->kernel.bss_end_addr, kmap->kernel.bss_len);
 
-    printf("total_memory: %d KB\n", kmap->system.total_memory);
-    printf("available:\n");
-    printf("  start_adddr: 0x%x\n  end_addr: 0x%x\n  size: %d\n",
+    printf_("total_memory: %d KB\n", kmap->system.total_memory);
+    printf_("available:\n");
+    printf_("  start_adddr: 0x%x\n  end_addr: 0x%x\n  size: %d\n",
            kmap->available.start_addr, kmap->available.end_addr, kmap->available.size);
 }
 void get_map(KERNEL_MEMORY_MAP *out)
@@ -153,14 +190,15 @@ void kmain(unsigned long magic, unsigned long addr) {
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         //@ Gets screen size from memory
-        
+        keyboard_init();
         ata_init();
         int x = 1280;
         int y = 1024;
         
-        keyboard_init();
+        
         kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
-        int ret = kassert(display_init(0,x,y,32),0,1);
+        int ret = display_init(0,x,y,32);
+        
         
         char* mode = logo();
         set_screen_x(0);
@@ -171,19 +209,46 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("more boot options coming soon\n");
         }
         
-        printf("%s\n",mode);
+        //printf_("%s\n",mode);
         cmd_handler("cls");
-        //printf("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
-        timer_init();//!DO NOT PUT BEFORE INIT VESA
+         //clear_screen();
+         //vbe_print_available_modes();
+        //printf_("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
+        
+        //sleep(190000);
         print_drives();
-        read_superblock();
-        ext2_init();
-        read_root_directory_inode();
-
+        //init_fs();
+        //printf_("hello");
+        init_pci_device();
+        //init_e82540EM_ethernet_card();
+        //printf_("CMP:");
+        MacAddress osMac = read_mac_address();
+        printf("Mac Address: ");
+        print_mac_address(&osMac);
+        //printf_("DONE");
+        //sleep(2000);
+        //access_grub_module(mboot_info);
+        IMAGE img;
+        img.ptrs.ptr = &athenx_logo;
+        img.Bpp = 8;
+        img.width = 1000;
+        img.height = 700;
+        strcpy(img.name,"Low resolution logo image" );
+        //draw_low_res_img(img);
+        IMAGE bg_img;
+        bg_img.ptrs.ptr = &background;
+        bg_img.Bpp = 8;
+        bg_img.width = 1980;
+        bg_img.height = 1080;
+        strcpy(bg_img.name, "Low resolution background image" );
+        //draw_low_res_img(bg_img);
+        //draw_hi_res_img(1980,1080);
+        //sleep(10000);
+        //ext2_init();
         // FUNC_ADDR_NAME(&kmain);
         // ADDER_NAME_LIST test;
         // get_name_addr(&test);
-        // printf("\n%s : 0x%x",test.names,test.addr);
+        // printf_("\n%s : 0x%x",test.names,test.addr);
         
         
         
@@ -202,14 +267,15 @@ void kmain(unsigned long magic, unsigned long addr) {
  
             printf("Terminal initialization (%d)",ret);
             fpu_enable();
+            timer_init();//!DO NOT PUT BEFORE INIT VESA
             unsigned char* bios_start = (unsigned char*)0xE0000;
             unsigned int bios_length = 0x20000;  // 128 KB
 
             struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
 
             if (rsdp) {
-                printf("RSDP found at address: 0x%p\n", rsdp);
-                printf("Version: %d\n",rsdp->Revision);
+                printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
+                //printf("Version: %d\n",rsdp->Revision);
             
                 // Access other information in the RSDP as needed
             } else {
@@ -222,7 +288,7 @@ done:
         pmm_free_blocks(start, 256);
         pmm_deinit_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
     } else {
-        printf("error: invalid multiboot magic number\n");
+        printf_("error: invalid multiboot magic number\n");
     }
 }
 
@@ -255,15 +321,15 @@ int login(int skip)
         password[0] = '\0';
         if(skip == 0)
         {
-            printf("Username>");
+            printf_("Username>");
                 while (1==1)
                 {
-                    //printf(">");
+                    //printf_(">");
                     char c = kb_getchar();
                     char* s;
                     if (c == '\n')
                     {
-                            printf("\n");
+                            printf_("\n");
                             
                             
                             break;
@@ -275,22 +341,22 @@ int login(int skip)
                         
                         
                         s = ctos(s, c);
-                        //printf(s);
-                        printf(s);
-                        //printf(".");
-                        //printf(s);
+                        //printf_(s);
+                        printf_(s);
+                        //printf_(".");
+                        //printf_(s);
                         
                         append(username,c);
                     }
                     
                 }
-                printf("Password>");
+                printf_("Password>");
                 while (1==1)
                 {
                     char c = kb_getchar();
                     if (c == '\n')
                     {
-                            printf("\n");
+                            printf_("\n");
                             
                             
                             break;
@@ -302,9 +368,9 @@ int login(int skip)
                         
                         char* s;
                         s = ctos(s, c);
-                        //printf(s);
-                        //printf(s);
-                        printf("#");
+                        //printf_(s);
+                        //printf_(s);
+                        printf_("#");
                         
                         append(password,c);
                     }
@@ -347,18 +413,18 @@ void getstr_bound(char *buffer, uint8 bound) {
     while(1) {
         char ch = kb_getchar();
         if (ch == '\n') {
-            printf("\n");
+            printf_("\n");
             return ;
         } else if(ch == '\b') {
             if(backspace(*buffer))
             {
-                printf("\b");
+                printf_("\b");
                 
             }
 
         } else {
             *buffer++ = ch;
-            printf("%c", ch);
+            printf_("%c", ch);
         }
     }
 }
@@ -370,7 +436,7 @@ void toggle_cursor_visibility() {
 
 void terminal_main()
 {
-    DEBUG("terminal_main");
+    //DEBUG("terminal_main");
     FUNC_ADDR_NAME(&terminal_main);
     // WINDOW *test_win;
     // test_win->color = VBE_RGB(0,255,125);
@@ -382,15 +448,15 @@ void terminal_main()
     //init_window(test_win);
     // ADDER_NAME_LIST test;
     // get_name_addr(&test);
-    // printf("\n%s : 0x%x",test.names,test.addr);
-    // //printf("0x%x",&terminal_main);
+    // printf_("\n%s : 0x%x",test.names,test.addr);
+    // //printf_("0x%x",&terminal_main);
     // while(1)
     // {
     //     char buffer[512];
     //     char *shell = "\nUser@AthenX-2.0 ";
-    //     printf(shell);
-    //     //printf(cwd);
-    //     printf(">");
+    //     printf_(shell);
+    //     //printf_(cwd);
+    //     printf_(">");
     //     memset(buffer, 0, sizeof(buffer));
     //     getstr_bound(buffer, strlen(shell));
     //     cmd_handler(buffer);
@@ -398,15 +464,15 @@ void terminal_main()
     //login(1);
     // #define LOGIN 0
     // #if LOGIN
-    //     printf("Login:\n");
+    //     printf_("Login:\n");
     //     while (1 == 1)
     //     {
     //         if(login(0) == 1)
     //         {
-    //             printf("Login successful\n");
+    //             printf_("Login successful\n");
     //             break;
     //         }
-    //         else{printf("Invalid login\n");}
+    //         else{printf_("Invalid login\n");}
             
     //     }
     
@@ -414,7 +480,8 @@ void terminal_main()
     // #endif
     
      printf(">");
-     //printf("{/330:0,255,0");
+     
+     //printf_("{/330:0,255,0");
     //sleep(10);
     //printV("\nHeight%s\n",vbe_get_height());
     uint8_t byte;
@@ -438,7 +505,7 @@ void terminal_main()
                 reset_ticks();
     }
              
-            //printf("%d",c);
+            //printf_("%d",c);
             
            
             if(c == '\b')
@@ -446,9 +513,9 @@ void terminal_main()
                 //crude_song();
                 if(backspace(buffer))
                 {
-                    printf("\b");
+                    printf_("\b");
                     //set_cursor_x(get_cursor_x()-2);
-                    //printf(" ");
+                    //printf_(" ");
                     //console_ungetchar();
                 }
                 else
@@ -456,12 +523,12 @@ void terminal_main()
                     beep();
                 }
                 
-                //printf("\b");
+                //printf_("\b");
             }
             
             else if (c == '\n')
             {
-                //printf("\n");
+                //printf_("\n");
                 undraw_square(get_screen_x(),get_screen_y());
                 cmd_handler(buffer);
                 memset(buffer, 0,sizeof(buffer));
@@ -482,17 +549,17 @@ void terminal_main()
                 
                 char* s;
                 s = ctos(s, c);
-                //printf(s);
+                //printf_(s);
                 //undraw_square(get_screen_x(),get_screen_y());
-                // printf(s);
+                // printf_(s);
                 undraw_square(get_screen_x(),get_screen_y());
                 printf(s);
-                //printf("X{}");
+                //printf_("X{}");
                 //undraw_square(get_screen_x()-10,get_screen_y());
-                //printf(s);
+                //printf_(s);
                  
-                 //printf(s);
-                //printf(s);
+                 //printf_(s);
+                //printf_(s);
                 
                 append(buffer,c);
                
@@ -505,7 +572,7 @@ void terminal_main()
     }
             //undraw_square(get_screen_x(),get_screen_y());
             
-             //printf("CAY");
+             //printf_("CAY");
             
             
     }

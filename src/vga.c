@@ -229,7 +229,7 @@ int vga_graphics_init()
 	
     //bios32_init();
     //int86(0x10, &in_vga,&out_vga); 
-	//printf("%x",out_vga.ax);
+	//printf_("%x",out_vga.ax);
 	//beep();
 	//asm("cli");
     //return -0; // call 
@@ -321,7 +321,7 @@ void vga_putentryat(char c, uint8_t color, size_t x, size_t y)
     //draw_char(c,color,COLOR_WHITE,y,x,0);
     // if(strcmp(c," ") == 0)
     // {
-    //     //printf("HERE");
+    //     //printf_("HERE");
     // }
     //draw_char(c,color,Default_screen_color,y,x,0);
     // const size_t index = y * VGA_WIDTH + x;
@@ -372,7 +372,7 @@ void vga_putchar(char c)
        
         vga_putentryat(' ', vga_color, vga_column, vga_row);
         vga_putentryat(' ', vga_color, vga_column, vga_row);
-         //printf(" ");
+         //printf_(" ");
         return;
     }
     vga_putentryat(c, default_font_color, vga_row,vga_column);
@@ -382,7 +382,7 @@ void vga_putchar(char c)
    {
         vga_column = vga_column+16;
         vga_row = 0;
-        //printf("90023");
+        //printf_("90023");
         //write_serial("Q",DEFAULT_COM_DEBUG_PORT);
         
 

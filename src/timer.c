@@ -1,3 +1,4 @@
+
 #include "timer.h"
 
 #include "console.h"
@@ -46,7 +47,7 @@ void timer_handler(REGISTERS* r) {
 void timer_register_function(TIMER_FUNCTION function, TIMER_FUNC_ARGS *args) {
     uint32 index = 0;
     if (function == NULL || args == NULL) {
-        printf("ERROR: failed to register timer function %x\n", function);
+        printf_("ERROR: failed to register timer function %x\n", function);
         return;
     }
     index = (++g_timer_function_manager.current_index) % MAXIMUM_TIMER_FUNCTIONS;

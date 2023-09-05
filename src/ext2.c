@@ -1,3 +1,4 @@
+#include "display.h"
 #include "debug.h"
 #include "ext2.h"
 #include "console.h"
@@ -6,10 +7,11 @@
 #include "kheap.h"
 
 #define DRIVE 0 // We are using drive 0, the harddisk
-
+ext2_superblock* esb;
+int inodes_per_group;
 void read_superblock(){
-    uint32* superblock = kmalloc(sizeof(*superblock));
-	ide_read_sectors(DRIVE, 1, 2, esb);      
+    //uint32* superblock = kmalloc(sizeof(*superblock));
+	ide_read_sectors(DRIVE, 2, 2, esb);      
 }
 
 static int lba_to_ext2_block(int block_num_LBA)
@@ -21,16 +23,16 @@ static int lba_to_ext2_block(int block_num_LBA)
 
 uint32 determine_blk_group(uint32 inode){
 	FUNC_ADDR_NAME(&determine_blk_group);
-	printf("\nINODES PER GROUP: %d\n", esb->inodes_per_group);
-	printf("INODES-1: %d\n", inode-1);
-    uint32 block_group = (inode - 1) / esb->inodes_per_group;
+	printf_("\nINODES PER GROUP: %d\n", inodes_per_group);
+	printf_("INODES-1: %d\n", inode-1);
+    uint32 block_group = (inode - 1) / inodes_per_group;
 	//DEBUG("");
     return block_group;
 }
 
 uint32 get_inode_index(uint32 inode){
 	FUNC_ADDR_NAME(&get_inode_index);
-    uint32 index = (inode - 1) % esb->inodes_per_group;
+    uint32 index = (inode - 1) % inodes_per_group;
     return index;
 }
 
@@ -41,7 +43,7 @@ ext2_bgdt* parse_bgdt(uint32 block_group) {
 	uint32 bgdt_start = blk_group_start_block + 2;
 	uint32 *bgdt_tmp = kmalloc(sizeof(bgdt));
 	ide_read_sectors(DRIVE, 1, bgdt_start + 1, bgdt);
-	printf("\nBlock bitmap: %d\ninode bmap: %d\ninode table start: %d\nUnallocated Blocks: %d\nUnallocated Inodes: %d\nNumber of dirs: %d", bgdt->blk_bmap, bgdt->inode_bmap, bgdt->inode_table_start, bgdt->unalloc_blocks, bgdt->unalloc_inodes, bgdt->num_of_dirs);
+	printf_("\nBlock bitmap: %d\ninode bmap: %d\ninode table start: %d\nUnallocated Blocks: %d\nUnallocated Inodes: %d\nNumber of dirs: %d", bgdt->blk_bmap, bgdt->inode_bmap, bgdt->inode_table_start, bgdt->unalloc_blocks, bgdt->unalloc_inodes, bgdt->num_of_dirs);
 	return bgdt;
 }
 
@@ -49,29 +51,29 @@ void get_inode_type(uint32 type){
 	FUNC_ADDR_NAME(&get_inode_type);
 	switch(type) {
 			default:
-				printf("\nUnknown Inode Type");	
-				printf("%x", type);	
+				printf_("\nUnknown Inode Type");	
+				printf_("%x", type);	
 				break;
 			case INODE_TYPE_FIFO:
-				printf("\nInode Type: FIFO");
+				printf_("\nInode Type: FIFO");
 				break;
 			case INODE_TYPE_CHAR_DEV:
-				printf("\nInode Type: Character Device");
+				printf_("\nInode Type: Character Device");
 				break;
 			case INODE_TYPE_DIR:
-				printf("\nInode Type: Directory");
+				printf_("\nInode Type: Directory");
 				break;
 			case INODE_TYPE_BLK_DEV:
-				printf("\nInode Type: Block Device");
+				printf_("\nInode Type: Block Device");
 				break;
 			case INODE_TYPE_FILE:
-				printf("\nInode Type: Regular File");
+				printf_("\nInode Type: Regular File");
 				break;
 			case INODE_TYPE_SYMB_LINK:
-				printf("\nInode Type: Symbolic Link");
+				printf_("\nInode Type: Symbolic Link");
 				break;
 			case INODE_TYPE_UNIX_SOCKET:
-				printf("\nInode Type: Unix Socket");
+				printf_("\nInode Type: Unix Socket");
 				break;	
 		}
 }
@@ -90,8 +92,8 @@ ext2_inode* read_inode(uint32 inode) {
 	//DEBUG("");
 	uint32 inode_table_start = inode_bgdt->inode_table_start;
 	//DEBUG("");
-	printf("\nReading Inode: %d", inode);
-	//printf("\nInode Table Start: %d", inode_table_start);
+	printf_("\nReading Inode: %d", inode);
+	//printf_("\nInode Table Start: %d", inode_table_start);
 	uint32 containing_block = (index * INODE_SIZE) / (1024 << esb->log_block_size);
 	//DEBUG("containing_block");
 	uint32* inode_tmp = malloc(sizeof(inode_tmp));
@@ -99,7 +101,7 @@ ext2_inode* read_inode(uint32 inode) {
 	//DEBUG("read_sectors");
 	ext2_inode* inode_info;
 	inode_info = (ext2_inode*)((uint32) inode_tmp + (index % (1024/INODE_SIZE))*INODE_SIZE);
-	printf("\nInode Type: %x\nInode UID: %x\nInode Block 0: %d\n", inode_info->type_perm, inode_info->user_id, inode_info->direct_block_pointers[0]);
+	printf_("\nInode Type: %x\nInode UID: %x\nInode Block 0: %d\n", inode_info->type_perm, inode_info->user_id, inode_info->direct_block_pointers[0]);
 	uint32 index_in_block = inode % 4;
 	//DEBUG("END");
 	return inode_info;
@@ -124,11 +126,11 @@ ext2_dirent ext2_read_dirent(uint32* data, uint32 index){
 	FUNC_ADDR_NAME(&ext2_read_dirent);
 	ext2_dirent dirent;
 	dirent.inode = data[index] & 0xFF;
-	//printf("\nInode: %d", dirent.inode);
+	//printf_("\nInode: %d", dirent.inode);
 	dirent.dirent_size = data[index + 1] & 0xFF;
-	//printf("\nDirent Size: %d", dirent.dirent_size);
+	//printf_("\nDirent Size: %d", dirent.dirent_size);
 	dirent.name_len = (data[index + 1] & 0x0FF000) >> 16;
-	//printf("\nName Size: %d", (uint32)dirent.name_len);
+	//printf_("\nName Size: %d", (uint32)dirent.name_len);
 	getdata(dirent.name, dirent.name_len, index + 2, data);
 	char * tmp = kcalloc(dirent.name_len + 1, 1);
 	memcpy(tmp, dirent.name, dirent.name_len);
@@ -152,11 +154,11 @@ char **ext2_ls(uint32 inode_num){
 		if(curr_dirent.inode == 0){
 			break;
 		}
-		//printf("\nInode: %d ", curr_dirent.inode);
-		//printf("\nDirent Size: %d", curr_dirent.dirent_size);
+		//printf_("\nInode: %d ", curr_dirent.inode);
+		//printf_("\nDirent Size: %d", curr_dirent.dirent_size);
 		next = curr_dirent.dirent_size / 4;
-		//printf("\nName Size: %d", curr_dirent.name_len);
-		printf(" %s", curr_dirent.name);
+		//printf_("\nName Size: %d", curr_dirent.name_len);
+		printf_(" %s", curr_dirent.name);
 		return_names[i] = curr_dirent.name;
 		curr = curr + next;
 		i++;
@@ -181,10 +183,10 @@ uint32 ext2_find_in_dir(uint32 inode_num, char* dirent_name){
 		if(curr_dirent.inode == 0){
 			break;
 		}
-		//printf("\nInode: %d ", curr_dirent.inode);
-		//printf("\nDirent Size: %d", curr_dirent.dirent_size);
+		//printf_("\nInode: %d ", curr_dirent.inode);
+		//printf_("\nDirent Size: %d", curr_dirent.dirent_size);
 		next = curr_dirent.dirent_size / 4;
-		//printf("\nName Size: %d", curr_dirent.name_len);
+		//printf_("\nName Size: %d", curr_dirent.name_len);
 		if(!strcmp(curr_dirent.name, dirent_name)){
 			return_inode = curr_dirent.inode;
 		}
@@ -202,7 +204,7 @@ char* ext2_get_filedata(uint32 inode_num){
 	uint32 datablock0 = inode->direct_block_pointers[0];
 	ide_read_sectors(DRIVE, 1, 2 * datablock0, filedata);
 	getdata(file_buf, 1024, 0, filedata);
-	//printf("\n%s", file_buf);
+	//printf_("\n%s", file_buf);
 	return file_buf;
 }
 
@@ -211,7 +213,7 @@ char* ext2_get_filedata(uint32 inode_num){
 */
 
 uint32 ext2_path_to_inode(char* path){
-	//printf("\nParsing Path: %s", path);
+	//printf_("\nParsing Path: %s", path);
 	FUNC_ADDR_NAME(&ext2_path_to_inode);
 	int i = 0;
 	uint32 last_inode = 2;
@@ -259,9 +261,9 @@ char* ext2_read_file(char* fpath){
 	FUNC_ADDR_NAME(&ext2_read_file);
 	char* file_buf = kmalloc(sizeof(*file_buf));
 	uint32 file_inode = ext2_path_to_inode(fpath);
-	printf("\nFile Inode: %d", file_inode);
+	printf_("\nFile Inode: %d", file_inode);
 	file_buf = ext2_get_filedata(file_inode);
-	printf("%c\n", file_buf);
+	printf_("%c\n", file_buf);
 	return file_buf;
 }
 
@@ -291,13 +293,15 @@ char* ext2_read_sector(int sector)
 }
 
 int ext2_init(){
+	read_superblock();
 	FUNC_ADDR_NAME(&ext2_init);
 	if(esb->magic != 0xEF53){
-		printf("Filesystem is Not EXT2!\n");
+		printf_("Filesystem is Not EXT2!\n");
 		return -1;
 	}
 	else {
-		printf("Filesystem is EXT2!\n");
+		printf_("Filesystem is EXT2!\n");
+		inodes_per_group = esb->inodes_per_group;
 		return 0;
 	}
 }
@@ -314,7 +318,7 @@ int read_root_directory_inode()
 		if(block > 0)
 		{
 			
-			printf("%d: ", block);
+			printf_("%d: ", block);
 
 		}
 	}

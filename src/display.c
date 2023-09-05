@@ -1,3 +1,4 @@
+
 #include "vesa_display.h"
 //#include "vtconsole.h"
 #include "debug.h"
@@ -30,6 +31,7 @@ int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
         else
         {
             //asm("cli");
+            printf_("HERE");
             set_font_c(0,255,0);
             ret_int = vesa_init(width,height,bpp);
             display_mode_screen = 0;
@@ -57,7 +59,7 @@ int set_font_c(int r,int g,int b)
 {
    font_color = VBE_RGB(r,g,b);
     // beep();
-    // printf("set_font_c(%d,%d,%d)",r,g,b);
+    // printf_("set_font_c(%d,%d,%d)",r,g,b);
 }
 uint32 get_font_color()
 {
@@ -89,8 +91,8 @@ void next_line()
     }
     else if (display_mode_screen == 1)
     {
-        //printf("Coming soon");
-        printf("\n");
+        //printf_("Coming soon");
+        printf_("\n");
     }
     else if (display_mode_screen == 2)
     {
@@ -190,7 +192,7 @@ void set_font_color(uint32_t color)
 // {
 //    font_color = VBE_RGB(r,g,b);
 //     // beep();
-//     // printf("set_font_c(%d,%d,%d)",r,g,b);
+//     // printf_("set_font_c(%d,%d,%d)",r,g,b);
 // }
 
 int clear_display()
@@ -402,9 +404,9 @@ int normalize_v(double *val)
     *val = value;
     return exponent;
 }
-int printf(const char *format, ...)
+int printf_(const char *format, ...)
 {
-    //FUNC_ADDR_NAME(&printf);
+    //FUNC_ADDR_NAME(&printf_);
     va_list parameters;
     va_start(parameters, format);
     int written = 0;
@@ -578,11 +580,11 @@ int kassert(int ret,int expected_ret,int level)
         }
         else if (level == 2)
         {
-            printf("WANING");
+            printf_("WANING");
         }
         else if (level >= 3);
         {
-            __asm__("int $3");
+            //__asm__("int $3");
         }
         
         

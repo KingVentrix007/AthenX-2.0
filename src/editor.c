@@ -1,3 +1,4 @@
+
 #include "keyboard.h"
 #include "string.h"
 #include "display.h"
@@ -15,27 +16,27 @@ int text_editor(int max_letters,char *dest)
                 if(backspace(out))
                 {  
                     //max = max +1;
-                    printf("\b");
+                    printf_("\b");
                 }
                 else
                 {
                     beep();
                 }
                 
-                //printf("\b");
+                //printf_("\b");
             }
             else if (c == '`')
             {
                 append(out,'\0');
                 break;
-                //printf("\n");
+                //printf_("\n");
                 // cmd_handler(buffer);
                 // buffer[0] = '\0';
                 // next_line();
                 // set_screen_x(0);
                 // //set_terminal_colum(get_terminal_col()+16);
                 // //set_terminal_row(0);
-                // printf(">");
+                // printf_(">");
                 //crude_song();
             }
             
@@ -44,9 +45,9 @@ int text_editor(int max_letters,char *dest)
                 
                 char* s;
                 s = ctos(s, c);
-                //printf(s);
-                printf(s);
-                //printf(s);
+                //printf_(s);
+                printf_(s);
+                //printf_(s);
                 max = max + 1;
                 append(out,c);
             }

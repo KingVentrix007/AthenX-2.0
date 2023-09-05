@@ -37,7 +37,7 @@ void outports(uint16 port, uint16 data) {
  */
 uint32 inportl(uint16 port) {
     uint32 rv;
-    asm volatile ("inl %%dx, %%eax" : "=a" (rv) : "dN" (port));
+    asm volatile ("inl %1, %0" : "=a" (rv) : "dN" (port));
     return rv;
 }
 
@@ -45,7 +45,7 @@ uint32 inportl(uint16 port) {
  * write given 4 bytes(long) to given port number
  */
 void outportl(uint16 port, uint32 data) {
-    asm volatile ("outl %%eax, %%dx" : : "dN" (port), "a" (data));
+    asm volatile ("outl %1, %0" : : "dN" (port), "a" (data));
 }
 uint8_t input_bytes(uint16_t port)
 {

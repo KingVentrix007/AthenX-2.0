@@ -31,4 +31,6 @@ int strncmp(const char *s1, const char *s2, size_t n);
 int string_length(char s[]);
 void append(char s[], char n);
 void * malloc(int nbytes);
+bool hex_string_to_uint16(const char* hexString, uint16_t* result);
+unsigned long strtoul(const char* str, char** endptr, int base);
 #endif

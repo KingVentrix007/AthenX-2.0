@@ -1,3 +1,4 @@
+
 #include "graphics.h"
 #include "string.h"
 #include "rle.h"
@@ -74,11 +75,11 @@ int main() {
     int encoded_size = rle_encode(input_array, rows, cols, encoded_array);
 
     // Print the encoded array
-    printf("Encoded array(%d): ",encoded_size);
+    printf_("Encoded array(%d): ",encoded_size);
     for (int i = 0; i < encoded_size; i++) {
-        printf("%d ", encoded_array[i]);
+        printf_("%d ", encoded_array[i]);
     }
-    printf("\n");
+    printf_("\n");
 
     // Allocate memory for the decoded array
     int** decoded_array = (int**)malloc(rows * sizeof(int*));
@@ -90,12 +91,12 @@ int main() {
     int decoded_size = rle_decode(encoded_array, encoded_size, decoded_array, rows, cols);
 
     // Print the decoded array
-    printf("Decoded array(%d):\n",decoded_size);
+    printf_("Decoded array(%d):\n",decoded_size);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            printf("%d ", decoded_array[i][j]);
+            printf_("%d ", decoded_array[i][j]);
         }
-        printf("\n");
+        printf_("\n");
     }
 
     // Free the allocated memory (using kfree based on your OS convention)

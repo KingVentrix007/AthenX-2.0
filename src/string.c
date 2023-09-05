@@ -325,3 +325,91 @@ void parse_string(char *parser, char *string, char c)
     }
     parser[i] = '\0';
 }
+
+
+bool hex_string_to_uint16(const char* hexString, uint16_t* result) {
+    // Check if the string starts with "0x"
+    if (hexString == NULL || hexString[0] != '0' || hexString[1] != 'x') {
+        return false; // Invalid format
+    }
+
+    // Use strtol to convert the rest of the string to uint16_t
+    char* endptr;
+    unsigned long tempResult = strtoul(hexString + 2, &endptr, 16);
+
+    // Check for errors during conversion
+    if (*endptr != '\0' || tempResult > UINT16_MAX) {
+        return false; // Conversion error or value out of range
+    }
+
+    *result = (uint16_t)tempResult;
+    return true; // Successful conversion
+}
+
+
+
+
+
+
+// Function to convert a string to an unsigned long integer
+unsigned long strtoul(const char* str, char** endptr, int base) {
+    // Handle the base argument (for simplicity, only support base 10 and 16)
+    if (base != 10 && base != 16) {
+        if (endptr != NULL) {
+            *endptr = (char*)str;
+        }
+        return 0;
+    }
+
+    // Initialize the result and the sign
+    unsigned long result = 0;
+    int sign = 1;
+
+    // Skip leading whitespace characters
+    while (*str == ' ' || *str == '\t') {
+        str++;
+    }
+
+    // Handle optional sign
+    if (*str == '-') {
+        sign = -1;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+
+    // Handle "0x" prefix for hexadecimal values
+    if (base == 16 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
+        str += 2;
+    }
+
+    // Convert the string to an unsigned long integer
+    while (*str != '\0') {
+        char c = *str;
+
+        if (base == 10 && (c < '0' || c > '9')) {
+            break;
+        } else if (base == 16 && !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+            break;
+        }
+
+        result = result * base;
+        if (c >= '0' && c <= '9') {
+            result += c - '0';
+        } else if (c >= 'a' && c <= 'f') {
+            result += c - 'a' + 10;
+        } else if (c >= 'A' && c <= 'F') {
+            result += c - 'A' + 10;
+        }
+
+        str++;
+    }
+
+    // Set the endptr to the next character after the parsed number
+    if (endptr != NULL) {
+        *endptr = (char*)str;
+    }
+
+    // Apply the sign
+    return result * sign;
+}

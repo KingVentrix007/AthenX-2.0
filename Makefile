@@ -2,12 +2,12 @@ CC=gcc
 AS=as
 ASM = nasm
 CONFIG = ./config
-GCCPARAMS = -m32 -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
+GCCPARAMS = -m32 -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
             -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
             -Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-            -Wconversion
+            
 ASPARAMS = --32
-LDPARAMS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib --allow-multiple-definition -Map LDout.map
+LDPARAMS = -m elf_i386 -T $(CONFIG)/linker.ld --allow-multiple-definition -nostdlib -Map LDout.map
 
 SRC_DIR=src
 HDR_DIR=include/
@@ -22,7 +22,7 @@ SRC_FILES3=$(wildcard $(SRC_DIR)/*.asm)
 OBJ_FILES3=$(patsubst $(SRC_DIR)/%.asm, $(OBJ_DIR)/%.o, $(SRC_FILES3))
 
 
-# check_dir:
+# check_dir:c
 # 	if [ ! -d "$(OBJ_DIR)" ]; then \
 # 		mkdir -p $(OBJ_DIR); \
 # 	fi
@@ -58,13 +58,13 @@ HackOS.bin:$(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
 	
 iso: HackOS.bin
 	
-	make HackOS.bin
+	
 # mkdir iso
 # mkdir iso/boot
 # mkdir iso/boot/grub
 	cp HackOS.bin iso/boot/HackOS.bin
 	
-	grub-mkrescue --output=HackOS.iso iso
+	sudo grub-mkrescue --output=HackOS.iso iso
 #	rm -rf iso
 HackOS.bin2: $(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
 
@@ -96,7 +96,7 @@ changlog:
 	./update_changelog
 run: iso
 	truncate -s 0 pipe
-	qemu-system-x86_64 -cdrom HackOS.iso  -drive file=ext2.img,format=raw -serial pipe:pipe -vga std -device sb16 -soundhw pcspk -m 2G
+	qemu-system-i386 -boot d -cdrom HackOS.iso  -drive file=ext2.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 2G -netdev user,id=network0 -netdev user,id=network1 -device e1000,netdev=network0,mac=52:5E:56:12:34:56 -device i82557a,netdev=network1
 run-ext2:
 	
 	qemu-system-x86_64 -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
@@ -130,3 +130,8 @@ fs-img:
 ext2-img:
 	bash ./mkdisk.sh
 
+fat32-img:
+	qemu-img create fat32.img 1G
+
+qemu-list:
+	qemu-system-i386 -device help

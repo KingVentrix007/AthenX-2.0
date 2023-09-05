@@ -1,3 +1,5 @@
+#include "pci.h"
+#include "printf.h"
 #include "ext2.h"
 #include "debug.h"
 #include "rle.h"
@@ -24,27 +26,27 @@
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
 void display_available_commands() {
-    printf("\nAvailable commands:\n");
-    printf("help - Display this list of commands\n");
-    printf("time - Display the current time\n");
-    printf("echo <message> - Print the provided message\n");
-    printf("write <filename> <type> - Write content to a file\n");
-    printf("read <filename> - Read content from a file\n");
-    printf("ls - List files in the current directory\n");
-    printf("rm <filename> - Delete a file\n");
-    printf("cls - Clear the screen\n");
-    printf("bg - Change background colors\n");
-    printf("logo - Display a logo\n");
-    printf("mkdir <directoryname> - Create a new directory\n");
-    printf("exit - Update file system partition table\n");
-    printf("set-xt <x> <y> - Set screen resolution\n");
-    printf("song - Play a song\n");
-    printf("format <disk> - Format a disk\n");
-    printf("table - Display file system partition table\n");
-    printf("3d - Display a 3D demo\n");
-    printf("rle - run length encoding tests\n");
-    printf("exe <filename> - run executable file\n");
-    printf("edit <filename> - edit a file\n");
+    printf_("\nAvailable commands:\n");
+    printf_("help - Display this list of commands\n");
+    printf_("time - Display the current time\n");
+    printf_("echo <message> - Print the provided message\n");
+    printf_("write <filename> <type> - Write content to a file\n");
+    printf_("read <filename> - Read content from a file\n");
+    printf_("ls - List files in the current directory\n");
+    printf_("rm <filename> - Delete a file\n");
+    printf_("cls - Clear the screen\n");
+    printf_("bg - Change background colors\n");
+    printf_("logo - Display a logo\n");
+    printf_("mkdir <directoryname> - Create a new directory\n");
+    printf_("exit - Update file system partition table\n");
+    printf_("set-xt <x> <y> - Set screen resolution\n");
+    printf_("song - Play a song\n");
+    printf_("format <disk> - Format a disk\n");
+    printf_("table - Display file system partition table\n");
+    printf_("3d - Display a 3D demo\n");
+    printf_("rle - run length encoding tests\n");
+    printf_("exe <filename> - run executable file\n");
+    printf_("edit <filename> - edit a file\n");
 }
 void parse_command(const char* command) {
     FUNC_ADDR_NAME(&parse_command);
@@ -71,7 +73,7 @@ void parse_command(const char* command) {
         }
         else
         {
-            printf("This feature is still coming");
+            printf_("This feature is still coming");
         }
 
          
@@ -80,12 +82,12 @@ void parse_command(const char* command) {
     } else if (strcmp(arguments[0], "time") == 0) {
         // Implement time command logic
         // For example: display the current time
-        printf("Coming soon");
+        printf_("Coming soon");
     } else if (strcmp(arguments[0], "echo") == 0) {
         // Implement echo command logic
         // For example: print the following arguments
         for (int i = 1; i < arg_count; i++) {
-            printf("%c", arguments[i]);
+            printf_("%c", arguments[i]);
             // Print each argument separated by a space
             // You can implement this based on your output functionality
         }
@@ -94,17 +96,32 @@ void parse_command(const char* command) {
     else if (strcmp(arguments[0],"com") == 0)
     {
         char out = "C";
-        printf("\nCOM output: ");
+        printf_("\nCOM output: ");
         out = read_serial();
-        printf("C%c", out);
+        printf_("C%c", out);
         // while(out != NULL)
         // {
         //     out = read_serial();
-        //     printf("%c", out);
+        //     printf_("%c", out);
         // }
          
        
     }
+    else if (strcmp(arguments[0], "pci") == 0)
+    {
+        printf("\n");
+        if(strcmp(arguments[1], "list") == 0)
+        {
+            list_pci_devices();
+        }
+        else if(strcmp(arguments[1], "reg") == 0)
+        {
+            list_registered_device();
+        }
+        //list_pci_devices();
+        //printf("list");
+    }
+    
     else if (strcmp(arguments[0], "write") == 0)
     {
         if(arg_count == 3)
@@ -114,11 +131,11 @@ void parse_command(const char* command) {
             set_screen_x(87000000);
             set_cursor_y(5656754);
             cmd_handler("cls");
-            printf("\nPress ` to exit");
-            printf("\nWelcome to Text:\n");
+            printf_("\nPress ` to exit");
+            printf_("\nWelcome to Text:\n");
             int size = text_editor(MAX_FILE_SIZE,out);
             write_fs();
-       //printf(out);
+       //printf_(out);
         //strcpy(buf, out);
 
             //write_file(0,arguments[1], out);
@@ -144,7 +161,7 @@ void parse_command(const char* command) {
         char *cwd = "/";
         uint32 ino = ext2_path_to_inode(cwd);
         char **names = ext2_ls(ino);
-        printf("\n");
+        printf_("\n");
     }
     else if(strcmp(arguments[0],"rm") == 0)
     {
@@ -195,7 +212,7 @@ void parse_command(const char* command) {
         sc_size.y = atoi(arguments[2]);
         memcpy(buf, &sc_size, sizeof(sc_size));
         ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        printf("data written\n");
+        printf_("data written\n");
     }
     else if(strcmp(arguments[0],"song") == 0)
     {
@@ -214,7 +231,7 @@ void parse_command(const char* command) {
     }
     else if(strcmp(arguments[0],"3d") == 0)
     {
-        //printf("Please");
+        //printf_("Please");
         ArtemisVision();
     }
     else if(strcmp(arguments[0],"rle") == 0)
@@ -225,14 +242,14 @@ void parse_command(const char* command) {
     else if(strcmp(arguments[0],"fs") == 0)
     {
         clear_display();
-        // printf("SUPERBLOCK: %d\n",sizeof(SUPERBLOCK));
-        // printf("INODE_FILE: %d\n",sizeof(INODE_FILE));
-        // printf("INODE_DIR: %d\n",sizeof(INODE_DIR));
-        // printf("DATA_BLOCK: %d\n",sizeof(DATA_BLOCK));
+        // printf_("SUPERBLOCK: %d\n",sizeof(SUPERBLOCK));
+        // printf_("INODE_FILE: %d\n",sizeof(INODE_FILE));
+        // printf_("INODE_DIR: %d\n",sizeof(INODE_DIR));
+        // printf_("DATA_BLOCK: %d\n",sizeof(DATA_BLOCK));
         // write_superblock(512);
-        // printf("CONE_BLOCK\n");
+        // printf_("CONE_BLOCK\n");
         // read_superblock_al(512);
-        // printf("Done!\n");
+        // printf_("Done!\n");
         format_disk(0);
         
       
@@ -255,11 +272,11 @@ void parse_command(const char* command) {
         // You can set the elements to any value you want, for example:
             myArray[i] = i % 256; // This sets each element with values from 0 to 255 in a repeating pattern
          }
-        printf("\n%c", myArray);
+        printf_("\n%c", myArray);
         ide_write_sectors(0,2,60,(uint32)myArray);
         char outb[1024] = {0};
         ide_read_sectors(0,2,60,(uint32)outb);
-        printf("\n%c", outb);
+        printf_("\n%c", outb);
 
     }
     else if(strcmp(arguments[0],"edit") == 0)
@@ -267,13 +284,13 @@ void parse_command(const char* command) {
         char data[1024] = {0};
         memset(data,0,sizeof(data));
         read_add(arguments[1],data);
-        printf("\n%c",data);
+        printf_("\n%c",data);
         text_editor(1024,data);
     }
     else {
-        printf("{/330:255,0,0}{/331:0,200,0}");
+        printf_("{/330:255,0,0}{/331:0,200,0}");
         printf("\n[!] %s is not a valid command",arguments[0]);
-        printf("{/330:0,255,0}{/331:0,0,0}");
+        printf_("{/330:0,255,0}{/331:0,0,0}");
         // Handle invalid or unknown commands
         // For example: display an error message
     }
@@ -314,20 +331,20 @@ void kernel_command_handler(char *buffer[512])
         memset(buf, 0, sizeof(buf));
         memcpy(buf, &login, sizeof(login));
         ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        printf("\nlogin set\n");
-        printf("Username: %s\n", login.username_stored);
-        printf("Password: %s\n", login.password_stored);
-        // printf("data written\n");
+        printf_("\nlogin set\n");
+        printf_("Username: %s\n", login.username_stored);
+        printf_("Password: %s\n", login.password_stored);
+        // printf_("data written\n");
 
         // read message from drive
         // memset(buf, 0, sizeof(buf));
         // ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        // printf("read data: %s\n", buf);
+        // printf_("read data: %s\n", buf);
 
         // memset(buf, 0, sizeof(buf));
         // ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA + 3, (uint32)buf);
         // memcpy(&e, buf, sizeof(e));
-        // printf("id: %d, name: %s\n", e.id, e.name);
+        // printf_("id: %d, name: %s\n", e.id, e.name);
 
     }
 }

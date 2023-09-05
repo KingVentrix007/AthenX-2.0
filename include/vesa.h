@@ -95,12 +95,13 @@ uint32 vbe_get_width();
 uint32 vbe_get_height();
 int vesa_init(uint32 width, uint32 height, uint32 bpp);
 uint32 vbe_rgb(uint8 red, uint8 green, uint8 blue);
-void vbe_putpixel(int x, int y, int color);
+uint32_t vbe_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void vbe_putpixel(int x, int y, uint32 color);
 void vbe_print_available_modes();
 void vbe_putpixel_v2(int x, int y,int color, unsigned char *buffer);
 void vese_mem(void *src, int n);
 
 int * find_biggest_mode();
 #define VBE_RGB(r, g, b) vbe_rgb(r, g, b)
-
+#define VBE_RGBA(r, g, b, a) vbe_rgba(r, g, b, a)
 #endif

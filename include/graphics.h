@@ -19,6 +19,22 @@ typedef struct
     int line_width; 
 
 }WINDOW;
+typedef struct
+{
+    uint8_t *ptr;
+    uint32_t *ptr32;
+    uint64_t *ptr64;
+}IMAGE_POINTERS;
+typedef struct
+{
+    char name[512];
+    int width;
+    int height;
+    int Bpp;
+    IMAGE_POINTERS ptrs;
+    
+
+}IMAGE;
 
 int printChar(int x, int y, char c);
 void cool_colors();
@@ -36,6 +52,9 @@ void bresenham_line(Point start, Point end);
 void draw_window(int x, int y, int length);
 void draw_char_g(unsigned char c,int fgcolor, int bgcolor, int x, int y, int base_address);
 int init_window(WINDOW *win);
+void draw_error_image();
+void draw_low_res_img(IMAGE img_header);
+void draw_hi_res_img(int w, int h);
 #endif
 
 

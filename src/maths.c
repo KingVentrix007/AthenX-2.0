@@ -422,7 +422,7 @@ void srand()
 int rand()
 {
     // char* out = char*(((seed = (seed * 1103515245 + 12345) & RAND_MAX) * NORM));
-    // printf(out);
+    // printf_(out);
     srand();
     
     return (seed = (seed * 1103515245 + 12345) & RAND_MAX) * NORM;
