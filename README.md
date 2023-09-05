@@ -175,6 +175,7 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
 * [OsDev.org](https://wiki.osdev.org/Main_Page): Lots if informative pages and articles
 * [Logo.com](https://app.logo.com/): They made my logo, and it was free
 * And anyone else that I have missed, thanks.
+* [OS](https://github.com/pritamzope/OS): I used A LOT of his code, ATA driver, VESA, FPU, etc
 * My mom:  she did all my editing and made sure my grammar was correct
 
 ## Images
