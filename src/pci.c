@@ -53,7 +53,7 @@ int Processing_Accelerator = 0;           // Number of Processing Accelerator de
 // pciDevices[0] = 
 // Function to read a 32-bit value from PCI configuration space
 uint32_t pci_read(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset) {
-    write_serial("*",DEFAULT_COM_DEBUG_PORT);
+    //write_serial("*",DEFAULT_COM_DEBUG_PORT);
     uint32_t address = (1U << 31) | ((uint32_t)bus << 16) | ((uint32_t)device << 11) | ((uint32_t)function << 8) | (offset & 0xFC);
     outportl(0xCF8, address);
     return inportl(0xCFC);
@@ -234,15 +234,20 @@ uint32_t calculate_pci_slot(uint8_t bus, uint8_t device, uint8_t function) {
     return ((uint32_t)bus << 8) | ((uint32_t)device << 3) | (uint32_t)function;
 }
 
+int dummy(uint8_t dummy1, uint8_t dummy2, uint8_t dummy3)
+{
+    printf("Dummy Call");
+}
+
 void init_pci_device()
 {
     num_devices_added_devices = 0;
     printf("Initializing PCI Device Headers\n");
     // RegisteredPCIDeviceInfo newDevice;
 
-    create_device_list(0x100e,0x8086,0x2,false,"82540EM Gigabit Ethernet Controller","Intel Corporation");
-    create_device_list(0x2415,0x8086,0x4,false,"82801AA AC'97 Audio Controller","Intel Corporation");
-    create_device_list(0x153A,0x8086,0x2,true,"Intel Ethernet i217","Intel Corporation");
+    create_device_list(0x100e,0x8086,0x2,true,"82540EM Gigabit Ethernet Controller","Intel Corporation",init_e82540EM_ethernet_card);
+    create_device_list(0x2415,0x8086,0x4,false,"82801AA AC'97 Audio Controller","Intel Corporation",dummy);
+    create_device_list(0x153A,0x8086,0x2,false,"Intel Ethernet i217","Intel Corporation",dummy);
     
     printf("Initialized PCI Device headers\n");
     printf("Scanning PCI for devices\n");
@@ -250,19 +255,24 @@ void init_pci_device()
     printf("Scanned PCI.\n");
     printf("[PCI] Found %d devices\n",pci_list.num_devices);
     printf("[PCI] Found %d registered devices\n",num_found_devices__registered);
+    if(num_devices_added_devices >= 1)
+    {
+        initialize_registered_devices();
+    }
    
 
    
 }
 
 // Creates a pci device
-int create_device_list(uint16_t device_id, uint16_t vendor_id, uint16_t class_code, bool has_driver, char device_name[200], char producer_name[200])
+int create_device_list(uint16_t device_id, uint16_t vendor_id, uint16_t class_code, bool has_driver, char device_name[200], char producer_name[200], DeviceDriverPtr init_func)
 {
     RegisteredPCIDeviceInfo new_device_info;
     new_device_info.device_id = device_id;
     new_device_info.vendor_id = vendor_id;
     new_device_info.class_code = class_code;
     new_device_info.has_driver = has_driver;
+    new_device_info.init_device = init_func;
     strcpy(new_device_info.device_name, device_name);
     strcpy(new_device_info.name, producer_name);
     pci_registered_device_list[num_devices_added_devices] = new_device_info;
@@ -534,9 +544,15 @@ void list_registered_device()
 
 void initialize_registered_devices()
 {
+    printf("Initializing registered devices\n");
     for (size_t i = 0; i < num_found_devices__registered; i++)
     {
-        //if(pci_registered_device_list)
+        if(pci_registered_device_list[i].has_driver == true)
+        {
+            printf("Calling %s initialization function \n", pci_registered_device_list[i].device_name);
+            pci_registered_device_list[i].init_device(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function);
+            //printf("initialized");
+        }
     }
     
 }

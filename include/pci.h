@@ -12,6 +12,9 @@
 #define PCI_CONFIG_ADDRESS 0xCF8
 #define PCI_CONFIG_DATA    0xCFC
 
+//Function pointer for device driver initialization
+typedef int (*DeviceDriverPtr)(uint8_t, uint8_t,uint8_t);
+
 
 // Structure for a PCI device
 typedef struct {
@@ -71,6 +74,7 @@ typedef struct {
     uint8_t function;
     //This information is not presented to the user, but is for internal use
     PCIHeader header;
+    DeviceDriverPtr init_device;
 }RegisteredPCIDeviceInfo;
 
 // Array to store a list of PCI devices
@@ -103,5 +107,8 @@ void list_pci_devices();
 void list_registered_device();
 
 // Function to register a PCI device
-int create_device_list(uint16_t device_id, uint16_t vendor_id, uint16_t class_code, bool has_driver, char device_name[200], char producer_name[200]);
+int create_device_list(uint16_t device_id, uint16_t vendor_id, uint16_t class_code, bool has_driver, char device_name[200], char producer_name[200], DeviceDriverPtr init_func);
+
+
+
 #endif /* PCI_H */

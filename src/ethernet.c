@@ -61,7 +61,7 @@ void map_e82540EM_memory_regions(uint8_t bus, uint8_t device, uint8_t function) 
     // Find the Intel 82540EM Ethernet card (you should already have done this)
     //uint8_t bus, device, function;
     // ...
-    printf("Initializing Intel 82540EM Ethernet card");
+    //printf("[Ethernet]Initializing Intel 82540EM Ethernet card");
     // Read the base address register for memory-mapped I/O
     uint32_t mmioBase = pci_read(bus, device, function, ee82540EM_BAR_MMIO);
 
@@ -79,7 +79,8 @@ void map_e82540EM_memory_regions(uint8_t bus, uint8_t device, uint8_t function) 
 }
 
 // Function to initialize the Intel e82540EM Ethernet card
-void init_e82540EM_ethernet_card(uint8_t bus, uint8_t device, uint8_t function) {
+int init_e82540EM_ethernet_card(uint8_t bus, uint8_t device, uint8_t function) {
+    //printf("HERERE");
     //init_e82540EM_pci_configuration();  // Step 2: Initialize PCI configuration
     map_e82540EM_memory_regions(bus,device,function);      // Step 3: Map memory regions
     // Step 4: Initialize the Ethernet card, set up MAC address, buffers, etc.

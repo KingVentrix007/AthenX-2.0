@@ -23,7 +23,7 @@ void map_e82540EM_memory_regions(uint8_t bus, uint8_t device, uint8_t function);
 void init_e82540EM_pci_configuration();
 
 // Function to initialize the Intel e82540EM Ethernet card
-void init_e82540EM_ethernet_card(uint8_t bus, uint8_t device, uint8_t function);
+int init_e82540EM_ethernet_card(uint8_t bus, uint8_t device, uint8_t function);
 
 // Function to read the MAC address from the Ethernet card
 MacAddress read_mac_address();
