@@ -32,7 +32,7 @@ int kheap_init(void *start_addr, void *end_addr) {
  * increase the heap memory by size & get its address
 */
 void *kbrk(int size) {
-    FUNC_ADDR_NAME(&kbrk);
+    FUNC_ADDR_NAME(&kbrk,1,"i");
     void *addr = NULL;
     if (size <= 0)
         return NULL;
@@ -49,7 +49,7 @@ void *kbrk(int size) {
  * print list of allocated blocks
 */
 void kheap_print_blocks() {
-    FUNC_ADDR_NAME(&kheap_print_blocks);
+    FUNC_ADDR_NAME(&kheap_print_blocks,0,"");
     KHEAP_BLOCK *temp = g_head;
     printf_("Block Size: %d\n", sizeof(KHEAP_BLOCK));
     while (temp != NULL) {
@@ -60,7 +60,7 @@ void kheap_print_blocks() {
 }
 
 BOOL is_block_free(KHEAP_BLOCK *block) {
-    FUNC_ADDR_NAME(&is_block_free);
+    FUNC_ADDR_NAME(&is_block_free,1,"T");
     if (!block)
         return FALSE;
     return (block->metadata.is_free == TRUE);
@@ -70,7 +70,7 @@ BOOL is_block_free(KHEAP_BLOCK *block) {
  * this just check freed memory is greater than the required one
 */
 KHEAP_BLOCK *worst_fit(int size) {
-    FUNC_ADDR_NAME(&worst_fit);
+    FUNC_ADDR_NAME(&worst_fit,1,"i");
     KHEAP_BLOCK *temp = g_head;
     while (temp != NULL) {
         if (is_block_free(temp)) {
@@ -84,7 +84,7 @@ KHEAP_BLOCK *worst_fit(int size) {
 
 // allocate a new heap block
 KHEAP_BLOCK *allocate_new_block(int size) {
-    FUNC_ADDR_NAME(&allocate_new_block);
+    FUNC_ADDR_NAME(&allocate_new_block,1,"i");
     KHEAP_BLOCK *temp = g_head;
     while (temp->next != NULL) {
         temp = temp->next;
@@ -105,7 +105,7 @@ KHEAP_BLOCK *allocate_new_block(int size) {
  * # Need to work on internal/external segmentaion problem
 */
 void *kmalloc(int size) {
-    FUNC_ADDR_NAME(&kmalloc);
+    FUNC_ADDR_NAME(&kmalloc,1,"i");
     if (size <= 0)
         return NULL;
     if (g_head == NULL) {
@@ -135,7 +135,7 @@ void *kmalloc(int size) {
  * allocate memory n * size & zeroing out
 */
 void *kcalloc(int n, int size) {
-    FUNC_ADDR_NAME(&kcalloc);
+    FUNC_ADDR_NAME(&kcalloc,2,"ii");
     if (n < 0 || size < 0)
         return NULL;
     void *mem = kmalloc(n * size);
@@ -148,7 +148,7 @@ void *kcalloc(int n, int size) {
  * copy previous block data & set free the previous block
 */
 void *krealloc(void *ptr, int size) {
-    FUNC_ADDR_NAME(&krealloc);
+    FUNC_ADDR_NAME(&krealloc,2,"pi");
     KHEAP_BLOCK *temp = g_head;
     while (temp != NULL) {
         if (temp->data == ptr) {
@@ -169,7 +169,7 @@ void *krealloc(void *ptr, int size) {
  * set free the block
 */
 void kfree(void *addr) {
-    FUNC_ADDR_NAME(&kfree);
+    FUNC_ADDR_NAME(&kfree,1,"p");
     KHEAP_BLOCK *temp = g_head;
     while (temp != NULL) {
         if (temp->data == addr) {

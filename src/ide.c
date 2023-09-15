@@ -18,7 +18,7 @@ static void ide_write_register(uint8 channel, uint8 reg, uint8 data);
 
 // read register value from the given channel
 static uint8 ide_read_register(uint8 channel, uint8 reg) {
-    FUNC_ADDR_NAME(&ide_read_register);
+    FUNC_ADDR_NAME(&ide_read_register,2,"ii");
     uint8 ret;
 
     // write value ata-control to tell irq is ready
@@ -44,7 +44,7 @@ static uint8 ide_read_register(uint8 channel, uint8 reg) {
 
 // write data to register to the given channel
 static void ide_write_register(uint8 channel, uint8 reg, uint8 data) {
-    FUNC_ADDR_NAME(&ide_write_register);
+    FUNC_ADDR_NAME(&ide_write_register,3,"iii");
     // write value ata-control to tell irq is ready
     if (reg > 0x07 && reg < 0x0C)
         ide_write_register(channel, ATA_REG_CONTROL, 0x80 | g_ide_channels[channel].no_intr);
@@ -106,7 +106,7 @@ void ide_read_buffer(uint8 channel, uint8 reg, uint32 *buffer, uint32 quads) {
 }
 
 void ide_write_buffer(uint8 channel, uint8 reg, uint32 *buffer, uint32 quads) {
-    FUNC_ADDR_NAME(&ide_write_buffer);
+    FUNC_ADDR_NAME(&ide_write_buffer,4,"iisi");
     if (reg > 0x07 && reg < 0x0C)
         ide_write_register(channel, ATA_REG_CONTROL, 0x80 | g_ide_channels[channel].no_intr);
 
@@ -342,7 +342,7 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
 }
 
 uint8 ide_ata_access(uint8 direction, uint8 drive, uint32 lba, uint8 num_sectors, uint32 buffer) {
-    FUNC_ADDR_NAME(&ide_ata_access);
+    FUNC_ADDR_NAME(&ide_ata_access,5,"iiiii");
     uint8 lba_mode /* 0: CHS, 1:LBA28, 2: LBA48 */, dma /* 0: No DMA, 1: DMA */, cmd;
     uint8 lba_io[6];
     uint32 channel = g_ide_devices[drive].channel;  // Read the Channel.
@@ -479,7 +479,7 @@ void ide_irq() {
 
 // start from lba = 0
 int ide_read_sectors(uint8 drive, uint8 num_sectors, uint32 lba, uint32 buffer) {
-    FUNC_ADDR_NAME(&ide_read_sectors);
+    FUNC_ADDR_NAME(&ide_read_sectors,4,"iiii");
     // 1: Check if the drive presents:
     if (drive > MAXIMUM_IDE_DEVICES || g_ide_devices[drive].reserved == 0) {
         printf_("IDE ERROR: Drive not found\n");
@@ -593,6 +593,7 @@ int print_drives()
             printf_("  size: %d sectors, %d bytes\n", g_ide_devices[i].size, g_ide_devices[i].size * ATA_SECTOR_SIZE);
             printf_("  signature: 0x%x, features: %d\n", g_ide_devices[i].signature, g_ide_devices[i].features);
         }
+        
 }
 
 uint64 get_sectors(int drive)

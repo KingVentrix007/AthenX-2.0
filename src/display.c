@@ -31,7 +31,7 @@ int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
         else
         {
             //asm("cli");
-            printf_("HERE");
+            //printf_("HERE");
             set_font_c(0,255,0);
             ret_int = vesa_init(width,height,bpp);
             display_mode_screen = 0;

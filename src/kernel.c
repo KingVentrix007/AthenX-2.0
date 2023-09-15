@@ -31,6 +31,7 @@
 #include "fpu.h"
 #include "ext2.h"
 #include "acpi.h"
+#include "ssfs.h"
 KERNEL_MEMORY_MAP g_kmap;
 
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
@@ -44,11 +45,7 @@ KERNEL_MEMORY_MAP g_kmap;
 //         printf_("Initramfs location not found in Multiboot info\n");
 //     }
 // }
-void print_mac_address(const MacAddress* mac) {
-    printf("%02X:%02X:%02X:%02X:%02X:%02X\n",
-        mac->bytes[0], mac->bytes[1], mac->bytes[2],
-        mac->bytes[3], mac->bytes[4], mac->bytes[5]);
-}
+
 
 int mac_cmp() {
     // MAC address obtained from QEMU command line
@@ -75,7 +72,7 @@ int mac_cmp() {
 }
 
 void access_grub_module(MULTIBOOT_INFO* mbi) {
-    printf_("HERE\n");
+    printf_("GHERE\n");
     if (!(mbi->flags & 0x00000008))
     {
         printf_("No Grub modules\n");
@@ -165,11 +162,11 @@ void get_map(KERNEL_MEMORY_MAP *out)
     memcpy(&out, &g_kmap, sizeof(out));
 }
 void kmain(unsigned long magic, unsigned long addr) {
+    FUNC_ADDR_NAME(&kmain,0,"");
     MULTIBOOT_INFO *mboot_info;
      
     gdt_init();
     idt_init();
-    
     //
     //ata_get_drive_by_model
     kassert(display_init(1,0,0,32),0,1);
@@ -193,7 +190,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         keyboard_init();
         ata_init();
         int x = 1280;
-        int y = 1024;
+        int y = 768;
         
         
         kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
@@ -211,36 +208,54 @@ void kmain(unsigned long magic, unsigned long addr) {
         
         //printf_("%s\n",mode);
         cmd_handler("cls");
+        
+        //ext2_init();
+        //read_root_directory_inode();
+        //read_root_directory_inode();
          //clear_screen();
          //vbe_print_available_modes();
         //printf_("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
         
         //sleep(190000);
-        print_drives();
+        //print_drives();
+        DEBUG(" ");
         //init_fs();
         //printf_("hello");
+        init_ssfs();
+        //write_file(40);
         init_pci_device();
+        //printf("GOT HERE");
+       
+         //printf("H\n");
+         //printf("0x%16x\n",&kmain);
+         timer_init();//!DO NOT PUT BEFORE INIT VESA
+         //printf("T\n");
+         
+         //printf("MADE IT HERE");
         //init_e82540EM_ethernet_card();
         //printf_("CMP:");
-        MacAddress osMac = read_mac_address();
-        printf("Mac Address: ");
-        print_mac_address(&osMac);
+        // MacAddress osMac = read_mac_address();
+        // printf("\nMac Address: ");
+        // print_mac_address(&osMac);
+        // MacAddress eepMAc = read_eep_mac();
+        // printf("Eep Address: ");
+        // print_mac_address(&eepMAc);
         //printf_("DONE");
         //sleep(2000);
         //access_grub_module(mboot_info);
-        IMAGE img;
-        img.ptrs.ptr = &athenx_logo;
-        img.Bpp = 8;
-        img.width = 1000;
-        img.height = 700;
-        strcpy(img.name,"Low resolution logo image" );
-        //draw_low_res_img(img);
-        IMAGE bg_img;
-        bg_img.ptrs.ptr = &background;
-        bg_img.Bpp = 8;
-        bg_img.width = 1980;
-        bg_img.height = 1080;
-        strcpy(bg_img.name, "Low resolution background image" );
+        // IMAGE img;
+        // img.ptrs.ptr = &athenx_logo;
+        // img.Bpp = 8;
+        // img.width = 1000;
+        // img.height = 700;
+        // strcpy(img.name,"Low resolution logo image" );
+        // //draw_low_res_img(img);
+        // IMAGE bg_img;
+        // bg_img.ptrs.ptr = &background;
+        // bg_img.Bpp = 8;
+        // bg_img.width = 1980;
+        // bg_img.height = 1080;
+        // strcpy(bg_img.name, "Low resolution background image" );
         //draw_low_res_img(bg_img);
         //draw_hi_res_img(1980,1080);
         //sleep(10000);
@@ -265,22 +280,23 @@ void kmain(unsigned long magic, unsigned long addr) {
             terminal_main();
         } else {
  
-            printf("Terminal initialization (%d)",ret);
+            //printf("Terminal initialization (%d)",ret);
             fpu_enable();
-            timer_init();//!DO NOT PUT BEFORE INIT VESA
-            unsigned char* bios_start = (unsigned char*)0xE0000;
-            unsigned int bios_length = 0x20000;  // 128 KB
-
-            struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
-
-            if (rsdp) {
-                printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
-                //printf("Version: %d\n",rsdp->Revision);
             
-                // Access other information in the RSDP as needed
-            } else {
-                printf("RSDP not found.\n");
-            }
+            // unsigned char* bios_start = (unsigned char*)0xE0000;
+            // unsigned int bios_length = 0x20000;  // 128 KB
+
+            //struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
+
+            // if (rsdp) {
+            //     printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
+            //     //printf("Version: %d\n",rsdp->Revision);
+            
+            //     // Access other information in the RSDP as needed
+            // } else {
+            //     printf("RSDP not found.\n");
+            // }
+            //dummy1();
             terminal_main();
         }
 
@@ -436,8 +452,9 @@ void toggle_cursor_visibility() {
 
 void terminal_main()
 {
+    //beep();
     //DEBUG("terminal_main");
-    FUNC_ADDR_NAME(&terminal_main);
+    FUNC_ADDR_NAME(&terminal_main,0,"");
     // WINDOW *test_win;
     // test_win->color = VBE_RGB(0,255,125);
     // test_win->start_x = 500;
@@ -480,14 +497,16 @@ void terminal_main()
     // #endif
     
      printf(">");
+     //int x = 1/0;
      
      //printf_("{/330:0,255,0");
     //sleep(10);
     //printV("\nHeight%s\n",vbe_get_height());
     uint8_t byte;
-    char *buffer[512];
-     buffer[0] = '\0';
-    
+    char buffer[512];
+    buffer[0] = '\0';
+    //DEBUG("HERE?");
+    //beep();
     while(1)
     {    
             //beep();
@@ -503,7 +522,7 @@ void terminal_main()
              if (ticks >= 50) {
                 toggle_cursor_visibility();
                 reset_ticks();
-    }
+            }
              
             //printf_("%d",c);
             
@@ -514,13 +533,14 @@ void terminal_main()
                 if(backspace(buffer))
                 {
                     printf_("\b");
+                    
                     //set_cursor_x(get_cursor_x()-2);
                     //printf_(" ");
                     //console_ungetchar();
                 }
                 else
                 {
-                    beep();
+                    ///beep();
                 }
                 
                 //printf_("\b");
@@ -529,11 +549,12 @@ void terminal_main()
             else if (c == '\n')
             {
                 //printf_("\n");
-                undraw_square(get_screen_x(),get_screen_y());
+                undraw_square(get_screen_y(),get_screen_x());
                 cmd_handler(buffer);
                 memset(buffer, 0,sizeof(buffer));
                 next_line();
-                set_screen_x(0);
+                printf("\n");
+                //set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
                 printf(">");
@@ -542,7 +563,9 @@ void terminal_main()
             }
             else if (c == '\0')
             {
-                
+                //DEBUG("NULL");
+                char dummy = "c";
+                //beep();
             }
             else
             {
@@ -552,7 +575,7 @@ void terminal_main()
                 //printf_(s);
                 //undraw_square(get_screen_x(),get_screen_y());
                 // printf_(s);
-                undraw_square(get_screen_x(),get_screen_y());
+                undraw_square(get_screen_y(),get_screen_x());
                 printf(s);
                 //printf_("X{}");
                 //undraw_square(get_screen_x()-10,get_screen_y());
@@ -566,9 +589,9 @@ void terminal_main()
                 
             }
              if (cursor_visible) {
-                 draw_square_cursor(get_screen_x(),get_screen_y(),VBE_RGB(255, 255, 255));
+                 draw_square_cursor(get_screen_y(),get_screen_x(),VBE_RGB(255, 255, 255));
             } else {
-                undraw_square(get_screen_x(),get_screen_y());
+                undraw_square(get_screen_y(),get_screen_x());
     }
             //undraw_square(get_screen_x(),get_screen_y());
             
@@ -577,4 +600,43 @@ void terminal_main()
             
     }
     
+}
+struct fake
+{
+    int v1;
+    int v2;
+    int v3;
+};
+int dummy1()
+{
+    FUNC_ADDR_NAME(&dummy1,0," ");
+    dummy2();
+}
+int dummy2()
+{
+    FUNC_ADDR_NAME(&dummy2,0," ");
+    struct fake ff;
+    ff.v1 = 1;
+    ff.v2 = 2;
+    ff.v3 = 3;
+    dummy3();
+}
+int dummy3()
+{
+    FUNC_ADDR_NAME(&dummy3,0," ");
+    int q = 76;
+    dummy4("CAT");
+}
+
+int dummy4(char *word) {
+    FUNC_ADDR_NAME(&dummy4,1,"s");
+    fake_err(100,2);
+    /* function_end variable */
+    
+}
+int fake_err(int z, int y)
+{
+    FUNC_ADDR_NAME(&fake_err,2,"ii");
+    int o = 1893;
+    int x = 1/0;
 }

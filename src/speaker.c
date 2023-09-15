@@ -39,7 +39,7 @@ void beep()
     // It does so by calling the `play_sound()` function with the specified frequency,
     // then pausing for 0.2 seconds using the `sleep()` function, and finally turning off the speaker using `nosound()`.
     play_sound(1000);
-    sleep(0.2);
+    sleep(1);
     nosound();
 }
 

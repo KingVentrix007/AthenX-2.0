@@ -132,5 +132,8 @@ extern void irq_15();
 #define IRQ14_HARD_DISK     0x0E
 #define IRQ15_RESERVED      0x0F
 
-
+void TraceStackTrace(unsigned int MaxFrames,uintptr_t ebp_in);
+void inspect_stack_frame(int* ebp,int *esp, int total_params, const char* param_types);
+void extractLocalVars(int* esp, int* ebp) ;
+uint32_t *unwind_stack(REGISTERS *reg,int search_level);
 #endif

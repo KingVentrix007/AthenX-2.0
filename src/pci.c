@@ -5,7 +5,8 @@
 #include "vesa_display.h"
 #include "vesa.h"
 #include "serial.h"
-
+#include "speaker.h"
+#include "errno.h"
 // typedef struct {
 //     uint16_t device_id;
 //     uint16_t vendor_id;
@@ -21,7 +22,8 @@
 PCIDeviceList pci_list; // PCI device list (Invalid)
 // PciDeviceInfoList pci_device_list; // PCI device list
 RegisteredPCIDeviceInfo pci_registered_device_list[MAX_PCI_DEVICES];
-
+RegisteredPCIDeviceInfo pci_registered_device_list_running[MAX_PCI_DEVICES];
+int running_drivers = 0;
 int num_devices_added_devices;
 
 // pci_registered_device_list
@@ -125,54 +127,55 @@ void pci_scan() {
     }
     int old_pos_row = get_vesa_row();
     int old_pos_col = get_vesa_col();
-    set_vesa_colum(0);
-    set_vesa_row(750);
+    set_vesa_row(0);
+    set_vesa_colum(760);
           
            
     printf("----------------------------------------\n");
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("PCI Device list:\n");
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Unclassified (0x0): %d\n", Unclassified);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Mass Storage Controller (0x1): %d\n", Mass_Storage_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Network Controller (0x2): %d\n", Network_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Display Controller (0x3): %d\n", Display_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Multimedia Controller (0x4): %d\n", Multimedia_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Memory Controller (0x5): %d\n", Memory_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Bridge (0x6): %d\n", Bridge);
-    set_vesa_row(750);
-    printf("Simple Communication Controller (0x6): %d\n", Simple_Communication_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
+    printf("Simple Communication Controller (0x7): %d\n", Simple_Communication_Controller);
+    set_vesa_colum(768);
     printf("Base System Peripheral (0x8): %d\n", Base_System_Peripheral);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Input Device Controller (0x9): %d\n", Input_Device_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Docking Station (0x10): %d\n", Docking_Station);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Processor (0x11): %d\n", Processor);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Serial Bus Controller (0x12): %d\n", Serial_Bus_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Wireless Controller (0x13): %d\n", Wireless_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Intelligent I/O Controller (0x14): %d\n", Intelligent_I_O_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Satellite Communication Controller (0x15): %d\n", Satellite_Communication_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Encryption/Decryption Controller (0x16): %d\n", Encryption_Decryption_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Data Acquisition and Signal Processing Controller (0x17): %d\n", Data_Acquisition_and_Signal_Processing_Controller);
-    set_vesa_row(750);
+    set_vesa_colum(768);
     printf("Processing Accelerator (0x18): %d\n", Processing_Accelerator);
      set_vesa_colum(old_pos_col);
     set_vesa_row(old_pos_row); 
     //printf("--------------------------------------------------------------------\n");
+    main_exit(SUCCESS,SUCCESS,__FUNCTION__,false,&dummy);
 
     
 // }
@@ -241,26 +244,32 @@ int dummy(uint8_t dummy1, uint8_t dummy2, uint8_t dummy3)
 
 void init_pci_device()
 {
+    asm volatile("cli");
     num_devices_added_devices = 0;
     printf("Initializing PCI Device Headers\n");
     // RegisteredPCIDeviceInfo newDevice;
 
-    create_device_list(0x100e,0x8086,0x2,true,"82540EM Gigabit Ethernet Controller","Intel Corporation",init_e82540EM_ethernet_card);
-    create_device_list(0x2415,0x8086,0x4,false,"82801AA AC'97 Audio Controller","Intel Corporation",dummy);
-    create_device_list(0x153A,0x8086,0x2,false,"Intel Ethernet i217","Intel Corporation",dummy);
+    int ret = create_device_list(0x100e,0x8086,0x2,true,"82540EM Gigabit Ethernet Controller","Intel Corporation",init_e82540EM_ethernet_card);
+    if(ret != 0) return main_exit(PCI_ERROR,PCI_ERR_DEVICE_NOT_FOUND,__FUNCTION__,true,&dummy);
+    ret = create_device_list(0x2415,0x8086,0x4,false,"82801AA AC'97 Audio Controller","Intel Corporation",dummy);
+    if(ret != 0) return main_exit(PCI_ERROR,PCI_ERR_DEVICE_NOT_FOUND,__FUNCTION__,true,&dummy);
+    ret = create_device_list(0x1229,0x8086,0x2,false,"82557/8/9/0/1 Ethernet Pro 100","Intel Corporation",dummy);
+    if(ret != 0) return main_exit(PCI_ERROR,PCI_ERR_DEVICE_NOT_FOUND,__FUNCTION__,true,&dummy);
     
     printf("Initialized PCI Device headers\n");
     printf("Scanning PCI for devices\n");
     pci_scan();
-    printf("Scanned PCI.\n");
+    //printf("Scanned PCI.\n");
     printf("[PCI] Found %d devices\n",pci_list.num_devices);
+     printf_("{/330:0,0,225}");
     printf("[PCI] Found %d registered devices\n",num_found_devices__registered);
+     printf_("{/330:0,255,0}");
+     //asm("sti");
     if(num_devices_added_devices >= 1)
     {
         initialize_registered_devices();
     }
-   
-
+    asm volatile("sti");
    
 }
 
@@ -272,11 +281,13 @@ int create_device_list(uint16_t device_id, uint16_t vendor_id, uint16_t class_co
     new_device_info.vendor_id = vendor_id;
     new_device_info.class_code = class_code;
     new_device_info.has_driver = has_driver;
+    new_device_info.is_running = false;
     new_device_info.init_device = init_func;
     strcpy(new_device_info.device_name, device_name);
     strcpy(new_device_info.name, producer_name);
     pci_registered_device_list[num_devices_added_devices] = new_device_info;
     num_devices_added_devices += 1;
+    return 0;
 
 }
 
@@ -445,6 +456,26 @@ RegisteredPCIDeviceInfo* find_pci_device(uint16_t vendor_id, uint16_t device_id,
     return NULL; // Device not found
 }
 
+// Function to extract bits 31-24 from a uint32_t
+uint8_t extractBits31to24(uint32_t value) {
+    return (uint8_t)((value >> 24) & 0xFF);
+}
+
+// Function to extract bits 23-16 from a uint32_t
+uint8_t extractBits23to16(uint32_t value) {
+    return (uint8_t)((value >> 16) & 0xFF);
+}
+
+// Function to extract bits 15-8 from a uint32_t
+uint8_t extractBits15to8(uint32_t value) {
+    return (uint8_t)((value >> 8) & 0xFF);
+}
+
+// Function to extract bits 7-0 from a uint32_t
+uint8_t extractBits7to0(uint32_t value) {
+    return (uint8_t)(value & 0xFF);
+}
+
 // Function to find a PCI device and populate the PCIHeader struct
 void find_pci_device_header(uint8_t bus, uint8_t device, uint8_t func, PCIHeader* header) {
     uint16_t read_vendor_id;
@@ -490,7 +521,7 @@ void find_pci_device_header(uint8_t bus, uint8_t device, uint8_t func, PCIHeader
     header->capabilities_ptr = pci_read(bus, device, func, 0x34);
 
     // Read the remaining fields
-    header->interrupt_line = pci_read(bus, device, func, 0x3C);
+    header->interrupt_line = extractBits7to0(pci_read(bus, device, func, 0x3C));
     header->interrupt_pin = pci_read(bus, device, func, 0x3D);
     header->min_grant = pci_read(bus, device, func, 0x3E);
     header->max_latency = pci_read(bus, device, func, 0x3F);
@@ -521,6 +552,51 @@ void list_pci_devices()
         
     }
 }
+void list_pic_class_code(int class_code, int sub_class_code)
+{
+    if(class_code != 0 && sub_class_code != 0)
+    {
+
+    }
+    else if (class_code != 0 && sub_class_code == 0)
+    {
+        /* code */
+    }
+    else if (class_code == 0 && sub_class_code != 0)
+    {
+         for (int i = 0; i < pci_list.num_devices; i++)
+         {
+            if(pci_list.headers[i].subclass == sub_class_code)
+            {
+                 printf("Number of devices: %d\n", pci_list.num_devices);
+                for (int i = 0; i < pci_list.num_devices; i++) 
+                {
+                    printf("Device %d:\n", i);
+                    printf("Class code: 0x%x\n", pci_list.headers[i].class_code);
+                    printf("Vendor ID: 0x%x\n", pci_list.headers[i].vendor_id);
+                    printf("Device ID: 0x%x\n", pci_list.headers[i].device_id);
+                    printf("Device Sub class: 0x%x\n", pci_list.headers[i].subclass);
+                
+                }
+            }
+         }
+    }
+    else
+    {
+         printf("Number of devices: %d\n", pci_list.num_devices);
+    //printf("Number of real found devices: %d\n",num_found_devices);
+        for (int i = 0; i < pci_list.num_devices; i++) {
+            printf("Device %d:\n", i);
+            printf("Class code: 0x%x\n", pci_list.headers[i].class_code);
+            printf("Vendor ID: 0x%x\n", pci_list.headers[i].vendor_id);
+            printf("Device ID: 0x%x\n", pci_list.headers[i].device_id);
+            printf("Device Sub class: 0x%x\n", pci_list.headers[i].subclass);
+        
+        }
+    }
+    
+    
+}
 
 void list_registered_device()
 {
@@ -536,6 +612,26 @@ void list_registered_device()
         printf("Device ID: 0x%X\n", pci_registered_device_list[i].device_id);
         printf("Device Name: %s\n", pci_registered_device_list[i].device_name);
         printf("Driver Available: %s\n", pci_registered_device_list[i].has_driver ? "Yes" : "No");
+        printf("Driver running: %s\n",pci_registered_device_list[i].is_running ? "Yes" : "No");
+        printf_("{/330:0,255,0}");
+        printf("\n");
+    }
+    
+}
+
+void list_running_devices()
+{
+    for (size_t i = 0; i < running_drivers; i++)
+    {
+        printf_("{/330:0,0,225}");
+        printf("Device Found:\n");
+        printf("Class Code: 0x%X\n", pci_registered_device_list_running[i].class_code);
+        printf("Sub class Code: 0x%X\n", pci_registered_device_list_running[i].sub_class);
+        printf("Vendor ID: 0x%X\n", pci_registered_device_list_running[i].vendor_id);
+        printf("Developer Name: %s\n", pci_registered_device_list_running[i].name);
+        printf("Device ID: 0x%X\n", pci_registered_device_list_running[i].device_id);
+        printf("Device Name: %s\n", pci_registered_device_list_running[i].device_name);
+        printf("Driver Available: %s\n", pci_registered_device_list_running[i].has_driver ? "Yes" : "No");
         printf_("{/330:0,255,0}");
         printf("\n");
     }
@@ -547,12 +643,61 @@ void initialize_registered_devices()
     printf("Initializing registered devices\n");
     for (size_t i = 0; i < num_found_devices__registered; i++)
     {
-        if(pci_registered_device_list[i].has_driver == true)
+        if(pci_registered_device_list[i].has_driver == true && pci_registered_device_list[i].is_running == false)
         {
             printf("Calling %s initialization function \n", pci_registered_device_list[i].device_name);
             pci_registered_device_list[i].init_device(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function);
+            pci_registered_device_list[i].is_running = true;
+            pci_registered_device_list_running[running_drivers] = pci_registered_device_list[i];
             //printf("initialized");
         }
     }
     
+}
+
+RegisteredPCIDeviceInfo* return_registered_pci_device(uint8_t bus, uint8_t device, uint8_t func)
+{
+    uint16_t read_vendor_id;
+    uint16_t read_device_id;
+    uint32_t vendorDeviceID = pci_read(bus, device, func, 0);
+    read_vendor_id = vendorDeviceID & 0xFFFF;
+    read_device_id = (vendorDeviceID >> 16) & 0xFFFF;
+    for (size_t i = 0; i < num_found_devices__registered; i++)
+    {
+        if(pci_registered_device_list[i].vendor_id == read_vendor_id && pci_registered_device_list[i].device_id == read_device_id)
+        {
+            return &pci_registered_device_list[i];
+        }
+    }
+    
+}
+
+PCIDevice *PCI_search_device(uint16 vendor_id, uint16 device_id) {
+    PCIDevice *device;
+    RegisteredPCIDeviceInfo *temp_dev;
+    for (size_t i = 0; i < num_found_devices__registered; i++)
+    {
+        if(pci_registered_device_list[i].vendor_id == vendor_id && pci_registered_device_list[i].device_id == device_id)
+        {
+            temp_dev = &pci_registered_device_list[i];
+        }
+    }
+    device->BAR0 = temp_dev->header.bar[0];
+    device->bus = temp_dev->bus;
+    device->device_id = temp_dev->device_id;
+    device->device_name = temp_dev->device_name;
+    device->IRQ = temp_dev->header.interrupt_line;
+    device->vendor_id = temp_dev->vendor_id;
+    device->vendor_name = temp_dev->name;
+    if(device->vendor_id == vendor_id && device->device_id == device_id)
+    {
+        return device;
+    }
+    // while (device) {
+    //     if (device->vendor_id == vendor_id && device->device_id == device_id)
+    //         r
+    //     device = device->next;
+    // }
+
+    return 0;
 }

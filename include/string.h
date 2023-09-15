@@ -7,6 +7,7 @@
 void *memset(void *dst, char c, uint32 n);
 char *strstr(char *s1, const char *s2);
 void *memcpy(void *dst, const void *src, uint32 n);
+void* memmove(void* dest, const void* src, size_t size);
 void parse_string(char *parser, char *string, char c);
 int memcmp(uint8 *s1, uint8 *s2, uint32 n);
 uint32_t atoi(const char *str);
@@ -33,4 +34,5 @@ void append(char s[], char n);
 void * malloc(int nbytes);
 bool hex_string_to_uint16(const char* hexString, uint16_t* result);
 unsigned long strtoul(const char* str, char** endptr, int base);
+char* strtok(char* str, const char* delimiters);
 #endif

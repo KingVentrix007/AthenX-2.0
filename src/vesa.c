@@ -6,7 +6,7 @@
 #include "isr.h"
 #include "string.h"
 #include "types.h"
-
+#include "vesa_display.h"
 // vbe information
 VBE20_INFOBLOCK g_vbe_infoblock;
 VBE20_MODEINFOBLOCK g_vbe_modeinfoblock;
@@ -137,6 +137,39 @@ uint32_t vbe_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 void vbe_putpixel(int x, int y, uint32 color) {
     uint32 i = y * g_width + x;
     *(g_vbe_buffer + i) = color;
+}
+void vesa_scroll()
+{
+    //VGA_clear_screen(Default_screen_color);
+    int SCREEN_WIDTH = vbe_get_width();
+    int SCREEN_HEIGHT = vbe_get_height();
+    int BYTES_PER_PIXEL = 32;
+    int lines = 1;
+    if(1==1)
+    {
+      size_t bytesPerLine = SCREEN_WIDTH *4;
+
+    // Calculate the number of bytes to move
+        size_t bytesToMove = bytesPerLine * (SCREEN_HEIGHT - lines);
+
+        // Perform the scroll by moving the framebuffer data
+        memmove((g_vbe_buffer), (g_vbe_buffer) + bytesToMove, bytesToMove);
+
+        // Clear the newly revealed lines
+        //memset((g_vbe_buffer) + bytesToMove, 0, bytesPerLine * lines);
+        //vesa_row = vesa_row-100;
+        set_vesa_row(0);
+        //set_vesa_colum(100);
+        int x = get_vesa_row();
+        //set_vesa_row(x-100);
+        set_vesa_colum(0);
+    }
+    else
+    {
+
+    }
+    
+    // //vesa_row = VGA_HEIGHT - 1;
 }
 
 void vbe_putpixel_v2(int x, int y,int color, unsigned char *buffer)

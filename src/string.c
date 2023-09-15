@@ -59,6 +59,29 @@ char* strtok(char* str, const char* delimiters) {
 
     return current_token;
 }
+
+void* memmove(void* dest, const void* src, size_t size) {
+    // Check for overlapping regions
+    if (src < dest && src + size > dest) {
+        // Copy backward to avoid overwriting the source data
+        const char* source = (const char*)src + size;
+        char* destination = (char*)dest + size;
+
+        while (size--) {
+            *(--destination) = *(--source);
+        }
+    } else {
+        // Copy forward since there's no overlap
+        const char* source = (const char*)src;
+        char* destination = (char*)dest;
+
+        while (size--) {
+            *(destination++) = *(source++);
+        }
+    }
+
+    return dest;
+}
 void *memcpy(void *dst, const void *src, uint32 n) {
     //FUNC_ADDR_NAME(&memcpy);
     char *ret = dst;

@@ -8,10 +8,13 @@
 #include "io_ports.h"
 #include "8259_pic.h"
 #include "serial.h"
+#include "debug.h"
+
 /**
  * initialize 8259 PIC with default IRQ's defined in isr.h
  */
 void pic8259_init() {
+    //FUNC_ADDR_NAME(&pic8259_init);
     uint8 a1, a2;
 
     // save mask registers

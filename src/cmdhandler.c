@@ -1,3 +1,6 @@
+#include "isr.h"
+#include "stdio.h"
+#include "errno.h"
 #include "pci.h"
 #include "printf.h"
 #include "ext2.h"
@@ -20,60 +23,96 @@
 #include "keyboard.h"
 #include "fs.h"
 #include "serial.h"
+#include "man.h"
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
-void display_available_commands() {
-    printf_("\nAvailable commands:\n");
-    printf_("help - Display this list of commands\n");
-    printf_("time - Display the current time\n");
-    printf_("echo <message> - Print the provided message\n");
-    printf_("write <filename> <type> - Write content to a file\n");
-    printf_("read <filename> - Read content from a file\n");
-    printf_("ls - List files in the current directory\n");
-    printf_("rm <filename> - Delete a file\n");
-    printf_("cls - Clear the screen\n");
-    printf_("bg - Change background colors\n");
-    printf_("logo - Display a logo\n");
-    printf_("mkdir <directoryname> - Create a new directory\n");
-    printf_("exit - Update file system partition table\n");
-    printf_("set-xt <x> <y> - Set screen resolution\n");
-    printf_("song - Play a song\n");
-    printf_("format <disk> - Format a disk\n");
-    printf_("table - Display file system partition table\n");
-    printf_("3d - Display a 3D demo\n");
-    printf_("rle - run length encoding tests\n");
-    printf_("exe <filename> - run executable file\n");
-    printf_("edit <filename> - edit a file\n");
+void display_available_commands(const char* cmd) {
+    printf("\nAvailable commands:\n");
+    printf("help - Display this list of commands\n");
+    printf("time - Display the current time\n");
+    printf("echo <message> - Print the provided message\n");
+    printf("write <filename> <type> - Write content to a file\n");
+    printf("read <filename> - Read content from a file\n");
+    printf("ls - List files in the current directory\n");
+    printf("rm <filename> - Delete a file\n");
+    printf("cls - Clear the screen\n");
+    printf("bg - Change background colors\n");
+    printf("logo - Display a logo\n");
+    printf("mkdir <directoryname> - Create a new directory\n");
+    printf("exit - Update file system partition table\n");
+    printf("set-xt <x> <y> - Set screen resolution\n");
+    printf("song - Play a song\n");
+    printf("format <disk> - Format a disk\n");
+    printf("table - Display file system partition table\n");
+    printf("3d - Display a 3D demo\n");
+    printf("rle - run length encoding tests\n");
+    printf("exe <filename> - run executable file\n");
+    printf("edit <filename> - edit a file\n");
+    printf("new format\n-----------------------------------------------\n");
+    
+}
+
+void man(const char* cmd)
+{
+    if(strcmp(cmd,"inspect") == 0)
+    {
+        man_inspect();
+
+    }
 }
 void parse_command(const char* command) {
-    FUNC_ADDR_NAME(&parse_command);
+    FUNC_ADDR_NAME(&parse_command,1,"s");
     char command_copy[MAX_COMMAND_LENGTH];
     strcpy(command_copy, command);
 
     // Tokenize the command by spaces
     char* token;
     char* arguments[MAX_ARGUMENTS];
+    char* sub_args[MAX_ARGUMENTS];
+    int sub_arg_count = 0;
     int arg_count = 0;
 
     token = strtok(command_copy, " ");
-    while (token != NULL) {
-        arguments[arg_count++] = token;
+   while (token != NULL) {
+        if (arg_count >= MAX_ARGUMENTS) {
+            printf("Too many arguments!\n");
+            break;
+        }
+
+        // Check if it's an argument or sub-argument
+        if (token[0] == '-' && token[1] == '-') {
+            sub_args[sub_arg_count++] = token;
+        } else {
+            arguments[arg_count++] = token;
+        }
+
         token = strtok(NULL, " ");
     }
-
+    // printf("\nArgs: \n");
+    // for (size_t i = 0; i < arg_count; i++)
+    // {
+    //     printf("%s\n",arguments[i]);
+    // }
+    // printf("Sub args %d:\n",sub_arg_count);
+    // for (size_t q = 0; q < sub_arg_count; q++)
+    // {
+    //     printf("%s\n",sub_args[q]);
+    // }
+    
+    
     // Check for different commands and execute them
     if (strcmp(arguments[0], "help") == 0) {
         if(arg_count <= 1)
         {
-            display_available_commands();
+            display_available_commands("");
             
         }
         else
         {
-            printf_("This feature is still coming");
+            display_available_commands(arguments[1]);
         }
 
          
@@ -107,6 +146,95 @@ void parse_command(const char* command) {
          
        
     }
+    else if (strcmp(arguments[0],"man") == 0)
+    {
+        man(arguments[1]);
+    }
+    
+    else if (strcmp(arguments[0], "inspect") == 0)
+    {
+        if(strcmp(arguments[1],"err") == 0)
+        {
+
+            inspect_errors();
+        }
+        else if(strcmp(arguments[1],"log") == 0)
+        {
+            if(strcmp(sub_args[0],"--all") == 0)
+            {
+                printf("\n");
+                print_events();
+            }
+            else if (strcmp(sub_args[0],"--find") == 0)
+            {
+                TIME startTime, endTime;
+                bool isError;
+                const char specificCode[MAX_STRING_LENGTH] = ""; 
+                const char functionName[MAX_STRING_LENGTH]; 
+                printf("Enter start time (hh mm ss yyyy mm dd): ");
+                scanf("%d %d %d %d %d %d", &startTime.h, &startTime.m, &startTime.s, &startTime.y, &startTime.mo, &startTime.d);
+                while (get_chr() != '\n');
+                printf("\nEnter end time (hh mm ss yyyy mm dd): ");
+                scanf("%d %d %d %d %d %d", &endTime.h, &endTime.m, &endTime.s, &endTime.y, &endTime.mo, &endTime.d);
+                printf("%d",endTime.h);
+                while (get_chr() != '\n');
+                printf("\nEnter error status (0 for false, 1 for true): ");
+                scanf("%d", &isError);
+
+                printf("\nEnter specific function name (or leave blank for any): ");
+                scanf("%s", functionName);
+                filterAndPrintEvents(&startTime,&endTime,isError,functionName);
+
+            }
+            
+            
+        }
+        else if (strcmp(arguments[1],"pci") == 0)
+        {
+            if(strcmp(sub_args[0],"--list") == 0)
+            {
+                list_pci_devices();
+            }
+            if(strcmp(sub_args[0],"--find") == 0 && sub_args[1] != NULL)
+            {
+                printf("HERE");
+            }
+            
+        }
+        else if (strcmp(arguments[1],"stack") == 0)
+        {
+            printf("\n");
+            REGISTERS *regs;
+            getRegisters(regs);
+
+            TraceStackTrace(100,0);
+        }
+        
+        else if (strcmp(arguments[1],"drivers") == 0 )
+        {
+            
+            if(strcmp(sub_args[0],"--all") == 0)
+            {
+                 list_registered_device();
+            }
+            else if(strcmp(sub_args[0],"--live") == 0)
+            {
+                list_running_devices();
+            }
+           
+        }
+        // else if (strcmp(arguments[1],"test") == 0)
+        // {
+        //     char b[MAX_STRING_LENGTH];
+        //     scanf("%s",b);
+        //     printf("%s",b);
+        // }
+        
+        
+        
+        
+    }
+    
     else if (strcmp(arguments[0], "pci") == 0)
     {
         printf("\n");

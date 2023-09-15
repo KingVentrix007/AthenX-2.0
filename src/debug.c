@@ -48,12 +48,14 @@ void append_to_list_if_not_exists(List* list, ADDER_NAME_LIST item) {
     }
 }
 
-void append_name_addr(char name[20],uint32 addr,uint32 line,char filename[20])
+void append_name_addr(char name[20],uint32 addr,int num_parms,char param_list[10],uint32 line,char filename[20])
 {
     addr_name.addr = addr;
     strcpy(addr_name.names,name);
     strcpy(addr_name.file_name,filename);
     addr_name.line = line;
+    addr_name.num_params = num_parms;
+    strcpy(addr_name.addrtype,param_list);
     append_to_list_if_not_exists(&myList,addr_name);
     
     
@@ -80,7 +82,7 @@ bool find_by_address(uint32_t *targetAddr) {
     return false;
 }
 
-void print_list(uint32 num) {
+ADDER_NAME_LIST *print_list(uintptr_t num) {
    
     if(num == 0)
     {
@@ -94,20 +96,11 @@ void print_list(uint32 num) {
     }
     else
     {
-         for (int i = 0; i < myList.size; i++) {
-        //printf("Item %d:    ", i + 1);
-            double perc = check_similarity(num, myList.nodes[i].data.addr);
-            if (perc >= 90.0)
-            {
-                //printf("There is a %f%% probability that this function coursed the error %s\n",perc,myList.nodes[i].data.names);
-                 double perc_2 = check_similarity(100.0, perc);
-                 if(perc_2 >= 99.99)
-                 {
-                    printf_("Course of error: %s in %s at line %d. Address : 0x%x  : %f%% probability\n",myList.nodes[i].data.names,myList.nodes[i].data.file_name,myList.nodes[i].data.line,myList.nodes[i].data.addr,perc);
-            }
-                 }
-                
-        }
+        printf_("{/330:0,255,0}");
+         ADDER_NAME_LIST *addr = find_largest_smaller_address(&myList,num);
+         printf("%s(%d) : %s",addr->file_name,addr->line,addr->names);
+          printf_("{/330:0,255,0}");
+          return addr;
     }
     
 }
@@ -124,7 +117,18 @@ double check_similarity(double num1, double num2) {
     
     return similarity_percentage;
 }
-
+// Function to find the largest address smaller than the provided address
+const ADDER_NAME_LIST *find_largest_smaller_address(const List *list, uint32 search_addr) {
+    const ADDER_NAME_LIST *result = NULL;
+    for (int i = 0; i < list->size; ++i) {
+        if (list->nodes[i].data.addr < search_addr) {
+            if (result == NULL || list->nodes[i].data.addr > result->addr) {
+                result = &list->nodes[i].data;
+            }
+        }
+    }
+    return result;
+}
 void print_stack_trace(void *ebp) {
     void **current_ebp = ebp;
     void *return_address;
@@ -178,8 +182,8 @@ char *ctos_debug(char s[2], const char c)
 
 #define MAX_COMMAND_LENGTH_DEBUG 50
 #define MAX_ARGUMENTS_DEBUG 10
-void parse_command_debug(const char* command) {
-    FUNC_ADDR_NAME(&parse_command_debug);
+void parse_command_debug(const char* command, REGISTERS* reg) {
+    FUNC_ADDR_NAME(&parse_command_debug,2,"cu");
     char command_copy[MAX_COMMAND_LENGTH_DEBUG];
     strcpy(command_copy, command);
 
@@ -198,7 +202,7 @@ void parse_command_debug(const char* command) {
     if (strcmp(arguments[0], "help") == 0) {
 
     }
-    if(strcmp(arguments[0], "dump") == 0)
+    else if(strcmp(arguments[0], "dump") == 0)
     {
         if(strcmp(arguments[1],"mem") == 0)
         {
@@ -207,26 +211,28 @@ void parse_command_debug(const char* command) {
             display_kernel_memory_map(out);
         }
     }
-    if(strcmp(arguments[0],"stack") == 0)
+    else if(strcmp(arguments[0],"stack") == 0)
     {   
 
-        uint32 *eip = atoi(arguments[1]);
+        int *level = atoi(arguments[1]);
         
-        print_stack_trace(eip);
+        //print_stack_trace(eip);
+        unwind_stack(reg,level);
+        
     }
-    if(strcmp(arguments[0],"addr") == 0)
+    else if(strcmp(arguments[0],"addr") == 0)
     {
         print_list(0);
     }
     else if(strcmp(arguments[0],"inspect") == 0)
     {
-        uint32 addr = atoi(arguments[1]);
-        asm volatile (
-        "call *%0"
-        :
-        : "r"(addr)
-        : "memory"
-    );
+    //     uint32 addr = atoi(arguments[1]);
+    //     asm volatile (
+    //     "call *%0"
+    //     :
+    //     : "r"(addr)
+    //     : "memory"
+    // );
         //&addr;
     }
     else
@@ -238,15 +244,15 @@ void parse_command_debug(const char* command) {
 
 
 
-void debug_terminal()
+void debug_terminal(REGISTERS *regs)
 {
     //keyboard_init();
-    printf_("Debug terminal started");
+    printf("Debug terminal started");
     char *buffer[512];
      uint8_t byte;
     //char *buffer[512];
      buffer[0] = '\0';
-    printf_("\n@DEBUG>");
+    printf("\n@DEBUG>");
     while(1)
     {    
             
@@ -258,7 +264,7 @@ void debug_terminal()
                 //crude_song();
                 if(backspace(buffer))
                 {
-                    printf_("\b");
+                    printf("\b");
                     //set_cursor_x(get_cursor_x()-2);
                     //printf(" ");
                     //console_ungetchar();
@@ -272,14 +278,14 @@ void debug_terminal()
             }
             else if (c == '\n')
             {
-                //printf("\n");
-                parse_command_debug(buffer);
+                printf("\n");
+                parse_command_debug(buffer,regs);
                 memset(buffer, 0,sizeof(buffer));
                 next_line();
-                set_screen_x(0);
+                //set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
-                printf_("@DEBUG>");
+                printf("\n@DEBUG>");
                 //crude_song();
             }
             
@@ -289,7 +295,7 @@ void debug_terminal()
                 char* s;
                 s = ctos(s, c);
                 //printf(s);
-                printf_(s);
+                printf(s);
                 //printf(s);
                 
                 append(buffer,c);
@@ -298,4 +304,54 @@ void debug_terminal()
             
             
     }
+}
+
+
+void getRegisters(REGISTERS* regs) {
+    uint32_t ds, edi, esi, ebp, esp, ebx, edx, ecx, eax, eip, cs, eflags, ss;
+
+    //int eax, ebx, ecx, edx,esi,edi,esp,ebp;
+
+    // Inline assembly to move register values to variables
+    asm volatile(
+        "movl %%eax, %0\n\t"
+        "movl %%ebx, %1\n\t"
+        "movl %%ecx, %2\n\t"
+        "movl %%edx, %3\n\t"
+        
+        : "=r" (eax), "=r" (ebx), "=r" (ecx), "=r" (edx)
+        :
+        :);
+    asm volatile(
+        "movl %%esi, %0\n\t"
+        "movl %%edi, %1\n\t"
+        "movl %%esp, %2\n\t"
+        "movl %%ebp, %3\n\t"
+
+        : "=r" (esi), "=r" (edi), "=r" (esp), "=r" (ebp)
+        :
+        :);
+    
+    // asm volatile(
+    //     "movl %%eip, %0\n\t"
+    //     "movl %%cs, %1\n\t"
+    //     "movl %%eflags, %2\n\t"
+
+    //     :"=r" (eip), "=r" (cs), "=r" (eflags)
+    //     :
+    //     :);
+    // Copy the values to the REGISTERS struct
+    regs->ds = ds;
+    regs->edi = edi;
+    regs->esi = esi;
+    regs->ebp = ebp;
+    regs->esp = esp;
+    regs->ebx = ebx;
+    regs->edx = edx;
+    regs->ecx = ecx;
+    regs->eax = eax;
+    regs->eip = eip;
+    regs->cs = cs;
+    regs->eflags = eflags;
+    //regs->ss = ss;
 }

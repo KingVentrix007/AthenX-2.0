@@ -46,6 +46,26 @@
         "functional": "c",
         "ethernet.h": "c",
         "pci.h": "c",
-        "cstdio": "c"
+        "cstdio": "c",
+        "compare": "c",
+        "errno.h": "c",
+        "memory.h": "c",
+        "pmm.h": "c",
+        "stdio.h": "c",
+        "ssfs.h": "c",
+        "array": "c",
+        "deque": "c",
+        "forward_list": "c",
+        "list": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "io_context": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "8259_pic.h": "c",
+        "idt.h": "c",
+        "kheap.h": "c",
+        "time.h": "c"
     }
 }

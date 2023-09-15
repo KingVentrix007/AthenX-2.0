@@ -1,6 +1,6 @@
 
 #include "timer.h"
-
+#include "debug.h"
 #include "console.h"
 #include "idt.h"
 #include "io_ports.h"
@@ -14,11 +14,19 @@ uint32 g_ticks = 0;
 uint16 g_freq_hz = 0;
 // timer functions to be called when that ticks reached in irq handler
 TIMER_FUNCTION_MANAGER g_timer_function_manager;
+ cmos_address = 0x70;
+cmos_data    = 0x71;
 
+unsigned char get_RTC_register(int reg) {
+    outportb(cmos_address, reg);
+    return inportb(cmos_data);
+}
 
 // See https://wiki.osdev.org/Programmable_Interval_Timer
 void timer_set_frequency(uint16 f) {
+    FUNC_ADDR_NAME(&timer_set_frequency,1,"i");
     g_freq_hz = f;
+    //int error_fake = 1/0;
     uint16 divisor = TIMER_INPUT_CLOCK_FREQUENCY / f;
     // set Mode 3 - Square Wave Mode
     outportb(TIMER_COMMAND_PORT, 0b00110110);
@@ -30,6 +38,7 @@ void timer_set_frequency(uint16 f) {
 
 
 void timer_handler(REGISTERS* r) {
+    FUNC_ADDR_NAME(&timer_handler,1,"T");
     uint32 i;
     TIMER_FUNC_ARGS *args = NULL;
     g_ticks++;
@@ -57,7 +66,10 @@ void timer_register_function(TIMER_FUNCTION function, TIMER_FUNC_ARGS *args) {
 }
 
 void timer_init() {
+    FUNC_ADDR_NAME(&timer_init,0,"");
     // IRQ0 will fire 100 times per second
+    //printf("0x%x\n",&timer_init);
+    
     timer_set_frequency(100);
     isr_register_interrupt_handler(IRQ_BASE, timer_handler);
 }
@@ -74,4 +86,36 @@ int get_ticks()
 int reset_ticks()
 {
     g_ticks = 0;
+}
+
+TIME get_time()
+{
+    int second;
+    int minute;
+    int hour;
+    int day;
+    int month;
+    int year;
+    second = get_RTC_register(0x00);
+    minute = get_RTC_register(0x02);
+    hour = get_RTC_register(0x04);
+    day = get_RTC_register(0x07);
+    month = get_RTC_register(0x08);
+    year = get_RTC_register(0x09);
+    second = (second & 0x0F) + ((second / 16) * 10);
+    minute = (minute & 0x0F) + ((minute / 16) * 10);
+    hour = ( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80);
+    day = (day & 0x0F) + ((day / 16) * 10);
+    month = (month & 0x0F) + ((month / 16) * 10);
+    year = (year & 0x0F) + ((year / 16) * 10);
+    TIME time;
+    time.h = hour+2;
+    time.m = minute;
+    time.s = second;
+    time.y = year;
+    time.mo = month;
+    time.d = day;
+    // printf("time: %d/%d/%d\n",day,month,year);
+    // printf("time: %d.%d:%d\n",hour+2,minute,second);
+    return time;
 }

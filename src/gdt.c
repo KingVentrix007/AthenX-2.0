@@ -2,7 +2,7 @@
  * Global Descriptor Table(GDT) setup
  */
 #include "gdt.h"
-
+#include "debug.h"
 GDT g_gdt[NO_GDT_DESCRIPTORS];
 GDT_PTR g_gdt_ptr;
 
@@ -10,6 +10,7 @@ GDT_PTR g_gdt_ptr;
  * fill entries of GDT 
  */
 void gdt_set_entry(int index, uint32 base, uint32 limit, uint8 access, uint8 gran) {
+    //FUNC_ADDR_NAME(&gdt_set_entry);
     GDT *this = &g_gdt[index];
 
     this->segment_limit = limit & 0xFFFF;
@@ -25,6 +26,7 @@ void gdt_set_entry(int index, uint32 base, uint32 limit, uint8 access, uint8 gra
 
 // initialize GDT
 void gdt_init() {
+    //FUNC_ADDR_NAME(&gdt_init);
     g_gdt_ptr.limit = sizeof(g_gdt) - 1;
     g_gdt_ptr.base_address = (uint32)g_gdt;
 

@@ -104,4 +104,5 @@ void vese_mem(void *src, int n);
 int * find_biggest_mode();
 #define VBE_RGB(r, g, b) vbe_rgb(r, g, b)
 #define VBE_RGBA(r, g, b, a) vbe_rgba(r, g, b, a)
+void vesa_scroll();
 #endif

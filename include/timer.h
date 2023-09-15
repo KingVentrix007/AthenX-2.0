@@ -27,13 +27,22 @@ typedef struct {
     // arguments of each above timer functions
     TIMER_FUNC_ARGS func_args[MAXIMUM_TIMER_FUNCTIONS];
 } TIMER_FUNCTION_MANAGER;
-
+typedef struct
+{
+    int h;
+    int m;
+    int s;
+    // Expanded time
+    int y;
+    int mo;
+    int d;
+}TIME;
 
 void timer_init();
 void sleep(double sec);
 int get_ticks();
 void timer_register_function(TIMER_FUNCTION function, TIMER_FUNC_ARGS *args);
 int reset_ticks();
-
+TIME get_time();
 #endif
 

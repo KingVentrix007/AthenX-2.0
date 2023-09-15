@@ -9,11 +9,13 @@
 #include "bitmap.h"
 #include "font.h"
 #include "display.h"
+#include "keyboard.h"
 size_t vesa_row;
 size_t vesa_column;
 //static uint16_t *const VGA_MEMORY = (uint16_t *)0xb8000;
 uint8_t vesa_color;
 static uint16 *vesa_buffer;
+bool controlled_scroll = false;
 
 #define BUFFER_SIZE 1024
 
@@ -31,24 +33,7 @@ static inline uint16_t make_vgaentry(char c, uint8_t color)
 
 
 
-void vesa_scroll()
-{
-    //VGA_clear_screen(Default_screen_color);
-    vesa_column = 0;
-    vesa_row = 0;
-    int i;
-    for (i = 0; i < VGA_HEIGHT; i++)
-    {
-        int m;
-        for (m = 0; m < VGA_WIDTH; m++)
-        {
-            vesa_buffer[i * VGA_WIDTH + m] = vesa_buffer[(i + 1) * VGA_WIDTH + m];
-            
-        }
-        vesa_row--;
-    }
-    // //vesa_row = VGA_HEIGHT - 1;
-}
+
 
 void vesa_putentryat(char c, uint8_t color, size_t x, size_t y)
 {
@@ -79,14 +64,24 @@ void vesa_putchar(char c)
 {
     if (c == '\n' || c == '\r')
     {
-        vesa_column = vesa_column+16;
-        vesa_row = 0;
-        if (vesa_column >= vbe_get_height())
+       
+        if (vesa_row >= vbe_get_height()-8)
+        {
+            while(kb_get_scancode() != SCAN_CODE_KEY_DOWN);
+            vesa_scroll();
+            //printf("HERE");
+        }
+        else
+        {
+             vesa_column = 0;
+            vesa_row = vesa_row +16;
+        }
         //  set_screen_x(0);
         // set_screen_y(0);
         //     clear_screen();
         //     clear_display();
-             vesa_scroll();
+             
+       
         return;
     }
     else if (c == '\t')
@@ -105,19 +100,19 @@ void vesa_putchar(char c)
            }
            
         }
-        vesa_row = vesa_row - 8;
-        vesa_putentryat(' ', vesa_color, vesa_row, vesa_column);
-        vesa_putentryat(' ', vesa_color, vesa_row, vesa_column);
+        vesa_column = vesa_column - 8;
+        vesa_putentryat(' ', vesa_color, vesa_column, vesa_row);
+        vesa_putentryat(' ', vesa_color, vesa_column, vesa_row);
 
 
         return;
     }
-    vesa_putentryat(c, default_font_color, vesa_row,vesa_column);
-    vesa_row = vesa_row +8;
-   if(vesa_row >= vbe_get_width()-16)
+    vesa_putentryat(c, default_font_color,vesa_column, vesa_row);
+    vesa_column = vesa_column +8;
+   if(vesa_column >= vbe_get_width()-16)
    {
-        vesa_column = vesa_column+16;
-        vesa_row = 0;
+        vesa_row = vesa_row+16;
+        vesa_column = 0;
 
 
    }
@@ -182,7 +177,7 @@ int set_vesa_row(int row)
 
 int set_vesa_colum(int col)
 {
-    return vesa_column = col;
+    vesa_column = col;
 }
 
 void vesa_set_colors(enum vga_color font_color, enum vga_color background_color)

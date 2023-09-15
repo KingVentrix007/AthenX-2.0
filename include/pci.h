@@ -3,6 +3,31 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "types.h"
+
+
+
+#define PCI_ERR_DEVICE_NOT_FOUND 0x2000
+#define PCI_ERR_INVALID_VENDOR_ID 0x2001
+#define PCI_ERR_INVALID_DEVICE_ID 0x2002
+#define PCI_ERR_INVALID_BAR 0x2003
+#define PCI_ERR_INVALID_IRQ 0x2004
+#define PCI_ERR_INVALID_CLASS_CODE 0x2005
+#define PCI_ERR_INVALID_SUBSYSTEM 0x2006
+#define PCI_ERR_UNSUPPORTED_DEVICE 0x2007
+#define PCI_ERR_BUS_MASTER_DISABLED 0x2008
+#define PCI_ERR_PCI_POWER_STATE 0x2009
+#define PCI_ERR_DMA_ERROR 0x200A
+#define PCI_ERR_INVALID_REGISTER 0x200B
+#define PCI_ERR_INVALID_CAPABILITY 0x200C
+#define PCI_ERR_INVALID_BUS 0x200D
+#define PCI_ERR_UNSUPPORTED_OPERATION 0x200E
+#define PCI_ERR_VENDOR_MISMATCH 0x200F
+#define PCI_ERR_BAR_CONFLICT 0x2010
+#define PCI_ERR_IRQ_CONFLICT 0x2011
+#define PCI_ERR_DEVICE_NOT_ENABLED 0x2012
+#define PCI_ERR_INVALID_CONFIG_SPACE 0x2013
+int dummy(uint8_t dummy1, uint8_t dummy2, uint8_t dummy3);
 
 // Define constants for maximum values
 #define MAX_PCI_DEVICES 500
@@ -69,6 +94,7 @@ typedef struct {
     char name[MAX_DEVICE_NAME];
     char device_name[MAX_DEVICE_NAME];
     bool has_driver;
+    bool is_running;
     uint8_t bus;
     uint8_t device;
     uint8_t function;
@@ -108,6 +134,28 @@ void list_registered_device();
 
 // Function to register a PCI device
 int create_device_list(uint16_t device_id, uint16_t vendor_id, uint16_t class_code, bool has_driver, char device_name[200], char producer_name[200], DeviceDriverPtr init_func);
+
+RegisteredPCIDeviceInfo* return_registered_pci_device(uint8_t bus, uint8_t device, uint8_t func);
+
+
+void list_running_devices();
+
+//From CHAOS os
+//https://github.com/lpoulain/CHAOS
+typedef struct PCI_device_t {
+	uint16 vendor_id;
+	uint16 device_id;
+	char *vendor_name;
+	char *device_name;
+	unsigned char *BAR0;
+	struct PCI_device_t *next;
+	uint8 bus;
+	uint8 slot;
+	uint8 IRQ;
+} PCIDevice;
+
+PCIDevice *PCI_search_device(uint16 vendor_id, uint16 device_id);
+
 
 
 

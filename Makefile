@@ -2,7 +2,7 @@ CC=gcc
 AS=as
 ASM = nasm
 CONFIG = ./config
-GCCPARAMS = -m32 -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
+GCCPARAMS = -m32 -fno-omit-frame-pointer -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
             -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
             -Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
             
@@ -96,7 +96,7 @@ changlog:
 	./update_changelog
 run: iso
 	truncate -s 0 pipe
-	qemu-system-i386 -boot d -cdrom HackOS.iso  -drive file=ext2.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 2G -netdev user,id=network0 -netdev user,id=network1 -device e1000,netdev=network0,mac=52:5E:56:12:34:56 -device i82557a,netdev=network1
+	qemu-system-i386 -boot d -cdrom HackOS.iso  -drive file=HDD.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 2G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
 run-ext2:
 	
 	qemu-system-x86_64 -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk

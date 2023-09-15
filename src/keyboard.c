@@ -65,7 +65,7 @@ char alternate_chars(char ch) {
     }
 }
 
-void keyboard_handler(REGISTERS *r) {
+void keyboard_handler(isr_register_interrupt_handler) {
     int scancode;
 
     g_ch = 0;
@@ -136,7 +136,7 @@ char kb_getchar() {
         count++;
         if(count >= 100)
         {
-           break; 
+           return '\0'; 
         }
     };
     c = g_ch;

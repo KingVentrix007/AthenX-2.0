@@ -5,7 +5,7 @@
 #include "idt.h"
 #include "isr.h"
 #include "8259_pic.h"
-
+#include "debug.h"
 IDT g_idt[NO_IDT_DESCRIPTORS];
 IDT_PTR g_idt_ptr;
 
@@ -13,6 +13,7 @@ IDT_PTR g_idt_ptr;
  * fill entries of IDT 
  */
 void idt_set_entry(int index, uint32 base, uint16 seg_sel, uint8 flags) {
+    //FUNC_ADDR_NAME(&idt_set_entry);
     IDT *this = &g_idt[index];
 
     this->base_low = base & 0xFFFF;
@@ -23,6 +24,7 @@ void idt_set_entry(int index, uint32 base, uint16 seg_sel, uint8 flags) {
 }
 
 void idt_init() {
+    //FUNC_ADDR_NAME(&idt_init);
     g_idt_ptr.base_address = (uint32)g_idt;
     g_idt_ptr.limit = sizeof(g_idt) - 1;
     pic8259_init();
