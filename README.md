@@ -111,6 +111,7 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
 Simply add any changes you want then and save them, then type 'make run' and watch you change come to life (or not).
 
 ## Roadmap
+* Each update changes this Roadmap, something that worked before a commit might not work after the commit.
 
 * [X] Boot with GRUB
 * [X] VGA mode 13h
@@ -175,6 +176,7 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
 * [OsDev.org](https://wiki.osdev.org/Main_Page): Lots if informative pages and articles
 * [Logo.com](https://app.logo.com/): They made my logo, and it was free
 * And anyone else that I have missed, thanks.
+* [OS](https://github.com/pritamzope/OS): I used A LOT of his code, ATA driver, VESA, FPU, etc
 * My mom:  she did all my editing and made sure my grammar was correct
 
 ## Images
