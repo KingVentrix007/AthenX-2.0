@@ -136,4 +136,5 @@ void TraceStackTrace(unsigned int MaxFrames,uintptr_t ebp_in);
 void inspect_stack_frame(int* ebp,int *esp, int total_params, const char* param_types);
 void extractLocalVars(int* esp, int* ebp) ;
 uint32_t *unwind_stack(REGISTERS *reg,int search_level);
+REGISTERS *get_regs();
 #endif

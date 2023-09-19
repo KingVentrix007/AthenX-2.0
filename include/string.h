@@ -35,4 +35,9 @@ void * malloc(int nbytes);
 bool hex_string_to_uint16(const char* hexString, uint16_t* result);
 unsigned long strtoul(const char* str, char** endptr, int base);
 char* strtok(char* str, const char* delimiters);
+char *strtok_r(char* str, const char* delim, char** saveptr);
+unsigned long long strtoull(const char *str, char **endptr, int base);
+int tolower(int c);
+int isdigit(int c);
+int isxdigit(int c);
 #endif

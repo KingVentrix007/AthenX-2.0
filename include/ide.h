@@ -24,8 +24,8 @@ typedef struct {
 } IDE_DEVICE;
 
 
-#define KERNEL_SECTOR_BASE 100
-#define FILE_SECTOR_BASE 200
+#define KERNEL_SECTOR_BASE 900
+#define FILE_SECTOR_BASE 1000
 
 
 

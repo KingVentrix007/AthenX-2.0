@@ -1,4 +1,4 @@
-
+#include "printf.h"
 #include "debug.h"
 #include "ide.h"
 #include "console.h"
@@ -332,12 +332,12 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
     for (i = 0; i < 4; i++)
         if (g_ide_devices[i].reserved == 1) {
             printf_("%d:-\n", i);
-            printf_("  model: %s\n", g_ide_devices[i].model);
-            printf_("  type: %s\n", (const char *[]){"ATA", "ATAPI"}[g_ide_devices[i].type]);
-            printf_("  drive: %u, channel: %u\n", g_ide_devices[i].drive, g_ide_devices[i].channel);
-            printf_("  base: 0x%x, control: 0x%x\n", g_ide_channels[i].base, g_ide_channels[i].control);
-            printf_("  size: %u sectors, %u bytes\n", g_ide_devices[i].size, g_ide_devices[i].size * ATA_SECTOR_SIZE);
-            printf_("  signature: 0x%x, features: %d\n", g_ide_devices[i].signature, g_ide_devices[i].features);
+            printf("  model: %s\n", g_ide_devices[i].model);
+            printf("  type: %s\n", (const char *[]){"ATA", "ATAPI"}[g_ide_devices[i].type]);
+            printf("  drive: %u, channel: %u\n", g_ide_devices[i].drive, g_ide_devices[i].channel);
+            printf("  base: 0x%x, control: 0x%x\n", g_ide_channels[i].base, g_ide_channels[i].control);
+            printf("  size: %u sectors, %u bytes\n", g_ide_devices[i].size, g_ide_devices[i].size * ATA_SECTOR_SIZE);
+            printf("  signature: 0x%x, features: %d\n", g_ide_devices[i].signature, g_ide_devices[i].features);
         }
 }
 

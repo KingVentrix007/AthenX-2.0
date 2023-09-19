@@ -66,6 +66,13 @@
         "8259_pic.h": "c",
         "idt.h": "c",
         "kheap.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "fpu.h": "c",
+        "tui.h": "c",
+        "man.h": "c",
+        "math.h": "c",
+        "editor.h": "c",
+        "installer.h": "c",
+        "*.tcc": "c"
     }
 }

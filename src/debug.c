@@ -1,4 +1,4 @@
-
+#include "ide.h"
 #include <string.h>
 #include <vesa.h>
 #include <isr.h>
@@ -10,22 +10,95 @@
 #include "keyboard.h"
 #include "kernel.h"
 #include "graphics.h"
+#include "multiboot.h"
 ADDER_NAME_LIST addr_name;
 List myList;
+//#define NO_IMG
+
+
+void printMultibootInfo(MULTIBOOT_INFO *mb_info) {
+     printf_("{/330:255,0,255}");
+    printf("Multiboot Information:\n");
+     printf_("{/330:0,255,0}");
+    printf("Flags: 0x%x\n", mb_info->flags);
+    printf("Memory (Low): 0x%x\n", mb_info->mem_low);
+    printf("Memory (High): 0x%x\n", mb_info->mem_high);
+    printf("Boot Device: 0x%x\n", mb_info->boot_device);
+    printf("Kernel Command Line: 0x%x\n", mb_info->cmdline);
+    
+    if (mb_info->flags & (1 << 3)) {
+        printf("Modules Count: %d\n", mb_info->modules_count);
+        printf("Modules Address: 0x%x\n", mb_info->modules_addr);
+    }
+    else
+    {
+         printf_("{/330:255,0,0}");
+         printf("No modules\n");
+          printf_("{/330:0,255,0}");
+    }
+    
+    if (mb_info->flags & (1 << 4) && mb_info->flags & (1 << 5)) {
+        printf("Symbol Table Info (AOUT):\n");
+        printf("Tabsize: %d\n", mb_info->u.aout_sym.tabsize);
+        printf("Strsize: %d\n", mb_info->u.aout_sym.strsize);
+        printf("Addr: 0x%x\n", mb_info->u.aout_sym.addr);
+    } else if (mb_info->flags & (1 << 4)) {
+        printf("Symbol Table Info (ELF):\n");
+        printf("Num: %d\n", mb_info->u.elf_sec.num);
+        printf("Size: %d\n", mb_info->u.elf_sec.size);
+        printf("Addr: 0x%x\n", mb_info->u.elf_sec.addr);
+        printf("Shndx: %d\n", mb_info->u.elf_sec.shndx);
+    }
+    
+    // Add conditions for other flags as needed
+     printf_("{/330:255,255,0}");
+     printf("Multiboot memory map\n");
+      printf_("{/330:0,255,0}");
+    printf("Memory Map Length: %d\n", mb_info->mmap_length);
+    printf("Memory Map Address: 0x%x\n", mb_info->mmap_addr);
+    // Add more fields as needed
+    printf_("{/330:255,0,0}");
+    printf("Only applied to to moment grub was launched\n");
+     printf_("{/330:0,255,0}");
+    printf("Framebuffer Address: 0x%x\n", mb_info->framebuffer_addr);
+    printf("Framebuffer Pitch: %d\n", mb_info->framebuffer_pitch);
+    printf("Framebuffer Width: %d\n", mb_info->framebuffer_width);
+    printf("Framebuffer Height: %d\n", mb_info->framebuffer_height);
+    printf("Framebuffer BPP: %d\n", mb_info->framebuffer_bpp);
+    
+    // Print the color for framebuffer type
+    char *framebuffer_type_color = "";
+    switch (mb_info->framebuffer_type) {
+        case 0:
+            framebuffer_type_color = "RGB";
+            break;
+        case 1:
+            framebuffer_type_color = "Indexed";
+            break;
+        case 2:
+            framebuffer_type_color = "EGA";
+            break;
+    }
+    printf("Framebuffer Type (Color): [%d, %d, %d] %s\n",
+           0, 0, 0, framebuffer_type_color);
+}
+
 
 int screen_of_death()
 {
     //sleep(10);
-    set_background_color(0,51,187);
+    set_background_color(0,0,0);
     for (size_t y = 0; y < 1024; y++)
     {
         for (size_t x = 0; x < 1280; x++)
         {
-            vbe_putpixel(x,y,VBE_RGB(0,51,187));
+            vbe_putpixel(x,y,VBE_RGB(0,0,0));
         }
         
     }
+    #ifndef NO_IMG
     draw_error_image();
+    #endif
 }
 bool is_in_list(List* list, ADDER_NAME_LIST item) {
     for (int i = 0; i < list->size; i++) {
@@ -55,6 +128,9 @@ void append_name_addr(char name[20],uint32 addr,int num_parms,char param_list[10
     strcpy(addr_name.file_name,filename);
     addr_name.line = line;
     addr_name.num_params = num_parms;
+    addr_name.stack_ptr = 0;
+    addr_name.esp = 0;
+    addr_name.esp_in = 0;
     strcpy(addr_name.addrtype,param_list);
     append_to_list_if_not_exists(&myList,addr_name);
     
@@ -96,9 +172,9 @@ ADDER_NAME_LIST *print_list(uintptr_t num) {
     }
     else
     {
-        printf_("{/330:0,255,0}");
+        printf_("{/330:255,255,0}");
          ADDER_NAME_LIST *addr = find_largest_smaller_address(&myList,num);
-         printf("%s(%d) : %s",addr->file_name,addr->line,addr->names);
+         printf("%s line: %d : %s\n",addr->file_name,addr->line,addr->names);
           printf_("{/330:0,255,0}");
           return addr;
     }
@@ -202,6 +278,13 @@ void parse_command_debug(const char* command, REGISTERS* reg) {
     if (strcmp(arguments[0], "help") == 0) {
 
     }
+    else if (strcmp(arguments[0],"cls") == 0)
+    {
+        screen_of_death();
+        set_screen_x(0);
+        set_screen_y(0);
+    }
+    
     else if(strcmp(arguments[0], "dump") == 0)
     {
         if(strcmp(arguments[1],"mem") == 0)
@@ -209,6 +292,12 @@ void parse_command_debug(const char* command, REGISTERS* reg) {
             KERNEL_MEMORY_MAP *out;
             get_map(out);
             display_kernel_memory_map(out);
+        }
+        else if(strcmp(arguments[1],"multiboot") == 0)
+        {
+            MULTIBOOT_INFO *info = get_mb_info();
+            printMultibootInfo(info);
+            
         }
     }
     else if(strcmp(arguments[0],"stack") == 0)
@@ -354,4 +443,149 @@ void getRegisters(REGISTERS* regs) {
     regs->cs = cs;
     regs->eflags = eflags;
     //regs->ss = ss;
+}
+int get_adder_map()
+{
+    int drive = 1;
+    char b[100];
+    char buffer[512] = {0};
+    char output[71629] = {0};
+    memset(buffer,0,sizeof(buffer));
+    int lba = 0;
+    ide_read_sectors(drive,1,lba,(uint32)buffer);
+    //printf("\nOutput:\n%s",buffer);
+    int start = 0;
+    for (size_t i = 1; i < strlen("Memory Configuration")+1; i++)
+        {
+                append(b,buffer[i]);
+        }
+            printf("\nIUT:0%s\n",b);
+     
+    if(strstr(b,"Memory Configuration") != NULL)
+    {
+        printf("Found MAP\n");
+        ide_read_sectors(drive,(71629/512),0,(uint32)output);
+        //printf("OUTPUT:\n%s",output);
+        struct Function functions[MAX_FUNCTIONS];
+
+    // Parse the memory map data and get the number of functions
+        int numFunctions = parseMemoryMap(output, functions);
+
+    // Now you have a list of functions and their addresses
+    // You can loop through the list as needed
+
+        for (int i = 0; i < numFunctions; i++) {
+            printf("Function name: %s, Address: 0x%016x\n", functions[i].name, functions[i].address);
+        }
+        // for (size_t q = 0; q < 71629; q++)
+        // {
+        //     ide_read_sectors(drive,1,q,(uint32)buffer);
+        //     for (size_t i = start; i < start+512; i++)
+        //     {
+                
+        //         output[i] = buffer[i];
+        //     }
+        //     memset(buffer,0,sizeof(buffer));
+        //     start = start+512;
+        // }
+        
+        
+    }
+}
+char* findNextSpaceOrNewline(char* ptr) {
+    while (*ptr != ' ' && *ptr != '\n' && *ptr != '\0') {
+        ptr++;
+    }
+    return ptr;
+}
+unsigned long long parseHex(const char* str) {
+    unsigned long long result = 0;
+    while (*str != '\0') {
+        char c = *str;
+        result *= 16;
+        if (c >= '0' && c <= '9') {
+            result += c - '0';
+        } else if (c >= 'a' && c <= 'f') {
+            result += c - 'a' + 10;
+        } else if (c >= 'A' && c <= 'F') {
+            result += c - 'A' + 10;
+        } else {
+            break; // Stop parsing if a non-hex character is encountered
+        }
+        str++;
+    }
+    return result;
+}
+// Function to parse memory map data and create a list of functions
+int parseMemoryMap(const char* mapData, struct Function* functions) {
+    // Initialize a pointer to the start of the buffer
+    const char* ptr = mapData;
+
+    // Read and parse the memory map data
+    int count = 0;
+    while (count < MAX_FUNCTIONS && *ptr != '\0') {
+        // Skip leading spaces
+        while (*ptr == ' ') {
+            ptr++;
+        }
+
+        // Check if the line starts with "0x" indicating an address
+        if (*ptr == '0' && (*(ptr + 1) == 'x' || *(ptr + 1) == 'X')) {
+            // Skip the "0x" prefix
+            ptr += 2;
+
+            // Parse the hexadecimal address
+            uint64_t address = 0;
+            while ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'a' && *ptr <= 'f') || (*ptr >= 'A' && *ptr <= 'F')) {
+                char digit = *ptr;
+                if (digit >= 'a' && digit <= 'f') {
+                    digit = digit - 'a' + 'A'; // Convert to uppercase
+                }
+                address = (address << 4) | (digit - '0');
+                ptr++;
+            }
+
+            // Skip spaces
+            while (*ptr == ' ') {
+                ptr++;
+            }
+
+            // Find the end of the function name
+            char *nameStart = ptr;
+            while (*ptr != '\n' && *ptr != '\0') {
+                ptr++;
+            }
+
+            // Copy the function name into the struct
+            int nameLength = ptr - nameStart;
+            if (nameLength > 99) {
+                nameLength = 99; // Limit the function name length to 99 characters
+            }
+            strncpy(functions[count].name, nameStart, nameLength);
+            functions[count].name[nameLength] = '\0'; // Null-terminate the name
+
+            functions[count].address = address;
+            count++;
+        } else {
+            // Move to the next line
+            while (*ptr != '\n' && *ptr != '\0') {
+                ptr++;
+            }
+            if (*ptr == '\n') {
+                ptr++; // Move past the newline character
+            }
+        }
+    }
+
+    return count; // Return the number of functions found
+}
+
+const struct Function* resolve_function_name(uint64_t address, const struct Function* functions, int numFunctions) {
+    const struct Function* result = NULL;
+    for (int i = 0; i < numFunctions; i++) {
+        if (functions[i].address <= address && (result == NULL || functions[i].address > result->address)) {
+            result = &functions[i];
+        }
+    }
+    return result;
 }

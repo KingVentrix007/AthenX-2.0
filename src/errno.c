@@ -5,6 +5,8 @@
 #include "timer.h"
 //list of errors;
 error_list errors;
+int error_count = 0;
+int success_count = 0;
 bool init_message = true;
 const char* decode_error(int error_code) {
     switch (error_code) {
@@ -97,6 +99,7 @@ int main_exit(int exit_code,int subcode, char function[100],bool text,Decode_Fun
         event.sub_code = subcode;
         strcpy(event.function,function);
         event.is_error = true;
+        error_count++;
         //errors.num_errors = errors.num_errors +1; 
         // TIME time = get_time();
         // errors.error[errors.num_errors].h = time.h;
@@ -115,6 +118,7 @@ int main_exit(int exit_code,int subcode, char function[100],bool text,Decode_Fun
                 printf("\n");
                 printf_("{/330:0,255,0}");
                 get_time();
+                
         }
         
     }
@@ -134,6 +138,7 @@ int main_exit(int exit_code,int subcode, char function[100],bool text,Decode_Fun
         printf("\n");
         printf_("{/330:0,255,0}");
         get_time();
+        success_count++;
         
     }
     
@@ -242,4 +247,12 @@ void print_events()
         if(currentEvent.is_error == true) printf_("{/330:0,255,0}");
         printf("\n");
         }
+}
+int get_num_errors()
+{
+    return errors.num_errors;
+}
+int get_num_successes()
+{
+    return get_num_successes;
 }

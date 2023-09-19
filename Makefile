@@ -94,12 +94,23 @@ changlog-test:
 	./ update_changelog
 changlog:
 	./update_changelog
-run: iso
+run: iso MAP MAIN
 	truncate -s 0 pipe
-	qemu-system-i386 -boot d -cdrom HackOS.iso  -drive file=HDD.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 2G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
+	dd if=HackOS.iso of=MAIN.img bs=4M status=progress conv=notrunc
+	dd if=LDout.map of=MAP.img bs=4M status=progress conv=notrunc
+	
+	qemu-system-i386  -name "MAIN" -drive file=MAIN.img,format=raw -name "CAT" -drive file=MAP.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
+
+MAP:
+	qemu-img create MAP.img 1G
+MAIN:
+	qemu-img create MAIN.img 1G
+
+run-raw:
+	qemu-system-i386 -drive file=test.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
 run-ext2:
 	
-	qemu-system-x86_64 -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
+	qemu-system-x86_64  -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
 
 run-fat:
 #	make iso

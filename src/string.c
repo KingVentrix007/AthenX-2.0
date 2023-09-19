@@ -91,7 +91,30 @@ void *memcpy(void *dst, const void *src, uint32 n) {
         *p++ = *q++;
     return ret;
 }
+char* strtok_r(char* str, const char* delim, char** saveptr) {
+    if (str == NULL && (*saveptr) == NULL) {
+        return NULL; // No more tokens to tokenize
+    }
 
+    if (str != NULL) {
+        (*saveptr) = str; // Initialize or reset the saveptr
+    }
+
+    // Find the next occurrence of the delimiter or the end of the string
+    while ((**saveptr) != '\0' && strchr(delim, (**saveptr)) == NULL) {
+        (*saveptr)++;
+    }
+
+    // If the current character is a delimiter, replace it with null character
+    if ((**saveptr) != '\0') {
+        (**saveptr) = '\0';
+        (*saveptr)++;
+    } else {
+        (*saveptr) = NULL; // No more tokens
+    }
+
+    return str;
+}
 int memcmp(uint8 *s1, uint8 *s2, uint32 n) {
     while (n--) {
         if (*s1 != *s2)
@@ -435,4 +458,72 @@ unsigned long strtoul(const char* str, char** endptr, int base) {
 
     // Apply the sign
     return result * sign;
+}
+
+
+
+
+unsigned long long strtoull(const char *str, char **endptr, int base) {
+    unsigned long long result = 0;
+    int sign = 1;
+
+    // Handle optional '+' or '-' sign
+    if (*str == '+') {
+        str++;
+    } else if (*str == '-') {
+        str++;
+        sign = -1;
+    }
+
+    // Handle base prefix (0x for hexadecimal, 0 for octal)
+    if (base == 0) {
+        if (*str == '0') {
+            str++;
+            if (*str == 'x' || *str == 'X') {
+                base = 16;
+                str++;
+            } else {
+                base = 8;
+            }
+        } else {
+            base = 10;
+        }
+    }
+
+    // Convert the string to an unsigned long long
+    while (isdigit(*str) || (base == 16 && isxdigit(*str))) {
+        int digit;
+        if (isdigit(*str)) {
+            digit = *str - '0';
+        } else {
+            digit = tolower(*str) - 'a' + 10; // Convert hex character to digit
+        }
+
+        if (digit >= base) {
+            break; // Invalid digit for the given base
+        }
+
+        result = result * base + digit;
+        str++;
+    }
+
+    // Set endptr if it's provided
+    if (endptr != NULL) {
+        *endptr = (char *)str;
+    }
+
+    return result * sign;
+}
+int tolower(int c) {
+    if (c >= 'A' && c <= 'Z') {
+        return c + ('a' - 'A');
+    }
+    return c;
+}
+int isdigit(int c) {
+    return (c >= '0' && c <= '9');
+}
+
+int isxdigit(int c) {
+    return (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
 }

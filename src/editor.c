@@ -3,10 +3,15 @@
 #include "string.h"
 #include "display.h"
 // #include "ide.h"
-int text_editor(int max_letters,char *dest)
+#include "printf.h"
+#include "debug.h"
+#include "fs.h"
+int text_editor(int max_letters,char dest[MAX_FILE_SIZE])
 {
+    DEBUG("H");
     int max = 0;
-    char out[max_letters];
+    char out[1024];
+    
     while(1==1)
     {
             char c = kb_getchar();
@@ -40,7 +45,7 @@ int text_editor(int max_letters,char *dest)
                 //crude_song();
             }
             
-            else if(max < max_letters)
+            else if(max < max_letters && c != '\0')
             {
                 
                 char* s;
@@ -56,7 +61,7 @@ int text_editor(int max_letters,char *dest)
                 beep();
             }
     }
-    memcpy(dest,out,sizeof(out));
+    memcpy(&dest,out,sizeof(dest));
     return strlen(out);
 
 }

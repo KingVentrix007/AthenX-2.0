@@ -1,7 +1,7 @@
 #include "io_ports.h"
 #include "timer.h"
 #include "speaker.h"
-
+#include "debug.h"
 void play_sound(uint32_t nFrequency)
 {
     // This function plays a sound at the specified frequency.
@@ -64,4 +64,10 @@ void crude_song()
     {
         controlled_beep(song[i], 0.5);
     }
+}
+
+int sound_error()
+{
+    FUNC_ADDR_NAME(&sound_error,0," ");
+    int y = 1/0;
 }

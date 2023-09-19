@@ -3,13 +3,6 @@
 #include "stdint.h"
 #include "types.h"
 #include "ide.h"
-
-#define MAGIC1 0x11
-#define MAGIC2 0x22
-#define MAGIC3 0x33
-#define MAGIC4 0x44
-
-
 typedef struct FILE
 {
     char filename[8];
@@ -50,7 +43,7 @@ typedef struct format_table
 //     char file_type[3];
 //     int next_sector;
 // };
-#define MAX_FILE_SIZE 41*512 //max file size in bytes
+#define MAX_FILE_SIZE  (512*59) //max file size in bytes
 typedef struct FILE_HEADER_V1
 {
     char filename[8];
@@ -73,37 +66,15 @@ typedef struct DICTIONARY
 };
 int write(char filename[8],char file_type[3],char data[MAX_FILE_SIZE]);
 int run_once();
-int read(char filename[8]);
+int read(char filename[8], char type[3]);
 int init_fs();
 int update_table();
 void list_files();
 int fs_partition_table_main_update();
 int fs_partition_table_main_p();
-///int format_disk(int disk);
-delete_file(char *filename[8]);
+int format_disk(int disk);
+int delete_file(char *filename[8]);
 void clean_fs_partition_table_main(int num);
 int make_dir(char *dir_name[8]);
 int read_add(char filename[8],char* out);
-int format_disk();
-int write_fs();
-
-//# VERSION 2 
-typedef struct
-{
-    char drive_name[20]; // drive name
-    int num_sectors; // the total number of sectors in the disk
-    int sector_size; // the size of each sector in bytes
-    int num_blocks; // the number of blocks
-    int block_size; // the size of each block in bytes
-    int first_block; // the first blocks position LBA
-    int last_block; // the last blocks position LBA
-    int magic1; // the magic number for verification
-
-}SUPERBLOCK;
-typedef struct
-{
-    int block_num;
-    char sectors[504];
-    int num_free_sectors;
-}BLOCK;
 #endif

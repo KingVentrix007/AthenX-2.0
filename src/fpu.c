@@ -1,10 +1,11 @@
 #include "io_ports.h"
-
+#include "debug.h"
 void fpu_set_control_word(const uint16 cw) {
     asm volatile("fldcw %0" ::"m"(cw));
 }
 
 void fpu_enable() {
+    FUNC_ADDR_NAME(&fpu_enable,0," ");
     uint32 cr4;
     asm volatile("mov %%cr4, %0" :"=r"(cr4));
     // set 9th bit to 1 in cr4

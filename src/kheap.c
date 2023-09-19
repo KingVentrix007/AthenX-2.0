@@ -51,7 +51,9 @@ void *kbrk(int size) {
 void kheap_print_blocks() {
     FUNC_ADDR_NAME(&kheap_print_blocks,0,"");
     KHEAP_BLOCK *temp = g_head;
+    printf_("{/330:0,255,255}");
     printf_("Block Size: %d\n", sizeof(KHEAP_BLOCK));
+    printf_("{/330:0,255,0}");
     while (temp != NULL) {
         printf_("size:%d, free:%d, data: 0x%x, curr: 0x%x, next: 0x%x\n",
                temp->metadata.size, temp->metadata.is_free, temp->data, temp, temp->next);

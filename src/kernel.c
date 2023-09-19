@@ -1,4 +1,5 @@
-
+#include "errno.h"
+#include "version.h"
 #include "pci.h"
 #include "ethernet.h"
 #include "background.h"
@@ -33,7 +34,7 @@
 #include "acpi.h"
 #include "ssfs.h"
 KERNEL_MEMORY_MAP g_kmap;
-
+MULTIBOOT_INFO *multi_boot_info;
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
 //     if (mb_info->flags & (1 << 3)) {
 //         uint32_t initramfs_start = mb_info->initramfs_start;
@@ -46,7 +47,10 @@ KERNEL_MEMORY_MAP g_kmap;
 //     }
 // }
 
-
+MULTIBOOT_INFO *get_mb_info()
+{
+    return multi_boot_info;
+}
 int mac_cmp() {
     // MAC address obtained from QEMU command line
     beep();
@@ -162,7 +166,7 @@ void get_map(KERNEL_MEMORY_MAP *out)
     memcpy(&out, &g_kmap, sizeof(out));
 }
 void kmain(unsigned long magic, unsigned long addr) {
-    FUNC_ADDR_NAME(&kmain,0,"");
+    FUNC_ADDR_NAME(&kmain,2,"ui");
     MULTIBOOT_INFO *mboot_info;
      
     gdt_init();
@@ -172,6 +176,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     kassert(display_init(1,0,0,32),0,1);
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         mboot_info = (MULTIBOOT_INFO *)addr;
+        multi_boot_info = mboot_info;
         memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
         if (get_kernel_memory_map(&g_kmap, mboot_info) < 0) {
             printf("error: failed to get kernel memory map\n");
@@ -183,12 +188,14 @@ void kmain(unsigned long magic, unsigned long addr) {
         // initialize atleast 1MB blocks of memory for our heap
         pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
         // initialize heap 256 blocks(1MB)
+        //multi_boot_info = mboot_info;
+        //memcpy(multi_boot_info, mboot_info,sizeof(multi_boot_info));
         void *start = pmm_alloc_blocks(256);
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         //@ Gets screen size from memory
         keyboard_init();
-        ata_init();
+        
         int x = 1280;
         int y = 768;
         
@@ -208,7 +215,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         
         //printf_("%s\n",mode);
         cmd_handler("cls");
-        
+        ata_init();
         //ext2_init();
         //read_root_directory_inode();
         //read_root_directory_inode();
@@ -221,16 +228,20 @@ void kmain(unsigned long magic, unsigned long addr) {
         DEBUG(" ");
         //init_fs();
         //printf_("hello");
-        init_ssfs();
+        //init_ssfs();
+        partition_table tb;
+        //format_disk(0);
+        init_fs();
         //write_file(40);
         init_pci_device();
+        
         //printf("GOT HERE");
        
          //printf("H\n");
          //printf("0x%16x\n",&kmain);
          timer_init();//!DO NOT PUT BEFORE INIT VESA
          //printf("T\n");
-         
+         //printf("0x%x\n",addr);
          //printf("MADE IT HERE");
         //init_e82540EM_ethernet_card();
         //printf_("CMP:");
@@ -256,6 +267,13 @@ void kmain(unsigned long magic, unsigned long addr) {
         // bg_img.width = 1980;
         // bg_img.height = 1080;
         // strcpy(bg_img.name, "Low resolution background image" );
+        //printf("\n%d\n",sizeof(background)/512);
+        //char buffer_test[2073600] = {0};
+        //DEBUG("HERE");
+        //memset(buffer_test, 0, sizeof(buffer_test));
+        //memcpy(buffer_test,background,sizeof(buffer_test));
+        //DEBUG("HERE 2");
+        //ide_write_sectors(0,(2073600/512),900,(uint32)buffer_test);
         //draw_low_res_img(bg_img);
         //draw_hi_res_img(1980,1080);
         //sleep(10000);
@@ -282,6 +300,7 @@ void kmain(unsigned long magic, unsigned long addr) {
  
             //printf("Terminal initialization (%d)",ret);
             fpu_enable();
+            printf("Initialization complete\nAthenX %s:%d.%d.%d started successfully with %d errors\n",VERSION_MAIN,VERSION_SUB_MAIN,VERSION_SUB_MINOR,VERSION_SUB_PATCH,get_num_errors());
             
             // unsigned char* bios_start = (unsigned char*)0xE0000;
             // unsigned int bios_length = 0x20000;  // 128 KB
@@ -296,7 +315,10 @@ void kmain(unsigned long magic, unsigned long addr) {
             // } else {
             //     printf("RSDP not found.\n");
             // }
-            //dummy1();
+            char *dumbb = "DUMB";
+            beep();
+            //dummy_start();
+            get_adder_map();
             terminal_main();
         }
 
@@ -504,6 +526,7 @@ void terminal_main()
     //printV("\nHeight%s\n",vbe_get_height());
     uint8_t byte;
     char buffer[512];
+    memset(buffer,0,sizeof(buffer));
     buffer[0] = '\0';
     //DEBUG("HERE?");
     //beep();
@@ -546,12 +569,13 @@ void terminal_main()
                 //printf_("\b");
             }
             
-            else if (c == '\n')
+            else if (c == '\n' && is_all_one_type(buffer) == 0)
             {
                 //printf_("\n");
                 undraw_square(get_screen_y(),get_screen_x());
                 cmd_handler(buffer);
                 memset(buffer, 0,sizeof(buffer));
+                
                 next_line();
                 printf("\n");
                 //set_screen_x(0);
@@ -561,10 +585,16 @@ void terminal_main()
                 
                 //crude_song();
             }
+            else if(c == '\n')
+            {
+                undraw_square(get_screen_y(),get_screen_x());
+                printf("\n>");
+                memset(buffer,0,sizeof(buffer));
+            }
             else if (c == '\0')
             {
                 //DEBUG("NULL");
-                char dummy = "c";
+                
                 //beep();
             }
             else
@@ -601,15 +631,34 @@ void terminal_main()
     }
     
 }
+int is_all_one_type(const char* str) {
+    // Check if the string is empty
+    if (str[0] == '\0') {
+        return 1; // An empty string is considered to be all one type
+    }
+
+    char first_char = str[0]; // Store the first character
+
+    // Iterate through the string
+    for (int i = 1; str[i] != '\0'; i++) {
+        // If any character is different from the first character, return 0
+        if (str[i] != first_char) {
+            return 0;
+        }
+    }
+
+    // If we reach this point, all characters are the same
+    return 1;
+}
 struct fake
 {
     int v1;
     int v2;
     int v3;
 };
-int dummy1()
+int dummy_start()
 {
-    FUNC_ADDR_NAME(&dummy1,0," ");
+    FUNC_ADDR_NAME(&dummy_start,0," ");
     dummy2();
 }
 int dummy2()
@@ -630,7 +679,8 @@ int dummy3()
 
 int dummy4(char *word) {
     FUNC_ADDR_NAME(&dummy4,1,"s");
-    fake_err(100,2);
+    int fake_e = fake_err(100,2);
+    sound_error();
     /* function_end variable */
     
 }
@@ -638,5 +688,7 @@ int fake_err(int z, int y)
 {
     FUNC_ADDR_NAME(&fake_err,2,"ii");
     int o = 1893;
-    int x = 1/0;
+    int x = z/y;
+    return x;
 }
+

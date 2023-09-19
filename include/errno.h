@@ -84,4 +84,8 @@ int compareTime(const TIME* time1, const TIME* time2);
 void filterAndPrintEvents(const TIME* startTime, const TIME* endTime, bool isError,const char* functionName);
 
 void print_events();
+
+int get_num_successes();
+
+int get_num_errors();
 #endif // ERRNO_H

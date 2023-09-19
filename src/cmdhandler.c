@@ -1,3 +1,5 @@
+#include "installer.h"
+#include "kheap.h"
 #include "isr.h"
 #include "stdio.h"
 #include "errno.h"
@@ -24,6 +26,8 @@
 #include "fs.h"
 #include "serial.h"
 #include "man.h"
+#include "ssfs.h"
+
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
@@ -57,10 +61,20 @@ void display_available_commands(const char* cmd) {
 
 void man(const char* cmd)
 {
-    if(strcmp(cmd,"inspect") == 0)
-    {
-        man_inspect();
+    printf("\n");
+    man_main(cmd);
+}
+void removeFirstNChars(char* str, int n) {
+    int length = strlen(str);
 
+    // Check if n is greater than the length of the string
+    if (n >= length) {
+        // If n is greater or equal to the length of the string,
+        // the result will be an empty string.
+        str[0] = '\0';
+    } else {
+        // Use memmove to shift the remaining characters to the beginning
+        memmove(str, str + n, length - n + 1);
     }
 }
 void parse_command(const char* command) {
@@ -70,11 +84,12 @@ void parse_command(const char* command) {
 
     // Tokenize the command by spaces
     char* token;
+     char* saveptr;
     char* arguments[MAX_ARGUMENTS];
     char* sub_args[MAX_ARGUMENTS];
     int sub_arg_count = 0;
     int arg_count = 0;
-
+    int in_quote = 0;
     token = strtok(command_copy, " ");
    while (token != NULL) {
         if (arg_count >= MAX_ARGUMENTS) {
@@ -101,10 +116,16 @@ void parse_command(const char* command) {
     // {
     //     printf("%s\n",sub_args[q]);
     // }
-    
+    if(sub_arg_count >= 1)
+    {
+        if(strcmp(sub_args[0],"--help") == 0)
+        {
+            man(arguments[0]);
+        }
+    }
     
     // Check for different commands and execute them
-    if (strcmp(arguments[0], "help") == 0) {
+    else if (strcmp(arguments[0], "help") == 0) {
         if(arg_count <= 1)
         {
             display_available_commands("");
@@ -121,12 +142,12 @@ void parse_command(const char* command) {
     } else if (strcmp(arguments[0], "time") == 0) {
         // Implement time command logic
         // For example: display the current time
-        printf_("Coming soon");
+        printf("Coming soon");
     } else if (strcmp(arguments[0], "echo") == 0) {
         // Implement echo command logic
         // For example: print the following arguments
         for (int i = 1; i < arg_count; i++) {
-            printf_("%c", arguments[i]);
+            printf("%c", arguments[i]);
             // Print each argument separated by a space
             // You can implement this based on your output functionality
         }
@@ -135,13 +156,13 @@ void parse_command(const char* command) {
     else if (strcmp(arguments[0],"com") == 0)
     {
         char out = "C";
-        printf_("\nCOM output: ");
+        printf("\nCOM output: ");
         out = read_serial();
-        printf_("C%c", out);
+        printf("C%c", out);
         // while(out != NULL)
         // {
         //     out = read_serial();
-        //     printf_("%c", out);
+        //     printf("%c", out);
         // }
          
        
@@ -158,6 +179,22 @@ void parse_command(const char* command) {
 
             inspect_errors();
         }
+        else if (strcmp(arguments[1],"drive") == 0)
+        {
+             
+            removeFirstNChars(sub_args[0],2);
+            int drive = atoi(sub_args[0]);
+            char buffer[512];
+            for (size_t i = 0; i < get_sectors(drive); i++)
+            {
+
+                memset(buffer,0,sizeof(buffer));
+                ide_read_sectors(drive,1,i,(uint32)buffer);
+                printf("\nout put\n: %s\n",buffer);
+            }
+           
+        }
+        
         else if(strcmp(arguments[1],"log") == 0)
         {
             if(strcmp(sub_args[0],"--all") == 0)
@@ -189,6 +226,8 @@ void parse_command(const char* command) {
             
             
         }
+        
+        
         else if (strcmp(arguments[1],"pci") == 0)
         {
             if(strcmp(sub_args[0],"--list") == 0)
@@ -204,10 +243,8 @@ void parse_command(const char* command) {
         else if (strcmp(arguments[1],"stack") == 0)
         {
             printf("\n");
-            REGISTERS *regs;
-            getRegisters(regs);
-
-            TraceStackTrace(100,0);
+            
+            //TraceStackTrace(1000,0);
         }
         
         else if (strcmp(arguments[1],"drivers") == 0 )
@@ -234,6 +271,13 @@ void parse_command(const char* command) {
         
         
     }
+    else if (strcmp(arguments[0],"install") == 0)
+        {
+            if(arg_count >= 3)
+            {
+                install(atoi(arguments[1]),atoi(arguments[2]),ISO_FILE_SIZE_IN_SECTORS);
+            }
+        }
     
     else if (strcmp(arguments[0], "pci") == 0)
     {
@@ -252,22 +296,24 @@ void parse_command(const char* command) {
     
     else if (strcmp(arguments[0], "write") == 0)
     {
-        if(arg_count == 3)
+        if(arg_count >= 3)
         {
             char out[MAX_FILE_SIZE];
+            //memset(out,0,sizeof(out));
             clear_screen();
             set_screen_x(87000000);
             set_cursor_y(5656754);
             cmd_handler("cls");
-            printf_("\nPress ` to exit");
-            printf_("\nWelcome to Text:\n");
-            int size = text_editor(MAX_FILE_SIZE,out);
-            write_fs();
-       //printf_(out);
+            printf("\nPress ENTER to exit");
+            printf("\nWelcome to Text:\n");
+            // int len = text_editor(MAX_FILE_SIZE,&out);
+            // printf("len = %d\n",len);
+            scanf("%s",out);
+       //printf(out);
         //strcpy(buf, out);
+            printf("OUT: %s\n",out);
+            write(arguments[1], arguments[2],out);
 
-            //write_file(0,arguments[1], out);
-            
         }
         else
         {
@@ -276,9 +322,9 @@ void parse_command(const char* command) {
     }
     else if(strcmp(arguments[0],"read") == 0)
     {
-        if(arg_count == 2)
+       if(arg_count == 3)
         {
-             read(arguments[1]);
+             read(arguments[1],arguments[2]);
         }
       
        
@@ -286,10 +332,7 @@ void parse_command(const char* command) {
     else if(strcmp(arguments[0],"ls") == 0)
     {
         //char *cwd = kmalloc(sizeof(*cwd)); //Current working directory, in it's path
-        char *cwd = "/";
-        uint32 ino = ext2_path_to_inode(cwd);
-        char **names = ext2_ls(ino);
-        printf_("\n");
+        list_files();
     }
     else if(strcmp(arguments[0],"rm") == 0)
     {
@@ -320,7 +363,8 @@ void parse_command(const char* command) {
     }
     else if (strcmp(arguments[0],"exit") == 0)
     {
-        fs_partition_table_main_update();
+        //fs_partition_table_main_update();
+        ssfs_update_table();
     }
     else if (strcmp(arguments[0],"set-xy") == 0)
     {
@@ -340,7 +384,7 @@ void parse_command(const char* command) {
         sc_size.y = atoi(arguments[2]);
         memcpy(buf, &sc_size, sizeof(sc_size));
         ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        printf_("data written\n");
+        printf("data written\n");
     }
     else if(strcmp(arguments[0],"song") == 0)
     {
@@ -349,8 +393,18 @@ void parse_command(const char* command) {
     }
     else if(strcmp(arguments[0],"format") == 0)
     {
-        int disk = atoi(arguments[1]);
-        format_disk();
+        if(arg_count == 3)
+        {
+              int disk = atoi(arguments[1]);
+              char name[100];
+            strcpy(name,arguments[2]);
+            ssfs_format_disk(0,name);
+        }
+        else
+        {
+            printf("invalid parameters");
+        }
+      
         //format_drive(disk);
     }
     else if(strcmp(arguments[0],"table") == 0)
@@ -359,7 +413,7 @@ void parse_command(const char* command) {
     }
     else if(strcmp(arguments[0],"3d") == 0)
     {
-        //printf_("Please");
+        //printf("Please");
         ArtemisVision();
     }
     else if(strcmp(arguments[0],"rle") == 0)
@@ -370,14 +424,14 @@ void parse_command(const char* command) {
     else if(strcmp(arguments[0],"fs") == 0)
     {
         clear_display();
-        // printf_("SUPERBLOCK: %d\n",sizeof(SUPERBLOCK));
-        // printf_("INODE_FILE: %d\n",sizeof(INODE_FILE));
-        // printf_("INODE_DIR: %d\n",sizeof(INODE_DIR));
-        // printf_("DATA_BLOCK: %d\n",sizeof(DATA_BLOCK));
+        // printf("SUPERBLOCK: %d\n",sizeof(SUPERBLOCK));
+        // printf("INODE_FILE: %d\n",sizeof(INODE_FILE));
+        // printf("INODE_DIR: %d\n",sizeof(INODE_DIR));
+        // printf("DATA_BLOCK: %d\n",sizeof(DATA_BLOCK));
         // write_superblock(512);
-        // printf_("CONE_BLOCK\n");
+        // printf("CONE_BLOCK\n");
         // read_superblock_al(512);
-        // printf_("Done!\n");
+        // printf("Done!\n");
         format_disk(0);
         
       
@@ -391,34 +445,81 @@ void parse_command(const char* command) {
 
     }
     
-    else if(strcmp(arguments[0],"sect") == 0)
+    else if(strcmp(arguments[0],"raw") == 0)
     {
-        char myArray[1024] = {0}; // This sets all elements to 0, change this pattern if desired
+        if(strcmp(arguments[1],"read") == 0)
+        {
+            if(arg_count == 4)
+            {
+                 int drive = atoi(arguments[2]);
+                 char b[100];
+                char buffer[512] = {0};
+                memset(buffer,0,sizeof(buffer));
+                int lba = atoi(arguments[3]);
+                ide_read_sectors(drive,1,lba,(uint32)buffer);
+                printf("\nOutput:\n%s",buffer);
+                for (size_t i = 0; i < strlen("Memory Configuration")+1; i++)
+                    {
+                            append(b,buffer[i]);
+                    }
+                        printf("\nIUT:\n%s",b);
+            }
+            else if (arg_count >= 5)
+            {
+               
+                 int drive = atoi(arguments[2]);
+                char buffer[512] = {0};
+                char b[100];
+                memset(buffer,0,sizeof(buffer));
+                int lba_start = atoi(arguments[3]);
+                int lba_end = atoi(arguments[4]);
+                for (size_t lba = lba_start; lba < lba_end; lba++)
+                {
+                       ide_read_sectors(drive,1,lba,(uint32)buffer);
+                        printf("%s",buffer);
+                        for (size_t i = 0; i < strlen("Memory Configuration"); i++)
+                        {
+                            append(b,buffer[i]);
+                        }
+                        printf("\nIUT:\n%s",b);
+                        
+                        memset(buffer,0,sizeof(buffer));
+                        
+                }
+                
+             
+            }
+            
+           
 
-    // Access and modify elements in the array
-        for (int i = 0; i < 1024; i++) {
-        // You can set the elements to any value you want, for example:
-            myArray[i] = i % 256; // This sets each element with values from 0 to 255 in a repeating pattern
-         }
-        printf_("\n%c", myArray);
-        ide_write_sectors(0,2,60,(uint32)myArray);
-        char outb[1024] = {0};
-        ide_read_sectors(0,2,60,(uint32)outb);
-        printf_("\n%c", outb);
-
+        }
+        else if (strcmp(arguments[1],"write") == 0)
+        {
+            char *buffer = kmalloc(atoi(arguments[3])*8);
+            
+            //memset(buffer,0,sizeof(buffer)); 
+            printf("Enter data:\n");
+            scanf("%s",buffer);
+            
+            int num_sectors = (strlen(buffer)/512)+1; 
+            int lba = atoi(arguments[2]);
+            ide_write_sectors(0,num_sectors,lba,(uint32)buffer);
+            //printf("\nOutput:\n%s",buffer);
+        }
+        
     }
     else if(strcmp(arguments[0],"edit") == 0)
     {
         char data[1024] = {0};
         memset(data,0,sizeof(data));
         read_add(arguments[1],data);
-        printf_("\n%c",data);
+        printf("\n%c",data);
         text_editor(1024,data);
     }
     else {
-        printf_("{/330:255,0,0}{/331:0,200,0}");
+        printf("{/330:255,0,0}{/331:0,200,0}");
         printf("\n[!] %s is not a valid command",arguments[0]);
-        printf_("{/330:0,255,0}{/331:0,0,0}");
+        printf("{/330:0,255,0}{/331:0,0,0}");
         // Handle invalid or unknown commands
         // For example: display an error message
     }
@@ -459,20 +560,20 @@ void kernel_command_handler(char *buffer[512])
         memset(buf, 0, sizeof(buf));
         memcpy(buf, &login, sizeof(login));
         ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        printf_("\nlogin set\n");
-        printf_("Username: %s\n", login.username_stored);
-        printf_("Password: %s\n", login.password_stored);
-        // printf_("data written\n");
+        printf("\nlogin set\n");
+        printf("Username: %s\n", login.username_stored);
+        printf("Password: %s\n", login.password_stored);
+        // printf("data written\n");
 
         // read message from drive
         // memset(buf, 0, sizeof(buf));
         // ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-        // printf_("read data: %s\n", buf);
+        // printf("read data: %s\n", buf);
 
         // memset(buf, 0, sizeof(buf));
         // ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA + 3, (uint32)buf);
         // memcpy(&e, buf, sizeof(e));
-        // printf_("id: %d, name: %s\n", e.id, e.name);
+        // printf("id: %d, name: %s\n", e.id, e.name);
 
     }
 }

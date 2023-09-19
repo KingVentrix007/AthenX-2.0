@@ -92,4 +92,5 @@ static uint32_t thirty2nd_note_duration = 0;
 void nosound();
 void play_sound(uint32_t nFrequency);
 void crude_song();
+int sound_error();
 #endif

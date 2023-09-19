@@ -55,6 +55,7 @@ int init_window(WINDOW *win);
 void draw_error_image();
 void draw_low_res_img(IMAGE img_header);
 void draw_hi_res_img(int w, int h);
+void draw_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint32 color);
 #endif
 
 

@@ -2,7 +2,7 @@
 #define KERNEL_H
 
 #include "types.h"
-
+#include "multiboot.h"
 // symbols from linker.ld for section addresses
 extern uint8 __kernel_section_start;
 extern uint8 __kernel_section_end;
@@ -57,6 +57,8 @@ struct module {
 };
 void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap);
 void get_map(KERNEL_MEMORY_MAP *out);
+MULTIBOOT_INFO *get_mb_info();
+int is_all_one_type(const char* str);
 #endif
 
 
