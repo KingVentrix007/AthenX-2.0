@@ -13,42 +13,44 @@
 #include "multiboot.h"
 ADDER_NAME_LIST addr_name;
 List myList;
+struct Function functions[MAX_FUNCTIONS];
+int numFunctions = 0;
 //#define NO_IMG
 
 
 void printMultibootInfo(MULTIBOOT_INFO *mb_info) {
-     printf_("{/330:255,0,255}");
-    printf("Multiboot Information:\n");
-     printf_("{/330:0,255,0}");
-    printf("Flags: 0x%x\n", mb_info->flags);
-    printf("Memory (Low): 0x%x\n", mb_info->mem_low);
-    printf("Memory (High): 0x%x\n", mb_info->mem_high);
-    printf("Boot Device: 0x%x\n", mb_info->boot_device);
-    printf("Kernel Command Line: 0x%x\n", mb_info->cmdline);
+    //  printf_("{/330:255,0,255}");
+    // printf("Multiboot Information:\n");
+    //  printf_("{/330:0,255,0}");
+    // printf("Flags: 0x%x\n", mb_info->flags);
+    // printf("Memory (Low): 0x%x\n", mb_info->mem_low);
+    // printf("Memory (High): 0x%x\n", mb_info->mem_high);
+    // printf("Boot Device: 0x%x\n", mb_info->boot_device);
+    // printf("Kernel Command Line: 0x%x\n", mb_info->cmdline);
     
-    if (mb_info->flags & (1 << 3)) {
-        printf("Modules Count: %d\n", mb_info->modules_count);
-        printf("Modules Address: 0x%x\n", mb_info->modules_addr);
-    }
-    else
-    {
-         printf_("{/330:255,0,0}");
-         printf("No modules\n");
-          printf_("{/330:0,255,0}");
-    }
+    // if (mb_info->flags & (1 << 3)) {
+    //     printf("Modules Count: %d\n", mb_info->modules_count);
+    //     printf("Modules Address: 0x%x\n", mb_info->modules_addr);
+    // }
+    // else
+    // {
+    //      printf_("{/330:255,0,0}");
+    //      printf("No modules\n");
+    //       printf_("{/330:0,255,0}");
+    // }
     
-    if (mb_info->flags & (1 << 4) && mb_info->flags & (1 << 5)) {
-        printf("Symbol Table Info (AOUT):\n");
-        printf("Tabsize: %d\n", mb_info->u.aout_sym.tabsize);
-        printf("Strsize: %d\n", mb_info->u.aout_sym.strsize);
-        printf("Addr: 0x%x\n", mb_info->u.aout_sym.addr);
-    } else if (mb_info->flags & (1 << 4)) {
-        printf("Symbol Table Info (ELF):\n");
-        printf("Num: %d\n", mb_info->u.elf_sec.num);
-        printf("Size: %d\n", mb_info->u.elf_sec.size);
-        printf("Addr: 0x%x\n", mb_info->u.elf_sec.addr);
-        printf("Shndx: %d\n", mb_info->u.elf_sec.shndx);
-    }
+    // if (mb_info->flags & (1 << 4) && mb_info->flags & (1 << 5)) {
+    //     printf("Symbol Table Info (AOUT):\n");
+    //     printf("Tabsize: %d\n", mb_info->u.aout_sym.tabsize);
+    //     printf("Strsize: %d\n", mb_info->u.aout_sym.strsize);
+    //     printf("Addr: 0x%x\n", mb_info->u.aout_sym.addr);
+    // } else if (mb_info->flags & (1 << 4)) {
+    //     printf("Symbol Table Info (ELF):\n");
+    //     printf("Num: %d\n", mb_info->u.elf_sec.num);
+    //     printf("Size: %d\n", mb_info->u.elf_sec.size);
+    //     printf("Addr: 0x%x\n", mb_info->u.elf_sec.addr);
+    //     printf("Shndx: %d\n", mb_info->u.elf_sec.shndx);
+    // }
     
     // Add conditions for other flags as needed
      printf_("{/330:255,255,0}");
@@ -173,8 +175,12 @@ ADDER_NAME_LIST *print_list(uintptr_t num) {
     else
     {
         printf_("{/330:255,255,0}");
+        //printf("\n0x%016x\n",num);
+        //const struct Function *func = resolve_function_name(num,functions,numFunctions);
+        //  printf("\n%s 0x%016x -- num 0x%016x\n",func->name,func->address,num);
          ADDER_NAME_LIST *addr = find_largest_smaller_address(&myList,num);
          printf("%s line: %d : %s\n",addr->file_name,addr->line,addr->names);
+         
           printf_("{/330:0,255,0}");
           return addr;
     }
@@ -444,50 +450,55 @@ void getRegisters(REGISTERS* regs) {
     regs->eflags = eflags;
     //regs->ss = ss;
 }
-int get_adder_map()
+int get_adder_map(char output[71629])
 {
-    int drive = 1;
-    char b[100];
-    char buffer[512] = {0};
-    char output[71629] = {0};
-    memset(buffer,0,sizeof(buffer));
-    int lba = 0;
-    ide_read_sectors(drive,1,lba,(uint32)buffer);
-    //printf("\nOutput:\n%s",buffer);
-    int start = 0;
-    for (size_t i = 1; i < strlen("Memory Configuration")+1; i++)
-        {
-                append(b,buffer[i]);
-        }
-            printf("\nIUT:0%s\n",b);
+    // char output[71629] = {0};
+    // memcpy(output, adder,size);
+    // printf("\n%s",output);
+    // int drive = 1;
+    // char b[100];
+    // char buffer[512] = {0};
+    // char output[71629] = {0};
+    // memset(buffer,0,sizeof(buffer));
+    // int lba = 0;
+    // memcpy(output,adder,size);
+    // //ide_read_sectors(drive,1,lba,(uint32)buffer);
+    // //printf("\nOutput:\n%s",buffer);
+    // int start = 0;
+    // printf("\n%s",output);
+    // for (size_t i = 1; i < strlen("Memory Configuration")+1; i++)
+    //     {
+    //             append(b,buffer[i]);
+    //     }
+    //         printf("\nIUT:0%s\n",b);
      
-    if(strstr(b,"Memory Configuration") != NULL)
+    if(1==1)
     {
         printf("Found MAP\n");
-        ide_read_sectors(drive,(71629/512),0,(uint32)output);
+        //ide_read_sectors(drive,(71629/512),0,(uint32)output);
         //printf("OUTPUT:\n%s",output);
-        struct Function functions[MAX_FUNCTIONS];
+        
 
     // Parse the memory map data and get the number of functions
-        int numFunctions = parseMemoryMap(output, functions);
-
-    // Now you have a list of functions and their addresses
-    // You can loop through the list as needed
-
+        numFunctions = parseMemoryMap(output, functions);
+        printf("");
+    // // Now you have a list of functions and their addresses
+    // // You can loop through the list as needed
+        
         for (int i = 0; i < numFunctions; i++) {
-            printf("Function name: %s, Address: 0x%016x\n", functions[i].name, functions[i].address);
+            //printf("Function name: %s, Address: 0x%016x\n", functions[i].name, functions[i].address);
         }
-        // for (size_t q = 0; q < 71629; q++)
-        // {
-        //     ide_read_sectors(drive,1,q,(uint32)buffer);
-        //     for (size_t i = start; i < start+512; i++)
-        //     {
+    //     // for (size_t q = 0; q < 71629; q++)
+    //     // {
+    //     //     ide_read_sectors(drive,1,q,(uint32)buffer);
+    //     //     for (size_t i = start; i < start+512; i++)
+    //     //     {
                 
-        //         output[i] = buffer[i];
-        //     }
-        //     memset(buffer,0,sizeof(buffer));
-        //     start = start+512;
-        // }
+    //     //         output[i] = buffer[i];
+    //     //     }
+    //     //     memset(buffer,0,sizeof(buffer));
+    //     //     start = start+512;
+    //     // }
         
         
     }
@@ -580,12 +591,14 @@ int parseMemoryMap(const char* mapData, struct Function* functions) {
     return count; // Return the number of functions found
 }
 
-const struct Function* resolve_function_name(uint64_t address, const struct Function* functions, int numFunctions) {
+const struct Function* resolve_function_name(uintptr_t address, const struct Function* functions, int numFunctions) {
+    //printf("\n0x%016x",address);
     const struct Function* result = NULL;
     for (int i = 0; i < numFunctions; i++) {
         if (functions[i].address <= address && (result == NULL || functions[i].address > result->address)) {
             result = &functions[i];
         }
     }
+    //printf("\n0x%016x",address);
     return result;
 }

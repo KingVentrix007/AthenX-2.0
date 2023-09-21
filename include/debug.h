@@ -54,9 +54,9 @@ void debug_terminal(REGISTERS *regs);
 int kassert(int ret,int expected_ret,int level);
 const ADDER_NAME_LIST *find_largest_smaller_address(const List *list, uint32 search_addr);
 void getRegisters(REGISTERS* regs);
-int get_adder_map();
+int get_adder_map(char output[71629]);
 char* findNextSpaceOrNewline(char* ptr);
 int parseMemoryMap(const char* mapData, struct Function* functions);
 unsigned long long parseHex(const char* str);
-const struct Function* resolve_function_name(uint64_t address, const struct Function* functions, int numFunctions);
+const struct Function* resolve_function_name(uintptr_t address, const struct Function* functions, int numFunctions);
 #endif

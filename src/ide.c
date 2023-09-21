@@ -10,7 +10,8 @@
 
 IDE_CHANNELS g_ide_channels[MAXIMUM_CHANNELS];
 IDE_DEVICE g_ide_devices[MAXIMUM_IDE_DEVICES];
-
+struct NamedIndex device_index[MAXIMUM_IDE_DEVICES];
+int list_size = 0;
 static volatile unsigned char g_ide_irq_invoked = 0;
 
 static uint8 ide_read_register(uint8 channel, uint8 reg);
@@ -104,7 +105,12 @@ void ide_read_buffer(uint8 channel, uint8 reg, uint32 *buffer, uint32 quads) {
     if (reg > 0x07 && reg < 0x0C)
         ide_write_register(channel, ATA_REG_CONTROL, g_ide_channels[channel].no_intr);
 }
-
+struct NamedIndex* getList() {
+    return device_index;
+}
+int getListSize() {
+    return list_size;
+}
 void ide_write_buffer(uint8 channel, uint8 reg, uint32 *buffer, uint32 quads) {
     FUNC_ADDR_NAME(&ide_write_buffer,4,"iisi");
     if (reg > 0x07 && reg < 0x0C)
@@ -226,6 +232,17 @@ sec_channel_base_addr: Secondary channel base address(0x170-0x177)
 sec_channel_control_addr: Secondary channel control base address(0x376)
 bus_master_addr: Bus master address(pass 0 for now)
 */
+
+int appendIndexToList(struct NamedIndex list[], int *listSize, struct NamedIndex item) {
+    if (*listSize < MAX_LIST_SIZE) {
+        list[*listSize] = item;
+        (*listSize)++; // Increment the list size
+        return 1; // Success
+    } else {
+        return 0; // List is full, cannot append
+    }
+}
+
 void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_addr,
               uint32 sec_channel_base_addr, uint32 sec_channel_control_addr,
               uint32 bus_master_addr) {
@@ -329,6 +346,7 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
     }
 
     // 4- Print Summary:
+    
     for (i = 0; i < 4; i++)
         if (g_ide_devices[i].reserved == 1) {
             printf_("%d:-\n", i);
@@ -338,6 +356,14 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
             printf("  base: 0x%x, control: 0x%x\n", g_ide_channels[i].base, g_ide_channels[i].control);
             printf("  size: %u sectors, %u bytes\n", g_ide_devices[i].size, g_ide_devices[i].size * ATA_SECTOR_SIZE);
             printf("  signature: 0x%x, features: %d\n", g_ide_devices[i].signature, g_ide_devices[i].features);
+            struct NamedIndex temp;
+            temp.index = i;
+            strcpy(temp.name,g_ide_devices[i].model);
+            char tempModel[6]; // 6 characters (5 for "ATAPI" or "ATA" + 1 for the null terminator)
+            strcpy(tempModel, (const char *[]){"ATA", "ATAPI"}[g_ide_devices[i].type]);
+            strcpy(temp.model, tempModel);
+
+            appendIndexToList(device_index,&list_size,temp);
         }
 }
 

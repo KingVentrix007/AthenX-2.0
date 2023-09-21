@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "pci.h"
 #include "io_ports.h"
 #include "ethernet.h"
@@ -76,7 +77,7 @@ uint8_t read_bits_23_to_16(uint32_t value) {
 // Function to enumerate PCI devices
 void pci_scan() {
     //init_pci_device();
-    //write_serial("P",DEFAULT_COM_DEBUG_PORT);
+    //DEBUG("");    //write_serial("P",DEFAULT_COM_DEBUG_PORT);
     for (uint8_t bus = 0; bus < 256; ++bus) {
         
         // int old_pos_x = get_vesa_row();
@@ -125,6 +126,7 @@ void pci_scan() {
             break;
         }
     }
+    //DEBUG("");
     int old_pos_row = get_vesa_row();
     int old_pos_col = get_vesa_col();
     set_vesa_row(0);
@@ -437,7 +439,7 @@ RegisteredPCIDeviceInfo* find_pci_device(uint16_t vendor_id, uint16_t device_id,
                 // printf("V_ID: 0x%x\n",pciDevices[i].header.vendor_id);
                 
                       
-                beep();
+                //beep();
                 strcpy(found_devices[num_found_devices__registered], pci_registered_device_list[i].device_name);
                 pci_registered_device_list[i].bus = bus;
                 pci_registered_device_list[i].device = device;
@@ -478,6 +480,7 @@ uint8_t extractBits7to0(uint32_t value) {
 
 // Function to find a PCI device and populate the PCIHeader struct
 void find_pci_device_header(uint8_t bus, uint8_t device, uint8_t func, PCIHeader* header) {
+    
     uint16_t read_vendor_id;
     uint16_t read_device_id;
     uint32_t vendorDeviceID = pci_read(bus, device, func, 0);
@@ -530,6 +533,7 @@ void find_pci_device_header(uint8_t bus, uint8_t device, uint8_t func, PCIHeader
 
 // Function to append a PCI device to the list
 void append_pci_device(PCIDeviceList* list, PCIHeader* header) {
+     
     if (list->num_devices < MAX_PCI_DEVICES) {
         list->headers[list->num_devices] = *header;
         list->num_devices++;

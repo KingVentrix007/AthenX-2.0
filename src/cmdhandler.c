@@ -458,11 +458,11 @@ void parse_command(const char* command) {
                 int lba = atoi(arguments[3]);
                 ide_read_sectors(drive,1,lba,(uint32)buffer);
                 printf("\nOutput:\n%s",buffer);
-                for (size_t i = 0; i < strlen("Memory Configuration")+1; i++)
-                    {
-                            append(b,buffer[i]);
-                    }
-                        printf("\nIUT:\n%s",b);
+                // for (size_t i = 0; i < strlen("Memory Configuration")+1; i++)
+                //     {
+                //             append(b,buffer[i]);
+                //     }
+                //         printf("\nIUT:\n%s",b);
             }
             else if (arg_count >= 5)
             {

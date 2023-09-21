@@ -1,3 +1,4 @@
+#include "installer.h"
 #include "errno.h"
 #include "version.h"
 #include "pci.h"
@@ -33,6 +34,10 @@
 #include "ext2.h"
 #include "acpi.h"
 #include "ssfs.h"
+#include "fis.h"
+#include "ahci.h"
+#include "read.h"
+#include "write.h"
 KERNEL_MEMORY_MAP g_kmap;
 MULTIBOOT_INFO *multi_boot_info;
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
@@ -47,10 +52,72 @@ MULTIBOOT_INFO *multi_boot_info;
 //     }
 // }
 
+#define HBA_MEM_BASE_ADDRESS 0xFD0C0000
+
+#define H2D_DATA_BASE_ADDRESS 0x1000000 // host to data を格納するアドレス
+#define D2H_DATA_BASE_ADDRESS 0x1000000 // data to host を格納するアドレス
+
+#define PORT_NUM 0
+
+void testRead(HBA_MEM *ptr) {
+	// 2018セクタをオフセット0~2017から読み込む, 512*2018 = 1M
+	int result = sata_read(&(ptr->ports[PORT_NUM]), 0, 15, 16, (uint16_t*)D2H_DATA_BASE_ADDRESS);
+	if (result) printf("testRead Success\n");
+	else printf("test Read Error\n");
+}
+
+void testWrite(HBA_MEM *ptr) {
+	int result = sata_write(&(ptr->ports[1]), 0, 2017, 2018, (uint16_t*)H2D_DATA_BASE_ADDRESS);
+	if (result) printf("testWrite Success\n");
+	else printf("testWrite Error\n");
+}
+void setup(HBA_MEM* ptr) {
+
+	// sata clock program
+	ptr->pctrl = 0x010200;
+
+	// axis bus setup 
+	ptr->paxic = 0x1;
+
+	/* Port Phy Cfg register enables */
+	ptr->pcfg = 0x2;
+
+	/* Phy Control OOB timing parameters COMINIT */
+	ptr->pp2c = 0x28184616;
+
+	/* Phy Control OOB timing parameters COMWAKE */
+	ptr->pp3c = 0x13081907;
+
+	/* Phy Control Burst timing setting */
+	ptr->pp4c = 0x064A0815;
+
+	/* Rate Change Timer and Retry Interval Timer setting */
+	ptr->pp5c = (0xB00 << 20);
+
+	ptr->ports[0].sctl = (0x33 << 4);
+	ptr->ports[0].serr = 0xffffffff;
+}
+
+
 MULTIBOOT_INFO *get_mb_info()
 {
     return multi_boot_info;
 }
+static void* locate_initrd(MULTIBOOT_INFO *mbi, uint32_t* size)
+{
+    if (mbi->mods_count > 0)
+    {
+        uint32_t start_location = *((uint32_t*)mbi->mods_addr);
+        uint32_t end_location = *(uint32_t*)(mbi->mods_addr + 4);
+
+        *size = end_location - start_location;
+
+        return (void*)start_location;
+    }
+
+    return NULL;
+}
+
 int mac_cmp() {
     // MAC address obtained from QEMU command line
     beep();
@@ -124,7 +191,7 @@ int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
     kmap->kernel.bss_end_addr = (uint32)&__kernel_bss_section_end;
     kmap->kernel.bss_len = ((uint32)&__kernel_bss_section_end - (uint32)&__kernel_bss_section_start);
 
-    kmap->system.total_memory = mboot_info->mem_low + mboot_info->mem_high;
+    kmap->system.total_memory = mboot_info->mem_lower + mboot_info->mem_upper;
 
     for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
         MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
@@ -165,6 +232,27 @@ void get_map(KERNEL_MEMORY_MAP *out)
 {
     memcpy(&out, &g_kmap, sizeof(out));
 }
+// Function to extract the size in bytes from a char buffer
+// and return the number of sectors (512 bytes per sector)
+unsigned int getSizeInSectors(const char* buffer) {
+    // Look for the line starting with "#SIZE"
+    const char* sizeLine = strstr(buffer, "#SIZE");
+    if (sizeLine == NULL) {
+        // Return an error value or handle the absence of #SIZE line
+        return 0;
+    }
+
+    // Move the pointer to the beginning of the number
+    sizeLine += strlen("#SIZE");
+
+    // Parse the size as an integer
+    unsigned int sizeInBytes = atoi(sizeLine);
+
+    // Calculate the number of sectors (512 bytes per sector)
+    unsigned int sectors = (sizeInBytes + 511) / 512;
+
+    return sectors;
+}
 void kmain(unsigned long magic, unsigned long addr) {
     FUNC_ADDR_NAME(&kmain,2,"ui");
     MULTIBOOT_INFO *mboot_info;
@@ -176,7 +264,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     kassert(display_init(1,0,0,32),0,1);
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         mboot_info = (MULTIBOOT_INFO *)addr;
-        multi_boot_info = mboot_info;
+        //multi_boot_info = mboot_info;
         memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
         if (get_kernel_memory_map(&g_kmap, mboot_info) < 0) {
             printf("error: failed to get kernel memory map\n");
@@ -194,14 +282,15 @@ void kmain(unsigned long magic, unsigned long addr) {
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         //@ Gets screen size from memory
-        keyboard_init();
+        
         
         int x = 1280;
         int y = 768;
         
-        
-        kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
+         keyboard_init();
+        //kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
         int ret = display_init(0,x,y,32);
+       
         
         
         char* mode = logo();
@@ -214,8 +303,41 @@ void kmain(unsigned long magic, unsigned long addr) {
         }
         
         //printf_("%s\n",mode);
-        cmd_handler("cls");
+        //cmd_handler("cls");
         ata_init();
+        printf("Mod count: %d\n", mboot_info->mods_count);
+        uint32_t initrd_size = 0;
+        uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
+        uint8_t* initrd_end_location = initrd_location + initrd_size;
+        printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
+        char output[71629] = {0};
+        memcpy(output, initrd_location, initrd_size);
+        // uint8_t* initrd_location2 = locate_initrd(mboot_info, &initrd_size);
+        // uint8_t* initrd_end_location2 = initrd_location2 + initrd_size;
+        // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location2, initrd_end_location2, initrd_size);
+        int boot_device = mboot_info->boot_device;
+          timer_init();//!DO NOT PUT BEFORE INIT VESA
+          char* cmdline = ((uint32_t*)mboot_info->cmdline);
+           while (*cmdline != '\0') {
+            // Output or store the character (e.g., using a serial port or video buffer)
+            // ...
+            printf("%c",cmdline);
+            cmdline++;
+            }
+        if(strstr(output,"Memory Configuration") != NULL)
+        {
+            get_adder_map(output);
+        }
+        else if (strstr(output,"INSTALL") != NULL)
+        {
+            int size = getSizeInSectors(output);
+            printf("%d\n",size);
+            install(0,1,size);
+            printf("SHUT DOWN THE PC AND REMOVE THE INSTALL MEDIUM\n");
+            for(;;);
+        }
+        
+       
         //ext2_init();
         //read_root_directory_inode();
         //read_root_directory_inode();
@@ -225,21 +347,33 @@ void kmain(unsigned long magic, unsigned long addr) {
         
         //sleep(190000);
         //print_drives();
-        DEBUG(" ");
+        //DEBUG(" ");
         //init_fs();
         //printf_("hello");
         //init_ssfs();
         partition_table tb;
         //format_disk(0);
-        init_fs();
+        //init_fs();
         //write_file(40);
+        HBA_MEM* hba_mem_ptr = (HBA_MEM*)HBA_MEM_BASE_ADDRESS;
+        // printf("SATA\n");
+        // setup(hba_mem_ptr);
+        // hba_mem_ptr->ports[PORT_NUM].clb = 0x2000000;
+        // hba_mem_ptr->ports[PORT_NUM].fb  = 0x3000000;
+
+        // hba_mem_ptr->ports[PORT_NUM].cmd = (1 << 4);
+        // //while ((hba_mem_ptr->ports[PORT_NUM].cmd & ((1<<15))) == 0);
+        // hba_mem_ptr->ports[PORT_NUM].cmd = 1;
+
+        // debug_HBA_MEM(hba_mem_ptr);
+        //testRead(hba_mem_ptr);
         init_pci_device();
         
         //printf("GOT HERE");
        
          //printf("H\n");
          //printf("0x%16x\n",&kmain);
-         timer_init();//!DO NOT PUT BEFORE INIT VESA
+       
          //printf("T\n");
          //printf("0x%x\n",addr);
          //printf("MADE IT HERE");
@@ -316,9 +450,9 @@ void kmain(unsigned long magic, unsigned long addr) {
             //     printf("RSDP not found.\n");
             // }
             char *dumbb = "DUMB";
-            beep();
+            //beep();
             //dummy_start();
-            get_adder_map();
+            
             terminal_main();
         }
 
@@ -536,12 +670,12 @@ void terminal_main()
            
             char c = kb_getchar();
             int ticks = get_ticks();
-            // if(ticks >= 500)
-            // {
+            if(ticks >= 500)
+            {
 
-            //     undraw_square(get_screen_x(),get_screen_y());
-            //     reset_ticks();
-            // }
+                undraw_square(get_screen_x(),get_screen_y());
+                reset_ticks();
+            }
              if (ticks >= 50) {
                 toggle_cursor_visibility();
                 reset_ticks();
@@ -603,9 +737,9 @@ void terminal_main()
                 char* s;
                 s = ctos(s, c);
                 //printf_(s);
-                //undraw_square(get_screen_x(),get_screen_y());
+                undraw_square(get_screen_x(),get_screen_y());
                 // printf_(s);
-                undraw_square(get_screen_y(),get_screen_x());
+                //undraw_square(get_screen_y(),get_screen_x());
                 printf(s);
                 //printf_("X{}");
                 //undraw_square(get_screen_x()-10,get_screen_y());
@@ -619,11 +753,11 @@ void terminal_main()
                 
             }
              if (cursor_visible) {
-                 draw_square_cursor(get_screen_y(),get_screen_x(),VBE_RGB(255, 255, 255));
+                draw_square_cursor(get_screen_y(),get_screen_x(),VBE_RGB(255, 255, 255));
             } else {
-                undraw_square(get_screen_y(),get_screen_x());
+               undraw_square(get_screen_y(),get_screen_x());
     }
-            //undraw_square(get_screen_x(),get_screen_y());
+            undraw_square(get_screen_x(),get_screen_y());
             
              //printf_("CAY");
             

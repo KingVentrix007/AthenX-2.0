@@ -65,7 +65,7 @@ char alternate_chars(char ch) {
     }
 }
 
-void keyboard_handler(isr_register_interrupt_handler) {
+void keyboard_handler(REGISTERS *r) {
     int scancode;
 
     g_ch = 0;

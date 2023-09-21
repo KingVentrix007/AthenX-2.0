@@ -63,7 +63,8 @@ iso: HackOS.bin
 # mkdir iso/boot
 # mkdir iso/boot/grub
 	cp HackOS.bin iso/boot/HackOS.bin
-	
+	cp LDout.map iso/boot/grub/
+	./calculate_size_and_write.sh
 	sudo grub-mkrescue --output=HackOS.iso iso
 #	rm -rf iso
 HackOS.bin2: $(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
@@ -97,17 +98,18 @@ changlog:
 run: iso MAP MAIN
 	truncate -s 0 pipe
 	dd if=HackOS.iso of=MAIN.img bs=4M status=progress conv=notrunc
-	dd if=LDout.map of=MAP.img bs=4M status=progress conv=notrunc
 	
-	qemu-system-i386  -name "MAIN" -drive file=MAIN.img,format=raw -name "CAT" -drive file=MAP.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
+	
+	
+	qemu-system-i386 -name "MAIN" -hda MAIN.img -drive file=SECCOND.img,format=raw,if=none,id=sata-drive -device ahci,id=ahci -device ide-hd,drive=sata-drive  -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
 
 MAP:
-	qemu-img create MAP.img 1G
+	qemu-img create SECCOND.img 1G
 MAIN:
 	qemu-img create MAIN.img 1G
 
 run-raw:
-	qemu-system-i386 -drive file=test.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
+	qemu-system-i386 -drive file=SECCOND.img,format=raw,if=none,id=sata-drive -device ahci,id=ahci -device ide-hd,drive=sata-drive -serial pipe:pipe -vga std -device intel-hda -device tpm-crb -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
 run-ext2:
 	
 	qemu-system-x86_64  -drive file=HDD.img,format=raw -serial file:"serial.log" -vga std -device sb16 -soundhw pcspk
@@ -146,3 +148,24 @@ fat32-img:
 
 qemu-list:
 	qemu-system-i386 -device help
+
+# Replace these with your actual file names
+FILE1 = MAIN.img
+FILE2 = SECCOND.img
+
+# Output filenames for hexdump
+FILE1_HEX = MAIN_hex.txt
+FILE2_HEX = SECCOND_hex.txt
+DIFF_OUTPUT = diff_output.txt
+# Target to generate hexdump files
+generate_hexdump:
+	hexdump -C $(FILE1) > $(FILE1_HEX)
+	hexdump -C $(FILE2) > $(FILE2_HEX)
+
+# Target to compare hexdump files and produce a unified diff
+compare_hexdump: generate_hexdump
+	diff -u --suppress-common-lines $(FILE1_HEX) $(FILE2_HEX) |  tee $(DIFF_OUTPUT)
+
+# Clean up temporary hexdump files
+clean-hex:
+	rm -f $(FILE1_HEX) $(FILE2_HEX) $(DIFF_OUTPUT)

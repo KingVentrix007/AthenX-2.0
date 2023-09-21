@@ -12,3 +12,6 @@ serial.log
 LDout.map
 .vscode/*.json
 pipe
+main
+load
+*.fat

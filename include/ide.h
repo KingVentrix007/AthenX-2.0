@@ -3,7 +3,8 @@
 
 // https://wiki.osdev.org/PCI_IDE_Controller
 #include "types.h"
-
+#define MAXIMUM_CHANNELS    2
+#define MAXIMUM_IDE_DEVICES    5
 typedef struct {
     uint16 base;  // i/o base port
     uint16 control;  // control port
@@ -22,15 +23,25 @@ typedef struct {
     uint32 size; // drive size in sectors
     unsigned char model[41]; // drive name
 } IDE_DEVICE;
+struct NamedIndex {
+    char name[30]; // Name, including null terminator
+    int index;   // Index position
+    char model[10];
+};
+// struct NamedIndexList
+// {
+//     NamedIndex[MAXIMUM_IDE_DEVICES];
+// };
+
 
 
 #define KERNEL_SECTOR_BASE 900
 #define FILE_SECTOR_BASE 1000
 
+struct NamedIndex* getList();
+int getListSize();
 
 
-#define MAXIMUM_CHANNELS    2
-#define MAXIMUM_IDE_DEVICES    5
 
 // ATA register ports for read/write
 #define ATA_REG_DATA         0x00

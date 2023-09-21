@@ -39,6 +39,7 @@ int get_vbe_info() {
 }
 
 void get_vbe_mode_info(uint16 mode, VBE20_MODEINFOBLOCK *mode_info) {
+    //printf_("GET MODE INFO\n");
     REGISTERS16 in = {0}, out = {0};
     // set specific value 0x4F00 in ax to get vbe mode info into some other bios memory area
     in.ax = 0x4F01;
@@ -59,6 +60,7 @@ void vbe_set_mode(uint32 mode) {
 
 // find the vbe mode by width & height & bits per pixel
 uint32 vbe_find_mode(uint32 width, uint32 height, uint32 bpp) {
+    printf_("\nFIND MODE\n");
     // iterate through video modes list
     uint16 *mode_list = (uint16 *)g_vbe_infoblock.VideoModePtr;
     uint16 mode = *mode_list++;
@@ -181,6 +183,7 @@ void vbe_putpixel_v2(int x, int y,int color, unsigned char *buffer)
 int vesa_init(uint32 width, uint32 height, uint32 bpp) {
     bios32_init();
     printf_("initializing vesa vbe 2.0\n");
+    printf_("DATA");
     if (!get_vbe_info()) {
         printf_("No VESA VBE 2.0 detected\n");
         return -1;

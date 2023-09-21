@@ -11,6 +11,7 @@
 #include "bool.h"
 #include "vesa_display.h"
 #include "display.h"
+#include "keyboard.h"
 int display_mode_screen;
 size_t screen_x;
 size_t screen_y;
@@ -21,22 +22,23 @@ int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp)
     int ret_int;
     if(display_mode == 0)
     {
-        if(width == -200044 && height == -950481)
-        {
-            ret_int = vesa_init(600,800,bpp);
-            int* out = find_biggest_mode();
-            ret_int = vesa_init(out[0],out[1],bpp);
+        // if(width == -200044 && height == -950481)
+        // {
+        //     ret_int = vesa_init(600,800,bpp);
+        //     int* out = find_biggest_mode();
+        //     ret_int = vesa_init(out[0],out[1],bpp);
             
-        }
-        else
-        {
+        // }
+        
+        
             //asm("cli");
             //printf_("HERE");
             set_font_c(0,255,0);
             ret_int = vesa_init(width,height,bpp);
+            printf_("\nMADE IT OUT\n");
             display_mode_screen = 0;
             //asm("sti");
-        }
+        
         
     }
     else if (display_mode == 1)
@@ -596,6 +598,56 @@ int kassert(int ret,int expected_ret,int level)
 }
 
 
+int printArrayWithSelection(char* arr[], int arrSize) {
+    int selectedIdx = 0; // Initialize the selected index to the first item
+    int keyPressed;
+
+    // Set the font and background color
+    set_font_color(7); // Set font color to white
+    set_background_color(255,255,255); // Set background color to black
+    int start_x = get_screen_x();
+    int start_y = get_screen_y();
+    while (1) {
+        // Clear the screen
+        set_screen_x(start_x);
+        set_screen_y(start_y);
+
+        // Print the array elements with the selected item highlighted
+        for (int i = 0; i < arrSize; i++) {
+            if (i == selectedIdx) {
+                // Highlight the selected item
+                set_font_c(255,255,255); // Set font color to black
+                set_background_color(0,0,255); // Set background color to white
+            } else {
+                // Unhighlight other items
+                set_font_c(0,0,0); // Set font color to white
+                set_background_color(255,255,255); // Set background color to black
+            }
+
+            // Print the array item
+            printf("%s\n", arr[i]);
+        }
+
+        // Reset font and background colors for subsequent text
+        set_font_color(VBE_RGB(0,0,255)); // Set font color to white
+        set_background_color(255,255,255); // Set background color to black
+
+        // Wait for a key press
+        keyPressed = kb_get_scancode();
+
+        // Check the key pressed
+        if (keyPressed == SCAN_CODE_KEY_UP && selectedIdx > 0) {
+            // Move selection up
+            selectedIdx--;
+        } else if (keyPressed == SCAN_CODE_KEY_DOWN && selectedIdx < arrSize - 1) {
+            // Move selection down
+            selectedIdx++;
+        } else if (keyPressed == SCAN_CODE_KEY_ENTER) {
+            // User pressed Enter, return the selected index
+            return selectedIdx;
+        }
+    }
+}
 
 
 
@@ -608,3 +660,5 @@ int kassert(int ret,int expected_ret,int level)
 // {
 //     vtconsole_write(vtc, s, strlen(s));
 // }
+
+
