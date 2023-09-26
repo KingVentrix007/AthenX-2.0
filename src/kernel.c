@@ -1,3 +1,5 @@
+#include "fat_filelib.h"
+#include "fat32.h"
 #include "installer.h"
 #include "errno.h"
 #include "version.h"
@@ -38,6 +40,7 @@
 #include "ahci.h"
 #include "read.h"
 #include "write.h"
+#include "tui.h"
 KERNEL_MEMORY_MAP g_kmap;
 MULTIBOOT_INFO *multi_boot_info;
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
@@ -291,52 +294,65 @@ void kmain(unsigned long magic, unsigned long addr) {
         //kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
         int ret = display_init(0,x,y,32);
        
-        
-        
-        char* mode = logo();
-        set_screen_x(0);
-        set_screen_y(0);
-        clear_screen();
-        if(strcmp(mode,"b") != 0)
-        {
-            printf("more boot options coming soon\n");
-        }
-        
-        //printf_("%s\n",mode);
-        //cmd_handler("cls");
         ata_init();
-        printf("Mod count: %d\n", mboot_info->mods_count);
+         printf("Mod count: %d\n", mboot_info->mods_count);
         uint32_t initrd_size = 0;
         uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
         uint8_t* initrd_end_location = initrd_location + initrd_size;
         printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
         char output[71629] = {0};
         memcpy(output, initrd_location, initrd_size);
+       
         // uint8_t* initrd_location2 = locate_initrd(mboot_info, &initrd_size);
         // uint8_t* initrd_end_location2 = initrd_location2 + initrd_size;
         // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location2, initrd_end_location2, initrd_size);
         int boot_device = mboot_info->boot_device;
-          timer_init();//!DO NOT PUT BEFORE INIT VESA
-          char* cmdline = ((uint32_t*)mboot_info->cmdline);
-           while (*cmdline != '\0') {
-            // Output or store the character (e.g., using a serial port or video buffer)
-            // ...
-            printf("%c",cmdline);
-            cmdline++;
-            }
+         
+        timer_init();//!DO NOT PUT BEFORE INIT VESA
+        //sleep(100000);
+        // char* cmdline = ((uint32_t*)mboot_info->cmdline);
+        // while (*cmdline != '\0') {
+        // // Output or store the character (e.g., using a serial port or video buffer)
+        // // ...
+        // printf("%c",cmdline);
+        // cmdline++;
+        // }
         if(strstr(output,"Memory Configuration") != NULL)
         {
             get_adder_map(output);
         }
         else if (strstr(output,"INSTALL") != NULL)
         {
+           
+            // printf("HERE");
+            // tui_main(1,"install");
+             clear_screen();
             int size = getSizeInSectors(output);
-            printf("%d\n",size);
+            printf("%d\n",2000);
+             clear_screen();
             install(0,1,size);
-            printf("SHUT DOWN THE PC AND REMOVE THE INSTALL MEDIUM\n");
+            printf("\n\nSHUT DOWN THE PC AND REMOVE THE INSTALL MEDIUM\n");
             for(;;);
         }
+       
+        char* mode = logo();
+         printf("HELLO");
+        set_screen_x(0);
+        set_screen_y(0);
+        clear_screen();
+        if(strcmp(mode,"u") == 0)
+        {
+           clear_screen();
+            tui_main(0,"");
+        }
+        printf("boot %d\n",mboot_info->boot_device);
+       
+        //printf_("%s\n",mode);
+        //cmd_handler("cls");
         
+       
+        // clear_screen();
+        // tui_main(0,"");
        
         //ext2_init();
         //read_root_directory_inode();
@@ -396,6 +412,30 @@ void kmain(unsigned long magic, unsigned long addr) {
         // strcpy(img.name,"Low resolution logo image" );
         // //draw_low_res_img(img);
         // IMAGE bg_img;
+          fl_init();
+          if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
+        {
+            printf("ERROR: Failed to init file system\n");
+            //return -1;
+        }
+        else
+        {
+            
+        }
+        fl_listdirectory("/");
+        
+        // FILE *file;
+        // file = fopen("/grub/grub.cfg", "r");
+        // if (file == NULL) {
+        //     printf("Error opening file");
+        // }
+
+        //  char ch;
+        //  while ((ch = fgetc(file)) != EOF) {
+        //     printf("%c",ch); // Print each character
+        // }
+        //  fclose(file);
+        //  printf("\n");
         // bg_img.ptrs.ptr = &background;
         // bg_img.Bpp = 8;
         // bg_img.width = 1980;
@@ -449,10 +489,12 @@ void kmain(unsigned long magic, unsigned long addr) {
             // } else {
             //     printf("RSDP not found.\n");
             // }
-            char *dumbb = "DUMB";
+            //char *dumbb = "DUMB";
             //beep();
             //dummy_start();
+            //init_fat_32(0);
             
+            //printf("made it");
             terminal_main();
         }
 
@@ -611,6 +653,7 @@ void terminal_main()
     //beep();
     //DEBUG("terminal_main");
     FUNC_ADDR_NAME(&terminal_main,0,"");
+    //printf("HERE\n");
     // WINDOW *test_win;
     // test_win->color = VBE_RGB(0,255,125);
     // test_win->start_x = 500;
@@ -703,28 +746,28 @@ void terminal_main()
                 //printf_("\b");
             }
             
-            else if (c == '\n' && is_all_one_type(buffer) == 0)
+            else if (c == '\n')
             {
                 //printf_("\n");
                 undraw_square(get_screen_y(),get_screen_x());
                 cmd_handler(buffer);
                 memset(buffer, 0,sizeof(buffer));
                 
-                next_line();
-                printf("\n");
+                //next_line();
+                //printf("code");
                 //set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
-                printf(">");
+                printf("\n>");
                 
                 //crude_song();
             }
-            else if(c == '\n')
-            {
-                undraw_square(get_screen_y(),get_screen_x());
-                printf("\n>");
-                memset(buffer,0,sizeof(buffer));
-            }
+            // else if(c == '\n')
+            // {
+            //     undraw_square(get_screen_y(),get_screen_x());
+            //     printf("\n");
+            //     memset(buffer,0,sizeof(buffer));
+            // }
             else if (c == '\0')
             {
                 //DEBUG("NULL");
@@ -737,9 +780,9 @@ void terminal_main()
                 char* s;
                 s = ctos(s, c);
                 //printf_(s);
-                undraw_square(get_screen_x(),get_screen_y());
+                //undraw_square(get_screen_x(),get_screen_y());
                 // printf_(s);
-                //undraw_square(get_screen_y(),get_screen_x());
+                undraw_square(get_screen_y(),get_screen_x());
                 printf(s);
                 //printf_("X{}");
                 //undraw_square(get_screen_x()-10,get_screen_y());
@@ -757,7 +800,7 @@ void terminal_main()
             } else {
                undraw_square(get_screen_y(),get_screen_x());
     }
-            undraw_square(get_screen_x(),get_screen_y());
+            //undraw_square(get_screen_x(),get_screen_y());
             
              //printf_("CAY");
             

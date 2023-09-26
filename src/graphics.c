@@ -426,7 +426,7 @@ void clear_screen()
     {
         for (uint32 x = 0; x < vbe_get_width(); x++)
         {
-            vbe_putpixel(x,y,VBE_RGB(0,0,0));
+            vbe_putpixel(x,y,get_bg_color());
         }
         
     }
@@ -498,12 +498,12 @@ void draw_image(int x, int y, int rows, int cols) {
             square_y = y + (j * square_size);
             if(strcmp(logo_img[j][i],'#') == 0){
                 draw_square(square_x, square_y,VBE_RGBA(0,255,0,255),0);
-                sleep(10000);
+                //sleep(10000);
             }
             else
             {
                 draw_square(square_x, square_y,VBE_RGBA(0,0,0,255),0);
-                sleep(1000);
+                //sleep(1000);
             }
             
         }
@@ -517,7 +517,9 @@ void draw_image(int x, int y, int rows, int cols) {
 
 char* logo()
 {
+    
     draw_image(0,0,320,200);
+    printf("\nhi");
     while(1==1)
     {
           char c = kb_getchar();
@@ -530,7 +532,7 @@ char* logo()
             
             return s;
         }
-        else if (strcmp(s,"h") == 0)
+        else if (strcmp(s,"u") == 0)
         {
             return s;
         }
@@ -998,7 +1000,44 @@ void draw_low_res_img(IMAGE img_header)
             // int color = rgb_to_color(r, g, b);
 
                 // Draw the pixel using the vbe_putpixel function
-                vbe_putpixel(x, y, VBE_RGB(r,g,b));
+                vbe_putpixel(x+img_header.x, y+img_header.y, VBE_RGB(r,g,b));
+            }
+           
+        }
+    }
+}
+void draw_low_res_img_ptr(IMAGE* img_header)
+{
+    int h = img_header->height;
+    int w = img_header->width;
+    
+
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            // Calculate the index in the image_data array
+            int index = (y * w + x) *1;  // Assuming each pixel is represented by 1 byte
+
+            // Extract the pixel value
+            if(img_header->Bpp == 8)
+            {
+                uint8_t* img = img_header->ptrs.ptr;
+                 uint8_t pixel_value = img[index];
+
+                // Extract color components using bit manipulation
+                int r = (pixel_value >> 5) & 0x07;  // 3 bits for Red
+                int g = (pixel_value >> 2) & 0x07;  // 3 bits for Green
+                int b = pixel_value & 0x03;         // 2 bits for Blue
+
+                // Convert color components to 8-bit values (assuming they are 3-bit and 2-bit)
+                r = r * 255 / 7;
+                g = g * 255 / 7;
+                b = b * 255 / 3;
+
+                // Convert RGB values to a color
+            // int color = rgb_to_color(r, g, b);
+
+                // Draw the pixel using the vbe_putpixel function
+                vbe_putpixel(x+img_header->x, y+img_header->y, VBE_RGB(r,g,b));
             }
            
         }

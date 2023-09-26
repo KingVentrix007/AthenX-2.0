@@ -147,8 +147,15 @@ char kb_getchar() {
 
 char kb_get_scancode() {
     char code;
-
-    while(g_scan_code <= 0);
+    int count = 0;
+    while(g_scan_code <= 0)
+    {
+        count++;
+        if(count >= 100)
+        {
+            return -1;
+        }
+    };
     code = g_scan_code;
     g_ch = 0;
     g_scan_code = 0;

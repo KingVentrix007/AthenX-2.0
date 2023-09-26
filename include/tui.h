@@ -10,5 +10,7 @@ typedef struct
     char name[100];
 }TUI_MAIN;
 
-
+int printArrayWithSelection(char* arr[], int arrSize);
+void tui_main(int argc, char *argv[]);
+int tui_install();
 #endif

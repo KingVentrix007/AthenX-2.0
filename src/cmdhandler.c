@@ -27,7 +27,7 @@
 #include "serial.h"
 #include "man.h"
 #include "ssfs.h"
-
+#include "tui.h"
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
@@ -64,6 +64,9 @@ void man(const char* cmd)
     printf("\n");
     man_main(cmd);
 }
+
+
+
 void removeFirstNChars(char* str, int n) {
     int length = strlen(str);
 
@@ -169,7 +172,16 @@ void parse_command(const char* command) {
     }
     else if (strcmp(arguments[0],"man") == 0)
     {
-        man(arguments[1]);
+        if(arg_count >= 2)
+        {
+            man(arguments[1]);
+        }
+        else
+        {
+            clear_screen();
+            man_list();
+        }
+        
     }
     
     else if (strcmp(arguments[0], "inspect") == 0)
@@ -517,9 +529,9 @@ void parse_command(const char* command) {
         text_editor(1024,data);
     }
     else {
-        printf("{/330:255,0,0}{/331:0,200,0}");
+        printf_("{/330:255,0,0}{/331:0,200,0}");
         printf("\n[!] %s is not a valid command",arguments[0]);
-        printf("{/330:0,255,0}{/331:0,0,0}");
+        printf_("{/330:0,255,0}{/331:0,0,0}");
         // Handle invalid or unknown commands
         // For example: display an error message
     }

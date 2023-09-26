@@ -31,6 +31,8 @@ typedef struct
     int width;
     int height;
     int Bpp;
+    int x;
+    int y;
     IMAGE_POINTERS ptrs;
     
 
@@ -54,6 +56,7 @@ void draw_char_g(unsigned char c,int fgcolor, int bgcolor, int x, int y, int bas
 int init_window(WINDOW *win);
 void draw_error_image();
 void draw_low_res_img(IMAGE img_header);
+void draw_low_res_img_ptr(IMAGE* img_header);
 void draw_hi_res_img(int w, int h);
 void draw_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint32 color);
 #endif

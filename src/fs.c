@@ -638,3 +638,5 @@ int fs_partition_table_main_update()
     ide_write_sectors(0, 1, KERNEL_SECTOR_BASE + 2, buf);
     return 0;
 }
+
+

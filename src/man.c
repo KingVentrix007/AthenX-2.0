@@ -1,6 +1,6 @@
 #include "strings.h"
 #include "printf.h"
-
+#include "display.h"
 void man_inspect()
 {
     printf("Inspect Command\n");
@@ -307,4 +307,11 @@ void man_main(const char* functionName) {
     }else {
         printf("No manual page available for '%s'\n", functionName);
     }
+}
+
+int man_list()
+{
+    char *cmds[] = {"inspect","raw","edit","sect","exe","fs","rle","3d","table","format","song","set-xy","exit","mkdir","logo","bg","cls","rm","ls","read","write","pci"};
+    int option  = printArrayWithSelection(cmds,22);
+    man_main(cmds[option]);
 }

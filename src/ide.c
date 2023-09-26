@@ -5,6 +5,7 @@
 #include "io_ports.h"
 #include "string.h"
 #include "terminal.h"
+#include "debug.h"
 // https://wiki.osdev.org/PCI_IDE_Controller
 // https://datacadamia.com/io/drive/lba
 
@@ -546,10 +547,16 @@ int ide_read_sectors_fat(uint32 sector, uint8 *buffer, uint32 sector_count) {
         uint8 err;
         if (g_ide_devices[drive].type == IDE_ATA)
             err = ide_ata_access(ATA_READ, drive, lba, num_sectors, buffer);
+            if(err == 0)
+            {
+                return 1;
+            }
+            DEBUG("");
         // print if any error in reading
         return ide_print_error(drive, err);
     }
-    return 0;
+    printf("HERE");
+    return 1;
 }
 
 // start from lba = 0
@@ -589,10 +596,14 @@ int ide_write_sectors_fat(uint32 sector, uint8 *buffer, uint32 sector_count) {
         uint8 err;
         if (g_ide_devices[drive].type == IDE_ATA)
             err = ide_ata_access(ATA_WRITE, drive, lba, num_sectors, buffer);
+             if(err == 0)
+            {
+                return 1;
+            }
         // print if any error in writing
         return ide_print_error(drive, err);
     }
-    return 0;
+    return 1;
 }
 void ata_init() {
     ide_init(0x1F0, 0x3F6, 0x170, 0x376, 0x000);

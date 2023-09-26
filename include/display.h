@@ -15,6 +15,6 @@ uint32 get_font_color();
 uint32 get_bg_color();
 uint32 set_background_color(int r, int g, int b);
 int set_font_c(int r, int g, int b);
-int printArrayWithSelection(char* arr[], int arrSize);
+
 
 #endif

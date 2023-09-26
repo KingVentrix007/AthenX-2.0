@@ -65,4 +65,5 @@ void man_edit();
 
 void man_main(const char* functionName);
 
+int man_list();
 #endif

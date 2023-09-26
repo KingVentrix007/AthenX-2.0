@@ -178,6 +178,7 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
 * And anyone else that I have missed, thanks.
 * [OS](https://github.com/pritamzope/OS): I used A LOT of his code, ATA driver, VESA, FPU, etc
 * My mom:  she did all my editing and made sure my grammar was correct
+* [Incon8](https://icons8.com/):The smaller logos
 
 ## Images
 

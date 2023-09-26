@@ -92,7 +92,7 @@ void vesa_putchar(char c)
     else if (c == '\b')
     {
         
-        for (size_t x = vesa_row; x < vesa_row+20; x++)
+        for (size_t x = vesa_row; x < vesa_row+12; x++)
         {
            for (size_t y = vesa_column; y < vesa_column+20; y++)
            {
@@ -226,7 +226,7 @@ void draw_square_cursor(int x, int y, int color) {
 void undraw_square(int x, int y) {
     for (int i = x; i < x + 10; i++) {
         for (int j = y; j < y + 12; j++) {
-            vbe_putpixel(i, j, VBE_RGB(0,0,0));  // Set pixel to black (assuming 0 represents black)
+            vbe_putpixel(i, j, get_bg_color());  // Set pixel to black (assuming 0 represents black)
         }
     }
 }

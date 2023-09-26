@@ -73,6 +73,12 @@
         "math.h": "c",
         "editor.h": "c",
         "installer.h": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "typeinfo": "c",
+        "background.h": "c",
+        "logos.h": "c",
+        "fat32.h": "c",
+        "fat_types.h": "c",
+        "fat_filelib.h": "c"
     }
 }
