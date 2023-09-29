@@ -52,5 +52,7 @@ void *krealloc(void *ptr, int size);
  * set free the block
 */
 void kfree(void *addr);
-
+#define malloc(size) kmalloc(size)
+#define free(ptr) kfree(ptr)
+#define realloc(ptr, size) krealloc(ptr, size)
 #endif

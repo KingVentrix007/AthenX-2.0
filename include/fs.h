@@ -43,7 +43,7 @@ typedef struct format_table
 //     char file_type[3];
 //     int next_sector;
 // };
-#define MAX_FILE_SIZE  (512*59) //max file size in bytes
+#define MAX_FILE_SIZE  ( 5242880) //max file size in bytes
 typedef struct FILE_HEADER_V1
 {
     char filename[8];

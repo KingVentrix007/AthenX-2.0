@@ -143,5 +143,6 @@ struct fatfs*       fl_get_fs(void);
 #define rmdir(a)        0
 
 #endif
-
+int ferror(FILE *stream);
+int ungetc(int character, FILE *stream);
 #endif

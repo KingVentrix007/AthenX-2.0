@@ -9,7 +9,7 @@
 
 static BOOL g_caps_lock = FALSE;
 static BOOL g_shift_pressed = FALSE;
-char g_ch = 0, g_scan_code = 0;
+char *g_ch = 0, g_scan_code = 0;
 
 // see scan codes defined in keyboard.h for index
 char g_scan_code_chars[128] = {
@@ -94,7 +94,54 @@ void keyboard_handler(REGISTERS *r) {
             case SCAN_CODE_KEY_LEFT_SHIFT:
                 g_shift_pressed = TRUE;
                 break;
-
+            case 0x48: // Up Arrow
+                g_ch = SCAN_CODE_KEY_UP;
+                break;
+            case 0x50: // Down Arrow
+                g_ch = SCAN_CODE_KEY_DOWN;
+                break;
+            case 0x4D: // Right Arrow
+                g_ch =  SCAN_CODE_KEY_RIGHT;
+                break;
+            case 0x4B: // Left Arrow
+                g_ch = SCAN_CODE_KEY_LEFT;
+                break;
+            case 0x3B: // F1
+                g_ch = "\u23A7";
+                break;
+            case 0x3C: // F2
+                g_ch = "\u23A8";
+                break;
+            case 0x3D: // F3
+                g_ch = "\u23A9";
+                break;
+            case 0x3E: // F4
+                g_ch = "\u23AA";
+                break;
+            case 0x3F: // F5
+                g_ch = "\u23AB";
+                break;
+            case 0x40: // F6
+                g_ch = "\u23AC";
+                break;
+            case 0x41: // F7
+                g_ch = "\u23AD";
+                break;
+            case 0x42: // F8
+                g_ch = "\u23AE";
+                break;
+            case 0x43: // F9
+                g_ch = "\u23AF";
+                break;
+            case 0x44: // F10
+                g_ch = "\u23B0";
+                break;
+            case 0x57: // F11
+                g_ch = "\u23B1";
+                break;
+            case 0x58: // F12
+                g_ch = "\u23B2";
+                break;
             default:
                 g_ch = g_scan_code_chars[scancode];
                 // if caps in on, covert to upper
@@ -126,10 +173,10 @@ void keyboard_init() {
 }
 
 // a blocking character read
-char kb_getchar() {
+char* kb_getchar() {
     int count = 0;
     //printf_("HERE");
-    char c;
+    char *c;
     
     while(g_ch <= 0)
     {
@@ -163,3 +210,84 @@ char kb_get_scancode() {
 }
 
 
+int get_input(int mode)
+{
+    int key = kb_get_scancode();
+    int count = 0;
+    while(key <= 0)
+    {
+        count++;
+        if(count >= 100 && mode == 1)
+        {
+            return -1;
+        }
+    }
+    return key;
+}
+
+char *inter_key(int mode)
+{
+    int key = get_input(key);
+    if(key == -1) return -1;
+    switch (key) {
+        case 0x48: // Up Arrow
+            return "\u2191";
+        case 0x50: // Down Arrow
+            return "\u2193";
+        case 0x4D: // Right Arrow
+            return "\u2192";
+        case 0x4B: // Left Arrow
+            return "\u2190";
+        case 0x3B: // F1
+            return "\u23A7";
+        case 0x3C: // F2
+            return "\u23A8";
+        case 0x3D: // F3
+            return "\u23A9";
+        case 0x3E: // F4
+            return "\u23AA";
+        case 0x3F: // F5
+            return "\u23AB";
+        case 0x40: // F6
+            return "\u23AC";
+        case 0x41: // F7
+            return "\u23AD";
+        case 0x42: // F8
+            return "\u23AE";
+        case 0x43: // F9
+            return "\u23AF";
+        case 0x44: // F10
+            return "\u23B0";
+        case 0x57: // F11
+            return "\u23B1";
+        case 0x58: // F12
+            return "\u23B2";
+        default:
+                char out = g_scan_code_chars[key];
+                // if caps in on, covert to upper
+                if (g_caps_lock) {
+                    // if shift is pressed before
+                    if (g_shift_pressed) {
+                        // replace alternate chars
+                        out = alternate_chars(out);
+                    } else
+                        out = upper(out);
+                } else {
+                    if (g_shift_pressed) {
+                        if (isalpha(out))
+                            out = upper(out);
+                        else 
+                            // replace alternate chars
+                        out = alternate_chars(out);
+                    } else
+                        g_ch = g_scan_code_chars[key];
+                    g_shift_pressed = FALSE;
+                }
+                break;
+            
+                // if caps in on, covert to upper
+                
+        
+    }
+
+}

@@ -16,7 +16,7 @@ size_t vesa_column;
 uint8_t vesa_color;
 static uint16 *vesa_buffer;
 bool controlled_scroll = false;
-
+bool scroll = false;
 #define BUFFER_SIZE 1024
 
 static inline uint8_t make_color(enum vga_color fg, enum vga_color bg)
@@ -86,7 +86,7 @@ void vesa_putchar(char c)
     }
     else if (c == '\t')
     {
-        vesa_row = vesa_row +4*8;
+        vesa_column = vesa_column +4*8;
         return;
     }
     else if (c == '\b')

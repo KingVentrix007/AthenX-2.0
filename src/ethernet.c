@@ -11,7 +11,7 @@
 #include "ethernet.h"
 #include "pci.h"
 #include "string.h"
-#include "memory.h"
+//#include "memory.h"
 #include "speaker.h"
 #include "errno.h"
 #include "kheap.h"

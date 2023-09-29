@@ -1,3 +1,4 @@
+#include "fat_filelib.h"
 #include "installer.h"
 #include "kheap.h"
 #include "isr.h"
@@ -5,7 +6,7 @@
 #include "errno.h"
 #include "pci.h"
 #include "printf.h"
-#include "ext2.h"
+// #include "ext2.h"
 #include "debug.h"
 #include "rle.h"
 #include "editor.h"
@@ -33,6 +34,7 @@
 //* Main command handling
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
+char cwd[FATFS_MAX_LONG_FILENAME] = "/rootfs/";
 void display_available_commands(const char* cmd) {
     printf("\nAvailable commands:\n");
     printf("help - Display this list of commands\n");
@@ -308,23 +310,69 @@ void parse_command(const char* command) {
     
     else if (strcmp(arguments[0], "write") == 0)
     {
-        if(arg_count >= 3)
+        if(arg_count >= 2)
         {
             char out[MAX_FILE_SIZE];
+            set_font_c(0,0,0);
+            set_background_color(255,255,255);
             //memset(out,0,sizeof(out));
             clear_screen();
-            set_screen_x(87000000);
-            set_cursor_y(5656754);
-            cmd_handler("cls");
+            set_screen_x(0);
+            set_cursor_y(0);
+            //cmd_handler("cls");
+            
             printf("\nPress ENTER to exit");
             printf("\nWelcome to Text:\n");
-            // int len = text_editor(MAX_FILE_SIZE,&out);
-            // printf("len = %d\n",len);
-            scanf("%s",out);
-       //printf(out);
-        //strcpy(buf, out);
-            printf("OUT: %s\n",out);
-            write(arguments[1], arguments[2],out);
+            int bufferSize = 0;
+            char path[FATFS_MAX_LONG_FILENAME] = "";
+            strcat(path,cwd);
+            strcat(path,"/");
+            strcat(path,arguments[1]);
+            //printf("HERE\n");
+            fim(out,path);
+    //         int len = text_editor(out,bufferSize );
+
+    //         //printf("LEN->%d",len);
+    //         //// printf("len = %d\n",len);
+    //         //scanf("%s",out);
+    //    //printf(out);
+    //     //strcpy(buf, out);
+    //         //printf("out->%s",out);
+    //         FILE *file;
+    //         char path[FATFS_MAX_LONG_FILENAME] = "";
+    //         strcat(path,cwd);
+    //         strcat(path,"/");
+    //         strcat(path,arguments[1]);
+    //         printf("\n");
+    //         printf("Writing file at: %s\n",path);
+    //         file = fopen(path,"ab");
+    //         size_t dataLength = 0;
+    //         while (out[dataLength] != '\0') {
+    //             dataLength++;
+    //     }
+    //         size_t elementsWritten = fl_fwrite(out, sizeof(char), dataLength, file);
+    //          if (elementsWritten != dataLength) {
+    //             printf("Error");
+    //         // Failed to write all data to the file
+    //          fclose(file); // Close the file before returning
+    //         return -1;
+    //     }
+
+    // Close the file
+        //fclose(file);
+            //fl_fwrite();
+            //fprintf()
+            // if(file == NULL)
+            // {
+            //     printf("ERROR reading file\n");
+            //     return -1;
+            // }
+            // char ch;
+            // while ((ch = fgetc(file)) != EOF) {
+            //     printf("%c",ch); // Print each character
+            // }
+            
+            printf("\n");
 
         }
         else
@@ -334,17 +382,77 @@ void parse_command(const char* command) {
     }
     else if(strcmp(arguments[0],"read") == 0)
     {
-       if(arg_count == 3)
-        {
-             read(arguments[1],arguments[2]);
-        }
-      
+       
+        char path[FATFS_MAX_LONG_FILENAME] = "";
+        strcat(path,cwd);
+        strcat(path,"/");
+        strcat(path,arguments[1]);
+        printf("\n");
+        printf("Reading file at: %s\n",path);
+        clear_display();
+        clear_screen();
+        set_screen_x(0);
+        set_screen_y(0);
+        displayFileContents(path);
+        // if(file == NULL)
+        // {
+        //     printf("ERROR reading file\n");
+        //     return -1;
+        // }
+        // char ch;
+        // while ((ch = fgetc(file)) != EOF) {
+        //     printf("%c",ch); // Print each character
+        // }
+        // fclose(file);
+        printf("\n");
+        
        
     }
     else if(strcmp(arguments[0],"ls") == 0)
     {
         //char *cwd = kmalloc(sizeof(*cwd)); //Current working directory, in it's path
-        list_files();
+        // fl_listdirectory("/");
+        // fl_listdirectory("rootfs");
+        // fl_listdirectory("rootfs/");
+        // fl_listdirectory("/rootfs");
+        fl_listdirectory(cwd);
+    }
+    else if(strcmp(arguments[0],"cd") == 0)
+    {
+        if (arg_count >= 2) {
+            if (strcmp(arguments[1], "..") == 0) {
+                // Check if the current directory is the rootfs directory
+                if (strcmp(cwd, "rootfs") == 0 || strcmp(cwd, "/rootfs/") == 0) {
+                    // Allow going one level above rootfs
+                    strcpy(cwd, "/");
+                } else {
+                    // Find the last '/' character in the current directory path
+                    char* last_slash = strrchr(cwd, '/');
+                    
+                    if (last_slash != NULL) {
+                        // Remove the last directory from the current path
+                        *last_slash = '\0';
+                        strcat(cwd,"/");
+                    } else {
+                        // If there is no '/', set the current directory to rootfs
+                        strcpy(cwd, "rootfs/");
+                    }
+                }
+            } else {
+                char tmp[FATFS_MAX_LONG_FILENAME] = "";
+                strcat(tmp,cwd);
+                //strcat(tmp, "/");
+                strcat(tmp, arguments[1]);
+                
+                if (fl_is_dir(tmp) == 1) {
+                    strcpy(cwd, tmp);
+                } else {
+                    printf("%s is not a valid path\n", tmp);
+                }
+            }
+}
+
+            
     }
     else if(strcmp(arguments[0],"rm") == 0)
     {
@@ -371,7 +479,17 @@ void parse_command(const char* command) {
     }
     else if (strcmp(arguments[0],"mkdir") == 0)
     {
-        make_dir(arguments[1]);
+        char tmp[FATFS_MAX_LONG_FILENAME];
+        strcpy(tmp,cwd);
+        strcat(tmp,arguments[1]);
+        if(fl_is_dir(tmp) == 0)
+        {
+            mkdir(tmp);
+        }
+        else
+        {
+            printf("Dictionary exists\n");
+        }
     }
     else if (strcmp(arguments[0],"exit") == 0)
     {
@@ -589,7 +707,10 @@ void kernel_command_handler(char *buffer[512])
 
     }
 }
-
+char *get_cwd()
+{
+    return cwd;
+}
 // void format_disk()
 // {
 //     run_once();

@@ -16,7 +16,9 @@ int g_selected_mode = -1;
 uint32 g_width = 0, g_height = 0;
 // buffer pointer pointing to video memory
 uint32 *g_vbe_buffer = NULL;
-
+uint32 * BackBuffer = NULL;
+ unsigned char Bpp, PixelStride;
+        int Pitch;
 uint32 vbe_get_width() {
     return g_width;
 }
@@ -140,37 +142,43 @@ void vbe_putpixel(int x, int y, uint32 color) {
     uint32 i = y * g_width + x;
     *(g_vbe_buffer + i) = color;
 }
+void copy_text_line_above_and_clear(int pitch, int bpp, int srcLine, int destLine,int lineHeight) {
+    // Calculate the number of bytes per line
+    size_t bytesPerPixel = bpp / 8;
+    size_t bytesForTextLine = (size_t)(g_width * lineHeight * bytesPerPixel);
+
+
+
+    // Calculate the addresses of the source and destination lines
+    void* srcAddr = g_vbe_buffer + (srcLine * pitch);
+    void* destAddr = g_vbe_buffer + (destLine * pitch);
+    if(srcAddr == destAddr)
+    {
+        logo();
+    }
+    // Copy the source line to the destination line
+    memmove(destAddr, srcAddr, bytesForTextLine);
+    memset(srcAddr, 0, bytesForTextLine);
+    // Clear the source line
+   // memset(srcAddr, 0, bytesForTextLine);
+}
+void shift_text_lines_up() {
+    int totalLines = g_height / 16; // Assuming each text line is 16 pixels high
+
+    // Start from the second last line and go upwards
+    for (int line = 0; line <= totalLines; line++) {
+        // Copy the current line to the line above it and clear the current line
+        copy_text_line_above_and_clear(g_width, 32, line, line - 1,8);
+    }
+}
 void vesa_scroll()
 {
     //VGA_clear_screen(Default_screen_color);
-    int SCREEN_WIDTH = vbe_get_width();
-    int SCREEN_HEIGHT = vbe_get_height();
-    int BYTES_PER_PIXEL = 32;
-    int lines = 1;
-    if(1==1)
-    {
-      size_t bytesPerLine = SCREEN_WIDTH *4;
-
-    // Calculate the number of bytes to move
-        size_t bytesToMove = bytesPerLine * (SCREEN_HEIGHT - lines);
-
-        // Perform the scroll by moving the framebuffer data
-        memmove((g_vbe_buffer), (g_vbe_buffer) + bytesToMove, bytesToMove);
-
-        // Clear the newly revealed lines
-        //memset((g_vbe_buffer) + bytesToMove, 0, bytesPerLine * lines);
-        //vesa_row = vesa_row-100;
-        set_vesa_row(0);
-        //set_vesa_colum(100);
-        int x = get_vesa_row();
-        //set_vesa_row(x-100);
-        set_vesa_colum(0);
-    }
-    else
-    {
-
-    }
-    
+     //copy_text_line_above_and_clear(Pitch, 32, 1, 0,16);
+     //copy_text_line_above_and_clear(Pitch, 32, 2, 1,16);
+     clear_screen();
+     set_screen_x(0);
+     set_screen_y(0);
     // //vesa_row = VGA_HEIGHT - 1;
 }
 
@@ -209,6 +217,13 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp) {
         g_vbe_buffer = (uint32 *)g_vbe_modeinfoblock.PhysBasePtr;
         // set the mode to start graphics window
         vbe_set_mode(g_selected_mode);
+       
+        PixelStride = (bpp + 7) / 8;  // Calculate bytes per pixel
+        /* The pitch is the amount of bytes between the start of each row. This isn't always bytes * width. */
+        /* This should work for the basic 16 and 32 bpp modes (but not 24) */
+        Pitch = g_width * PixelStride;
+        //BackBuffer = ((uint32 *) (kmalloc(g_height * Pitch)));
+
     #endif
     printf_("END\n");
     return 0;

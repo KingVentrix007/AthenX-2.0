@@ -79,6 +79,18 @@
         "logos.h": "c",
         "fat32.h": "c",
         "fat_types.h": "c",
-        "fat_filelib.h": "c"
+        "fat_filelib.h": "c",
+        "read.h": "c",
+        "rle.h": "c",
+        "fat_defs.h": "c",
+        "fat_table.h": "c",
+        "fat_access.h": "c",
+        "fat_format.h": "c",
+        "fat_cache.h": "c",
+        "fat_list.h": "c",
+        "strings.h": "c",
+        "cstdlib": "c",
+        "memory": "c",
+        "new": "c"
     }
 }

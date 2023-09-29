@@ -9,7 +9,7 @@
 #include "terminal.h"
 #include "debug.h"
 #include "display.h"
-#include "time.h"
+#include "timer.h"
 #include "kernel.h"
 // For both exceptions and irq interrupt
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];

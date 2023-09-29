@@ -52,6 +52,8 @@ run: iso MAIN
 run-fat: iso
 	bash ./run.sh
 	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -serial pipe:pipe -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
+run-m:
+	qemu-system-i386 -name "MAIN" -drive file=AthenX.img,format=raw -drive file=my_disk_image.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
 start_pulseaudio:
 	@echo "Starting PulseAudio..."
 	pulseaudio --start
@@ -68,6 +70,7 @@ MAIN:
 
 clean:
 	rm -f *.o HackOS HackOS.iso HackOS.bin $(OBJ_DIR)/*.o
+	rm -f AthenX.img
 
 version+:
 	./update_version "turd"
@@ -89,3 +92,24 @@ compare_hexdump: generate_hexdump
 
 clean-hex:
 	rm -f $(FILE1_HEX) $(FILE2_HEX) $(DIFF_OUTPUT)
+	
+# Define the image file and folder
+IMG_FILE = AthenX.img
+INSPECT_FOLDER = inspect
+
+
+# Target to mount the image
+mount-img:
+	@echo "Mounting the image to $(INSPECT_FOLDER)..."
+	@if [ ! -d "$(INSPECT_FOLDER)" ]; then mkdir $(INSPECT_FOLDER); fi
+	@sudo mount -o loop $(IMG_FILE) $(INSPECT_FOLDER)
+
+# Target to unmount the image
+unmount-img:
+	@echo "Unmounting the image from $(INSPECT_FOLDER)..."
+	@sudo umount $(INSPECT_FOLDER)
+
+# Target to list the contents of the folder
+list-contents:
+	@echo "Listing contents of $(INSPECT_FOLDER):"
+	@ls -l $(INSPECT_FOLDER)

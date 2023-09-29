@@ -99,9 +99,8 @@
 void keyboard_init();
 
 // a blocking character read
-char kb_getchar();
-
+char* kb_getchar();
 // a blocking scan code read
 char kb_get_scancode();
-
+char *inter_key(int mode);
 #endif

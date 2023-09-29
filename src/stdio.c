@@ -95,3 +95,7 @@ void scanf(char* format, ...) {
 
     va_end(args);
 }
+
+
+    
+

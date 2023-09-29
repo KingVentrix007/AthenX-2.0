@@ -4,5 +4,5 @@
 #include "types.h"
 void cmd_handler(char *buffer[512]);
 void kernel_command_handler(char *buffer[512]);
-
+char *get_cwd();
 #endif

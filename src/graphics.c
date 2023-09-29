@@ -1,3 +1,5 @@
+#include "kheap.h"
+#include "fat_filelib.h"
 #include "background.h"
 #include "image.h"
 #include "bitmap.h"
@@ -1081,3 +1083,212 @@ int init_window(WINDOW *win)
     draw_rect(win->start_x,win->start_y,win->width,win->height,win->color);
 }
 
+void draw_image_stb(unsigned char* image_data, int image_width, int image_height) {
+    // Iterate through the image data
+    for (int y = 0; y < image_height; y++) {
+        for (int x = 0; x < image_width; x++) {
+            // Calculate the pixel index in the image_data
+            int pixel_index = (y * image_width + x) * 3; // Assuming RGB image
+
+            // Extract the color channels from image_data
+            int r = image_data[pixel_index];
+            int g = image_data[pixel_index + 1];
+            int b = image_data[pixel_index + 2];
+
+            // Calculate the screen coordinates for drawing
+            int screen_x = x; // Adjust this based on where you want to draw the image
+            int screen_y = y; // Adjust this based on where you want to draw the image
+
+            // Calculate the color using VBE_RGB macro
+            int color = VBE_RGB(r, g, b);
+
+            // Call your vbe_putpixel function to draw the pixel
+            vbe_putpixel(screen_x, screen_y, color);
+        }
+}
+}
+/**
+ * Function Name: loadAndDrawImage
+ * Description: Load a TGA image and draw it on the screen.
+ *
+ * Parameters:
+ *   filename (const char*) - The name of the TGA file to load.
+ *   screen_x (int) - The x-coordinate on the screen to start drawing the image.
+ *   screen_y (int) - The y-coordinate on the screen to start drawing the image.
+ *
+ * Return:
+ *   int - 0 if successful, -1 if an error occurred.
+ */
+int loadAndDrawImage(const char *filename, int screen_x, int screen_y) {
+    FILE *file = fopen(filename, "rb");
+    if (!file) {
+        printf("Failed to open file %s\n", filename);
+        return -1;
+    }
+
+    // Get the file size
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    // Read the entire file into memory
+    unsigned char *fileData = (unsigned char *)kmalloc(size);
+    if (!fileData) {
+        printf("Failed to allocate memory for file data\n");
+        fclose(file);
+        return -1;
+    }
+
+    fread(fileData, 1, size, file);
+    fclose(file);
+
+    // Parse the TGA image
+    unsigned int *imageData = tga_parse(fileData, size);
+
+    kfree(fileData);
+
+    if (!imageData) {
+        printf("Failed to parse TGA image\n");
+        // Failed to parse the TGA image
+        return -1;
+    }
+
+    int width = imageData[0];
+    int height = imageData[1];
+
+    // Draw the image pixel by pixel
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            unsigned int pixel = imageData[2 + y * width + x];
+            int color = VBE_RGB((pixel >> 16) & 0xFF, (pixel >> 8) & 0xFF, pixel & 0xFF);
+            vbe_putpixel(screen_x + x, screen_y + y, color);
+        }
+    }
+
+    kfree(imageData);
+
+    return 0; // Success
+}
+
+/**
+ * Function Name: tga_parse
+ * Description: Parse TGA format into pixels. Returns NULL or error, otherwise the returned data looks like
+ *   ret[0] = width of the image
+ *   ret[1] = height of the image
+ *   ret[2..] = 32 bit ARGB pixels (blue channel in the least significant byte, alpha channel in the most)
+ *
+ * Parameters:
+ *   ptr (unsigned char*) - Pointer to the TGA file data.
+ *   size (int) - Size of the TGA file data.
+ *
+ * Return:
+ *   unsigned int* - Pointer to the parsed image data (no dynamic memory allocation).
+ */
+unsigned int *tga_parse(unsigned char *ptr, int size) {
+    unsigned int *data;
+    int i, j, k, x, y, w = (ptr[13] << 8) + ptr[12], h = (ptr[15] << 8) + ptr[14], o = (ptr[11] << 8) + ptr[10];
+    int m = ((ptr[1]? (ptr[7]>>3)*ptr[5] : 0) + 18);
+
+    if (w < 1 || h < 1) return NULL;
+
+    // Assuming a fixed buffer size based on max resolution (1024x700) and 32bpp
+    // Adjust this buffer size as needed for your specific use case.
+    unsigned int fixedBuffer[1280 * 720];
+    data = fixedBuffer;
+
+    switch (ptr[2]) {
+        case 1:
+            if (ptr[6] != 0 || ptr[4] != 0 || ptr[3] != 0 || (ptr[7] != 24 && ptr[7] != 32)) {
+                return NULL;
+            }
+            for (y = i = 0; y < h; y++) {
+                k = ((!o ? h - y - 1 : y) * w);
+                for (x = 0; x < w; x++) {
+                    j = ptr[m + k++] * (ptr[7] >> 3) + 18;
+                    data[2 + i++] = ((ptr[7] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
+                }
+            }
+            break;
+        case 2:
+            if (ptr[5] != 0 || ptr[6] != 0 || ptr[1] != 0 || (ptr[16] != 24 && ptr[16] != 32)) {
+                return NULL;
+            }
+            for (y = i = 0; y < h; y++) {
+                j = ((!o ? h - y - 1 : y) * w * (ptr[16] >> 3));
+                for (x = 0; x < w; x++) {
+                    data[2 + i++] = ((ptr[16] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
+                    j += ptr[16] >> 3;
+                }
+            }
+            break;
+        case 9:
+            if (ptr[6] != 0 || ptr[4] != 0 || ptr[3] != 0 || (ptr[7] != 24 && ptr[7] != 32)) {
+                return NULL;
+            }
+            y = i = 0;
+            for (x = 0; x < w * h && m < size;) {
+                k = ptr[m++];
+                if (k > 127) {
+                    k -= 127;
+                    x += k;
+                    j = ptr[m++] * (ptr[7] >> 3) + 18;
+                    while (k--) {
+                        if (!(i % w)) {
+                            i = ((!o ? h - y - 1 : y) * w);
+                            y++;
+                        }
+                        data[2 + i++] = ((ptr[7] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
+                    }
+                } else {
+                    k++;
+                    x += k;
+                    while (k--) {
+                        j = ptr[m++] * (ptr[7] >> 3) + 18;
+                        if (!(i % w)) {
+                            i = ((!o ? h - y - 1 : y) * w);
+                            y++;
+                        }
+                        data[2 + i++] = ((ptr[7] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
+                    }
+                }
+            }
+            break;
+        case 10:
+            if (ptr[5] != 0 || ptr[6] != 0 || ptr[1] != 0 || (ptr[16] != 24 && ptr[16] != 32)) {
+                return NULL;
+            }
+            y = i = 0;
+            for (x = 0; x < w * h && m < size;) {
+                k = ptr[m++];
+                if (k > 127) {
+                    k -= 127;
+                    x += k;
+                    while (k--) {
+                        if (!(i % w)) {
+                            i = ((!o ? h - y - 1 : y) * w);
+                            y++;
+                        }
+                        data[2 + i++] = ((ptr[16] == 32 ? ptr[m + 3] : 0xFF) << 24) | (ptr[m + 2] << 16) | (ptr[m + 1] << 8) | ptr[m];
+                    }
+                    m += ptr[16] >> 3;
+                } else {
+                    k++;
+                    x += k;
+                    while (k--) {
+                        if (!(i % w)) {
+                            i = ((!o ? h - y - 1 : y) * w);
+                            y++;
+                        }
+                        data[2 + i++] = ((ptr[16] == 32 ? ptr[m + 3] : 0xFF) << 24) | (ptr[m + 2] << 16) | (ptr[m + 1] << 8) | ptr[m];
+                        m += ptr[16] >> 3;
+                    }
+                }
+            }
+            break;
+        default:
+            return NULL;
+    }
+    data[0] = w;
+    data[1] = h;
+    return data;
+}

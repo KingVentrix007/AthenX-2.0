@@ -1,1 +1,1 @@
-world
+if int is if int not food:

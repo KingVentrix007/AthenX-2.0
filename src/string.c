@@ -178,7 +178,7 @@ int strcpy(char *dst, const char *src) {
     return i;
 }
 bool backspace(char *buffer) {
-    int len = string_length(buffer);
+    int len = strlen(buffer);
     if (len > 0) {
         buffer[len - 1] = '\0';
         buffer--;
@@ -460,8 +460,76 @@ unsigned long strtoul(const char* str, char** endptr, int base) {
     return result * sign;
 }
 
+bool isalnum(int c) {
+    // Check if the character is a letter (a-z, A-Z) or a digit (0-9)
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+}
+long strtol(const char* str, char** endptr, int base) {
+    // Initialize variables to hold the result and sign
+    long result = 0;
+    bool negative = false;
 
+    // Skip leading white spaces
+    while (isspace(*str)) {
+        str++;
+    }
 
+    // Check for a sign (+ or -)
+    if (*str == '-') {
+        negative = true;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+
+    // Check for the base prefix (0x for hexadecimal)
+    if (base == 0) {
+        if (*str == '0') {
+            str++;
+            if (*str == 'x' || *str == 'X') {
+                base = 16;
+                str++;
+            } else {
+                base = 8;
+            }
+        } else {
+            base = 10;
+        }
+    }
+
+    // Convert the string to a long integer
+    while (isalnum(*str)) {
+        char c = *str;
+        int digit;
+
+        if (isdigit(c)) {
+            digit = c - '0';
+        } else if (isalpha(c)) {
+            digit = tolower(c) - 'a' + 10;
+        } else {
+            break;  // Invalid character, stop parsing
+        }
+
+        if (digit >= base) {
+            break;  // Invalid digit for the current base
+        }
+
+        result = result * base + digit;
+        str++;
+    }
+
+    // Set endptr to the first character after the parsed number
+    if (endptr != NULL) {
+        *endptr = (char*)str;
+    }
+
+    // Apply the sign
+    if (negative) {
+        result = -result;
+    }
+
+    return result;
+}
 
 unsigned long long strtoull(const char *str, char **endptr, int base) {
     unsigned long long result = 0;
@@ -526,4 +594,46 @@ int isdigit(int c) {
 
 int isxdigit(int c) {
     return (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
+}
+char* strrchr(const char* str, int ch) {
+    if (str == NULL)
+        return NULL;
+
+    const char* last_occurrence = NULL;
+
+    // Traverse the string and update the pointer when the character is found
+    while (*str != '\0') {
+        if (*str == ch)
+            last_occurrence = str;
+        str++;
+    }
+
+    // If the character was found, return the pointer to the last occurrence
+    if (last_occurrence != NULL)
+        return (char*)last_occurrence;
+
+    // If the character was not found, return NULL
+    return NULL;
+}
+/**
+ * Function Name: my_strcspn
+ * Description: Finds the length of the initial segment of a string
+ *              consisting of characters not in the reject string.
+ *
+ * Parameters:
+ *   str (const char*) - The string to search.
+ *   reject (const char*) - The set of characters to reject.
+ *
+ * Return:
+ *   size_t - The length of the initial segment of 'str' without any characters from 'reject'.
+ */
+size_t strcspn(const char* str, const char* reject) {
+    size_t length = 0;
+    while (str[length] != '\0') {
+        if (strchr(reject, str[length]) != NULL) {
+            break;
+        }
+        length++;
+    }
+    return length;
 }

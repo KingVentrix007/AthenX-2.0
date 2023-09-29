@@ -29,7 +29,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-
+//#include < >
 #include <string.h>
 #include "fat_defs.h"
 #include "fat_access.h"
@@ -40,7 +40,7 @@
 #include "fat_filelib.h"
 #include "fat_cache.h"
 #include "fat_format.h"
-#include "debug.h"
+
 //-----------------------------------------------------------------------------
 // Locals
 //-----------------------------------------------------------------------------
@@ -666,7 +666,6 @@ int fl_attach_media(fn_diskio_read rd, fn_diskio_write wr)
     // Initialise FAT parameters
     if ((res = fatfs_init(&_fs)) != FAT_INIT_OK)
     {
-        //DEBUG("");
         FAT_PRINTF(("FAT_FS: Error could not load FAT details (%d)!\r\n", res));
         return res;
     }
@@ -1491,11 +1490,11 @@ void fl_listdirectory(const char *path)
 
             if (dirent.is_dir)
             {
-                FAT_PRINTF(("%s <DIR>\r\n", dirent.filename));
+                FAT_PRINTF(("-  %s <DIR>\n", dirent.filename));
             }
             else
             {
-                FAT_PRINTF(("%s [%d bytes]\r\n", dirent.filename, dirent.size));
+                FAT_PRINTF(("-  %s [%d bytes]\n", dirent.filename, dirent.size));
             }
         }
 
@@ -1603,3 +1602,17 @@ struct fatfs* fl_get_fs(void)
     return &_fs;
 }
 #endif
+int ungetc(int character, FILE *stream) {
+    // This is a dummy implementation of ungetc.
+    // It doesn't actually push the character back into the stream,
+    // but it satisfies the function prototype.
+    
+    // Always return EOF to indicate an error.
+    return EOF;
+}
+int ferror(FILE *stream) {
+    // This is a dummy implementation of ferror.
+    // It always returns 0 (no error) to indicate that no error occurred.
+    
+    return 0;
+}

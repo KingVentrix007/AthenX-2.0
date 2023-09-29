@@ -1,3 +1,5 @@
+
+
 #include "fat_filelib.h"
 #include "fat32.h"
 #include "installer.h"
@@ -33,7 +35,7 @@
 #include "fs.h"
 #include "graphics.h"
 #include "fpu.h"
-#include "ext2.h"
+// #include "ext2.h"
 #include "acpi.h"
 #include "ssfs.h"
 #include "fis.h"
@@ -41,6 +43,8 @@
 #include "read.h"
 #include "write.h"
 #include "tui.h"
+#include "env.h"
+
 KERNEL_MEMORY_MAP g_kmap;
 MULTIBOOT_INFO *multi_boot_info;
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
@@ -384,7 +388,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // debug_HBA_MEM(hba_mem_ptr);
         //testRead(hba_mem_ptr);
         init_pci_device();
-        
+        printf("%s\n",__TIME__);
         //printf("GOT HERE");
        
          //printf("H\n");
@@ -423,8 +427,29 @@ void kmain(unsigned long magic, unsigned long addr) {
             
         }
         fl_listdirectory("/");
-        
+         const char* filename = "/rootfs/environment.txt";
+        char* loaded_vars[100]; // Adjust the size as needed.
+        int numLoaded = loadEnvironmentVariables(filename, loaded_vars, 10);
+        if (numLoaded > 0) {
+        printf("Loaded %d environmental variables:\n", numLoaded);
+        for (int i = 0; i < numLoaded; i++) {
+            printf("%s\n", loaded_vars[i]);
+            free(loaded_vars[i]); // Free allocated memory.
+        }
+    } else {
+        printf("Error loading environmental variables.\n");
+    }
+
+        // if (loadAndDrawImage("/rootfs/splash.tga", 0, 0) == 0) {
+        // printf("succsess\n");
+        // } else {
+        //     // Error occurred
+        // }
+
+        //f_chdir("rootfs/");
         // FILE *file;
+        // file = fopen("/rootfs/cat.txt", "w");
+
         // file = fopen("/grub/grub.cfg", "r");
         // if (file == NULL) {
         //     printf("Error opening file");
@@ -694,8 +719,9 @@ void terminal_main()
     
 
     // #endif
-    
-     printf(">");
+    char cwd_at[FATFS_MAX_LONG_FILENAME] = "";
+    strcpy(cwd_at,get_cwd());
+     printf("%s>",cwd_at);
      //int x = 1/0;
      
      //printf_("{/330:0,255,0");
@@ -711,8 +737,9 @@ void terminal_main()
     {    
             //beep();
            
-            char c = kb_getchar();
+            char *c = kb_getchar();
             int ticks = get_ticks();
+            
             if(ticks >= 500)
             {
 
@@ -758,7 +785,8 @@ void terminal_main()
                 //set_screen_x(0);
                 //set_terminal_colum(get_terminal_col()+16);
                 //set_terminal_row(0);
-                printf("\n>");
+                 strcpy(cwd_at,get_cwd());
+                printf("\n%s>",cwd_at);
                 
                 //crude_song();
             }
@@ -774,7 +802,7 @@ void terminal_main()
                 
                 //beep();
             }
-            else
+            else if((int)c != 0x48 && (int)c != 0x50 && (int)c != 0x4D && (int)c != 0x4B )
             {
                 
                 char* s;
@@ -793,6 +821,10 @@ void terminal_main()
                 
                 append(buffer,c);
                
+                
+            }
+            else
+            {
                 
             }
              if (cursor_visible) {

@@ -1,5 +1,5 @@
 #include "ide.h"
-#include <string.h>
+#include "string.h"
 #include <vesa.h>
 #include <isr.h>
 #include "debug.h"

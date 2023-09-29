@@ -59,6 +59,9 @@ void draw_low_res_img(IMAGE img_header);
 void draw_low_res_img_ptr(IMAGE* img_header);
 void draw_hi_res_img(int w, int h);
 void draw_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint32 color);
+void draw_image_stb(unsigned char* image_data, int image_width, int image_height);
+unsigned int *tga_parse(unsigned char *ptr, int size);
+int loadAndDrawImage(const char *filename, int screen_x, int screen_y);
 #endif
 
 

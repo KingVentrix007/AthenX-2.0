@@ -52,7 +52,7 @@ Bitwise operators (AND, OR, XOR, etc.) manipulate individual bits of data, often
 Command-line arguments are parameters passed to a C program when it is executed, allowing external input to affect program behavior.
 
 16. Standard Library:
-The Standard Library in C provides a set of built-in functions and macros that are part of the C language specification and accessible through standard header files like <stdio.h>, <stdlib.h>, etc.
+The Standard Library in C provides a set of built-in functions and macros that are part of the C language specification and accessible through standard header files like <stdio.h>, < >, etc.
 
 17. Macro:
 A macro is a preprocessor directive that defines a code snippet or value, which is replaced directly in the code during compilation.

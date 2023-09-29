@@ -26,12 +26,11 @@ int isalpha(char c);
 char upper(char c);
 char lower(char c);
 bool backspace(char *buffer);
-
+char* strrchr(const char* str, int ch);
 void itoa(char *buf, int base, int d);
 int strncmp(const char *s1, const char *s2, size_t n);
 int string_length(char s[]);
 void append(char s[], char n);
-void * malloc(int nbytes);
 bool hex_string_to_uint16(const char* hexString, uint16_t* result);
 unsigned long strtoul(const char* str, char** endptr, int base);
 char* strtok(char* str, const char* delimiters);
@@ -40,4 +39,7 @@ unsigned long long strtoull(const char *str, char **endptr, int base);
 int tolower(int c);
 int isdigit(int c);
 int isxdigit(int c);
+long strtol(const char* str, char** endptr, int base);
+bool isalnum(int c);
+size_t strcspn(const char* str, const char* reject);
 #endif

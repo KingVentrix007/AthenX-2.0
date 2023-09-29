@@ -1,4 +1,4 @@
-#include "strings.h"
+#include "string.h"
 #include "printf.h"
 #include "display.h"
 void man_inspect()

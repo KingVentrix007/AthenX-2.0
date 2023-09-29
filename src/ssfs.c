@@ -1,6 +1,6 @@
 #include "kheap.h"
 #include "string.h"
-#include "math.h"
+#include "maths.h"
 #include "ide.h"
 #include "ssfs.h"
 #include "string.h"

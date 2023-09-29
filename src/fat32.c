@@ -144,7 +144,7 @@ void readRootDirectory(int disk, uint32_t root_cluster, uint16_t bytes_per_secto
 //Experimental
 // #include <stdio.h>
 // #include <stdint.h>
-// #include <string.h>
+// #include "string.h"
 
 // Define the FAT boot sector struct and the extended FAT32 struct
 // (fat_BS_t and fat_extBS_32_t as defined in your previous messages)
