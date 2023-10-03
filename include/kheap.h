@@ -1,8 +1,8 @@
 #ifndef KHEAP_H
 #define KHEAP_H
 
-#include "types.h"
-#include "stddef.h"
+#include "../include/types.h"
+#include "../include/stddef.h"
 
 // a singly linked list heap block
 typedef struct _kheap_block {

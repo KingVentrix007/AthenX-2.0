@@ -1,7 +1,7 @@
 #ifndef ERRNO_H
 #define ERRNO_H
-#include "timer.h"
-#include "stdbool.h"
+#include "../include/timer.h"
+#include "../include/stdbool.h"
 
 typedef char *(*Decode_Function)(uint16_t);
 typedef struct 

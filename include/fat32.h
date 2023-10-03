@@ -1,6 +1,6 @@
 #ifndef __FAT__32__
 #define __FAT__32__
-#include "types.h"
+#include "../include/types.h"
 typedef struct fat_extBS_32
 {
 	//extended fat32 stuff

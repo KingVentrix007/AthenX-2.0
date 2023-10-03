@@ -1,7 +1,7 @@
 #ifndef VGA_H
 #define VGA_H
 
-#include "types.h"
+#include "../include/types.h"
 #include <stddef.h>
 #define VGA_ADDRESS        0xB8000
 #define VGA_TOTAL_ITEMS    2200

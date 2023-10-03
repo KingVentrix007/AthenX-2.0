@@ -1,6 +1,6 @@
 #ifndef _ACPI_
 #define _ACPI_
-#include "types.h"
+#include "../include/types.h"
 
 //! RSDP
 #define RSDP_SIGNATURE "RSD PTR "

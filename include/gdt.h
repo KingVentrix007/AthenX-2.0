@@ -5,7 +5,7 @@
 #ifndef GDT_H
 #define GDT_H
 
-#include "types.h"
+#include "../include/types.h"
 
 #define NO_GDT_DESCRIPTORS     8
 

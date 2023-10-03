@@ -5,7 +5,7 @@
 #ifndef IDT_H
 #define IDT_H
 
-#include "types.h"
+#include "../include/types.h"
 
 #define NO_IDT_DESCRIPTORS     256
 

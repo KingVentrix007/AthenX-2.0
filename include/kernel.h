@@ -1,8 +1,8 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include "types.h"
-#include "multiboot.h"
+#include "../include/types.h"
+#include "../include/multiboot.h"
 // symbols from linker.ld for section addresses
 extern uint8 __kernel_section_start;
 extern uint8 __kernel_section_end;

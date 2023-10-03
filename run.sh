@@ -4,25 +4,25 @@
 image_file="AthenX.img"
 
 # Set the path to the rootfs folder within the mount point
-rootfs_mount_point="/mnt/my_bootable/rootfs"
+rootfs_mount_point="/mnt/AthenX/rootfs"
 
 # Set the path to HackOS.bin
 hackos_bin="HackOS.bin"
 
 if [ -f "$image_file" ]; then
   # If the .img file exists, mount it
-  sudo mkdir -p /mnt/my_bootable
-  sudo mount -o loop,rw "AthenX.img" /mnt/my_bootable
-  # sudo umount /mnt/my_bootable
+  sudo mkdir -p /mnt/AthenX
+  sudo mount -o loop,rw "AthenX.img" /mnt/AthenX
+  # sudo umount /mnt/AthenX
   
   # Copy HackOS.bin into the rootfs folder
   echo "Contents of the mount point and its subdirectories:"
-  ls -R /mnt/my_bootable
-  sudo cp "HackOS.bin" "/mnt/my_bootable/boot"
-  sudo cp gui/sunset.tga "/mnt/my_bootable/gui"
-  # sudo cp "src/cmdhandler.c" "/mnt/my_bootable/rootfs/cmd.c"
+  ls -R /mnt/AthenX
+  sudo cp "../HackOS.bin" "/mnt/AthenX/boot"
+
+  # sudo cp "src/cmdhandler.c" "/mnt/AthenX/rootfs/cmd.c"
   # Unmount the image
-  sudo umount /mnt/my_bootable
+  sudo umount /mnt/AthenX
 else
     # Create an empty image file
     dd if=/dev/zero of="$image_file" bs=1M count=1024
@@ -35,39 +35,39 @@ else
     sudo mkfs.vfat -F 32 -n MYBOOT "$image_file"
 
     # Mount the image
-    sudo mkdir -p /mnt/my_bootable
+    sudo mkdir -p /mnt/AthenX
 
-    sudo mount -o loop,rw "$image_file" /mnt/my_bootable
-    sudo mkdir -p /mnt/my_bootable/bin
-    sudo mkdir -p /mnt/my_bootable/etc
-    sudo mkdir -p /mnt/my_bootable/home
-    sudo mkdir -p /mnt/my_bootable/mnt
-    sudo mkdir -p /mnt/my_bootable/tmp
-    sudo mkdir -p /mnt/my_bootable/usr
-    sudo mkdir -p /mnt/my_bootable/var
-    sudo mkdir -p /mnt/my_bootable/boot
-    sudo mkdir -p /mnt/my_bootable/media
-    sudo mkdir -p /mnt/my_bootable/sys
-    sudo mkdir -p /mnt/my_bootable/dev
-    sudo mkdir -p /mnt/my_bootable/proc
-    sudo mkdir -p /mnt/my_bootable/lib
-    sudo mkdir -p /mnt/my_bootable/sbin
-    sudo mkdir -p /mnt/my_bootable/opt
-    sudo mkdir -p /mnt/my_bootable/root
-    sudo mkdir -p /mnt/my_bootable/gui
-    sudo mkdir -p /mnt/my_bootable/user
-    sudo mkdir -p /mnt/my_bootable/var/log
+    sudo mount -o loop,rw "$image_file" /mnt/AthenX
+    sudo mkdir -p /mnt/AthenX/bin
+    sudo mkdir -p /mnt/AthenX/etc
+    sudo mkdir -p /mnt/AthenX/home
+    sudo mkdir -p /mnt/AthenX/mnt
+    sudo mkdir -p /mnt/AthenX/tmp
+    sudo mkdir -p /mnt/AthenX/usr
+    sudo mkdir -p /mnt/AthenX/var
+    sudo mkdir -p /mnt/AthenX/boot
+    sudo mkdir -p /mnt/AthenX/media
+    sudo mkdir -p /mnt/AthenX/sys
+    sudo mkdir -p /mnt/AthenX/dev
+    sudo mkdir -p /mnt/AthenX/proc
+    sudo mkdir -p /mnt/AthenX/lib
+    sudo mkdir -p /mnt/AthenX/sbin
+    sudo mkdir -p /mnt/AthenX/opt
+    sudo mkdir -p /mnt/AthenX/root
+    sudo mkdir -p /mnt/AthenX/gui
+    sudo mkdir -p /mnt/AthenX/user
+    sudo mkdir -p /mnt/AthenX/var/log
     # Copy your OS files and GRUB configuration
     
-    sudo cp HackOS.bin /mnt/my_bootable/boot
+    sudo cp HackOS.bin /mnt/AthenX/boot
 
     # Install GRUB to the MBR (Master Boot Record)
-    sudo grub-install --target=i386-pc --boot-directory=/mnt/my_bootable --force --no-floppy --modules="part_msdos fat" /dev/loop0
-    echo "saved_entry=grub.cfg" | sudo tee /mnt/my_bootable/grub/grubenv
-    sudo cat /mnt/my_bootable/grub/grubenv
-    # sudo cp "simple.cfg" /mnt/my_bootable/grub/grub.cfg
-    sudo cp -r "iso/boot/grub/." "/mnt/my_bootable/grub/"
-    sudo cp "mnt/my_bootable/gui/sunset.tga" "/mnt/my_bootable/gui"
+    sudo grub-install --target=i386-pc --boot-directory=/mnt/AthenX --force --no-floppy --modules="part_msdos fat" /dev/loop0
+    echo "saved_entry=grub.cfg" | sudo tee /mnt/AthenX/grub/grubenv
+    sudo cat /mnt/AthenX/grub/grubenv
+    # sudo cp "simple.cfg" /mnt/AthenX/grub/grub.cfg
+    sudo cp -r "grub/." "/mnt/AthenX/grub/"
+    sudo cp "mnt/AthenX/gui/sunset.tga" "/mnt/AthenX/gui"
     # Verify the root directory's LBA address using the file command
     # Calculate the LBA address for the root directory
     bytes_per_sector=$(sudo fdisk -l "$image_file" | grep "Sector size" | awk '{print $4}')
@@ -81,6 +81,6 @@ else
     echo "TESTING $image_file intergraty"
     fsck.fat $image_file
     # Unmount the image
-    sudo umount /mnt/my_bootable
+    sudo umount /mnt/AthenX
 
 fi

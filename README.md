@@ -57,11 +57,10 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
   ```
      ```sh
   sudo apt install grub-pc-bin
-```
+  ```
 
 * nasm
-
-     ```sh
+    ```sh
   sudo apt install nasm
   ```
 
@@ -94,10 +93,7 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
 2. open freshly installed repository with wsl or any other UNIX system and run:
 
     ```sh
-    make HDD
     make run
-    ```
-    make HDD creates a 1GB hardisk
 3. From this point on you only have to type
 
     ``` sh
@@ -124,10 +120,10 @@ Simply add any changes you want then and save them, then type 'make run' and wat
   * [x] list files
   * [x] read files
   * [ ] edit files
-  * [ ] make dictionary
+  * [X] make dictionary
   * [ ] rename dictionary
-  * [ ] delete dictionary
-  * [ ] set current dictionary
+  * [X] delete dictionary
+  * [X] set current dictionary
   * [ ] different file types
   * [X] super basic superblock
   * [X] format disk function
@@ -222,4 +218,19 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="images/File handling.png" alt="Logo" width="" height="">
+  </a>
+
+# VERSION 2.0
+
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="images/Stack trace on error.png" alt="Logo" width="" height="">
+  </a>
+  <div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="images/Main terminal.png" alt="Logo" width="" height="">
+  </a>
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="images/list of registerd PCI devices.png" alt="Logo" width="" height="">
   </a>

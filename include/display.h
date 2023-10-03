@@ -1,6 +1,6 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
-#include "types.h"
+#include "../include/types.h"
 
 int printf_(const char *format, ...);
 int display_init(int display_mode,uint32 width,uint32 height, uint32 bpp);

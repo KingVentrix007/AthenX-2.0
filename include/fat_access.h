@@ -1,8 +1,8 @@
 #ifndef __FAT_ACCESS_H__
 #define __FAT_ACCESS_H__
 
-#include "fat_defs.h"
-#include "fat_opts.h"
+#include "../include/fat_defs.h"
+#include "../include/fat_opts.h"
 
 //-----------------------------------------------------------------------------
 // Defines

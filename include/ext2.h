@@ -1,6 +1,6 @@
 #ifndef EXT2_H
 #define EXT2_H
-#include "types.h"
+#include "../include/types.h"
 
 #define EXT2_SUPER 1
 

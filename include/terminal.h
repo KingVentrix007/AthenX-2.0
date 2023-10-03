@@ -1,9 +1,9 @@
 #ifndef _TTY_H
 #define _TTY_H 1
 
-#include "stdint.h"
-#include "stddef.h"
-#include "stdarg.h"
+#include "../include/stdint.h"
+#include "../include/stddef.h"
+#include "../include/stdarg.h"
 
 /*
  * Some macros to produce output on the screen.

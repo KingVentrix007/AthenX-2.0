@@ -1,6 +1,6 @@
 #ifndef EDITOR_H
 #define EDITOR_H
-#include "fs.h"
+#include "../include/fs.h"
 typedef struct
 {
     /* data */

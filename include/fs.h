@@ -1,8 +1,8 @@
 #ifndef FS_H
 #define FS_H
-#include "stdint.h"
-#include "types.h"
-#include "ide.h"
+#include "../include/stdint.h"
+#include "../include/types.h"
+#include "../include/ide.h"
 typedef struct FILE
 {
     char filename[8];

@@ -1,13 +1,13 @@
 
 #ifndef VESA_DISPLAY_H
 #define VESA_DISPLAY_H
-#include "types.h"
+#include "../include/types.h"
 #include <stddef.h>
-#include "vga.h"
-#include "vesa.h"
-#include "types.h"
+#include "../include/vga.h"
+#include "../include/vesa.h"
+#include "../include/types.h"
 #include <stdint.h>
-#include "bool.h"
+#include "../include/bool.h"
 //void vesa_initialize(enum vga_color font_color, enum vga_color background_color);
 void vesa_set_colors(enum vga_color font_color, enum vga_color background_color);
 

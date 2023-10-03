@@ -2,8 +2,8 @@
 #define e82540EM_ETHERNET_H
 
 #include <stdint.h>
-#include "pci.h"
-#include "isr.h"
+#include "../include/pci.h"
+#include "../include/isr.h"
 // Vendor and Device IDs for Intel Ethernet e82540EM
 #define INTEL_VENDOR_ID 0x8086  
 #define e82540EM_DEVICE_ID  0x100e    

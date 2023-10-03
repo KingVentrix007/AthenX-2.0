@@ -1,7 +1,7 @@
 #ifndef _BOOL_H
 #define _BOOL_H 1
 
-#include "stdint.h"
+#include "../include/stdint.h"
 
 #define true 1
 #define false 0

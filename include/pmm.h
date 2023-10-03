@@ -1,7 +1,7 @@
 #ifndef PMM_H
 #define PMM_H
 
-#include "types.h"
+#include "../include/types.h"
 
 typedef uint32 PMM_PHYSICAL_ADDRESS;
 

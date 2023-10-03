@@ -1,6 +1,6 @@
 #ifndef __SSFS__H
 #define __SSFS__H
-#include "types.h"
+#include "../include/types.h"
 // Define the size of a sector (adjust according to your needs)
 // Define the maximum size for the disk name
 #define MAX_DISK_NAME_SIZE 100

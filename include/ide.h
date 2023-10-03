@@ -2,7 +2,7 @@
 #define IDE_H
 
 // https://wiki.osdev.org/PCI_IDE_Controller
-#include "types.h"
+#include "../include/types.h"
 #define MAXIMUM_CHANNELS    2
 #define MAXIMUM_IDE_DEVICES    5
 typedef struct {

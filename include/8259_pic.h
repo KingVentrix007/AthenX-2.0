@@ -5,7 +5,7 @@
 #ifndef _8259_PIC_H
 #define _8259_PIC_H
 
-#include "types.h"
+#include "../include/types.h"
 
 /* for more, see https://wiki.osdev.org/8259_PIC */
 #define PIC1            0x20  /* IO base address for master PIC */

@@ -1,6 +1,6 @@
 #ifndef _SOUND_H
 #define _SOUND_H 1
-#include "stdint.h"
+#include "../include/stdint.h"
 typedef enum {
     C2  = 18356,
     Cs2 = 17292,

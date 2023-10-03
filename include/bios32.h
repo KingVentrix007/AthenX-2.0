@@ -1,8 +1,8 @@
 #ifndef BIOS32_H
 #define BIOS32_H
 
-#include "types.h"
-#include "isr.h"
+#include "../include/types.h"
+#include "../include/isr.h"
 
 // defined in bios32_call.asm
 extern void BIOS32_START();

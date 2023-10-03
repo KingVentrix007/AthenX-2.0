@@ -1,8 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
-#include "types.h"
-#include "stdbool.h"
-#include "isr.h"
+#include "../include/types.h"
+#include "../include/stdbool.h"
+#include "../include/isr.h"
 #define MAX_LIST_SIZE 600
 #define MAX_FUNCTIONS 10000
 typedef struct

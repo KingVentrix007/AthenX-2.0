@@ -1,10 +1,10 @@
 #ifndef __FAT_FILELIB_H__
 #define __FAT_FILELIB_H__
 
-#include "fat_opts.h"
-#include "fat_access.h"
-#include "fat_list.h"
-#include "types.h"
+#include "../include/fat_opts.h"
+#include "../include/fat_access.h"
+#include "../include/fat_list.h"
+#include "../include/types.h"
 //-----------------------------------------------------------------------------
 // Defines
 //-----------------------------------------------------------------------------

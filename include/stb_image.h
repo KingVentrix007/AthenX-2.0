@@ -10,7 +10,7 @@
    #include ...
    #include ...
    #define STB_IMAGE_IMPLEMENTATION
-   #include "stb_image.h"
+   #include "../include/stb_image.h"
 
    You can #define STBI_ASSERT(x) before the #include to avoid using assert.h.
    And #define STBI_MALLOC, STBI_REALLOC, and STBI_FREE to avoid using malloc,realloc,free
@@ -370,7 +370,7 @@ RECENT REVISION HISTORY:
 #include <stdio.h>
 
 #endif // STBI_NO_STDIO
-#include "fat_filelib.h"
+#include "../include/fat_filelib.h"
 #define STBI_VERSION 1
 
 enum
@@ -587,9 +587,9 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
 #include <stdarg.h>
 #include <stddef.h> // ptrdiff_t on osx
 
-#include "string.h"
+#include "../include/string.h"
 #include <limits.h>
-#include "kheap.h"
+#include "../include/kheap.h"
 #if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR)
 #include <math.h>  // ldexp, pow
 #endif

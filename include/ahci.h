@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "fis.h"
+#include "../include/fis.h"
 
 
 // 各ポートの情報

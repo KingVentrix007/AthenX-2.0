@@ -1,7 +1,7 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include "vga.h"
+#include "../include/vga.h"
 
 #define MAXIMUM_PAGES  16
 

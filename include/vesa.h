@@ -1,7 +1,7 @@
 #ifndef VESA_H
 #define VESA_H
 
-#include "types.h"
+#include "../include/types.h"
 #include <stddef.h>
 enum vga_color
 {

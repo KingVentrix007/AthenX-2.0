@@ -1,7 +1,7 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
-#include "types.h"
+#include "../include/types.h"
 
 #define MOUSE_CMD_RESET     0xFF
 #define MOUSE_CMD_RESEND     0xFE

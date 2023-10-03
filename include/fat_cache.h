@@ -1,7 +1,7 @@
 #ifndef __FAT_CACHE_H__
 #define __FAT_CACHE_H__
 
-#include "fat_filelib.h"
+#include "../include/fat_filelib.h"
 
 //-----------------------------------------------------------------------------
 // Prototypes

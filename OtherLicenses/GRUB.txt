@@ -1,1 +1,0 @@
-Grub 2.06-2ubuntu7.2 is used to generate and boot my operating systems iso file, it is licensed under the: "GNU General Public License version 3" as of 30.07.2023(30/07/2023) 09:19(GMT+2)

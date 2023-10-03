@@ -1,7 +1,7 @@
 #ifndef _MATH_H
 #define _MATH_H 1
 
-#include "stdint.h"
+#include "../include/stdint.h"
 static uint32_t seed = 0;
 
 #define RAND_MAX 4294967295 // 2^32 - 1

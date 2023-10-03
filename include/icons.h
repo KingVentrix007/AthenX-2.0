@@ -1,6 +1,6 @@
 #ifndef __ICONS__H
 #define __ICONS__H
-#include "types.h"
+#include "../include/types.h"
 
 uint8_t HDD_map[] = {
   /*Pixel format: Red: 3 bit, Green: 3 bit, Blue: 2 bit*/

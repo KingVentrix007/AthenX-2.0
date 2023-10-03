@@ -1,7 +1,7 @@
 #ifndef BITMAP_H
 #define BITMAP_H
 
-#include "types.h"
+#include "../include/types.h"
 
 #define BITMAP_SIZE 20
 

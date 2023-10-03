@@ -1,7 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include "types.h"
+#include "../include/types.h"
 typedef struct {
     int x;
     int y;
