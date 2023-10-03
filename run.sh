@@ -12,13 +12,15 @@ hackos_bin="HackOS.bin"
 if [ -f "$image_file" ]; then
   # If the .img file exists, mount it
   sudo mkdir -p /mnt/my_bootable
-  sudo mount -o loop "$image_file" /mnt/my_bootable
-
+  sudo mount -o loop,rw "AthenX.img" /mnt/my_bootable
+  # sudo umount /mnt/my_bootable
+  
   # Copy HackOS.bin into the rootfs folder
   echo "Contents of the mount point and its subdirectories:"
   ls -R /mnt/my_bootable
-  sudo cp "$hackos_bin" "/mnt/my_bootable/rootfs"
-  sudo cp "src/cmdhandler.c" "/mnt/my_bootable/rootfs/cmd.c"
+  sudo cp "HackOS.bin" "/mnt/my_bootable/boot"
+  sudo cp gui/sunset.tga "/mnt/my_bootable/gui"
+  # sudo cp "src/cmdhandler.c" "/mnt/my_bootable/rootfs/cmd.c"
   # Unmount the image
   sudo umount /mnt/my_bootable
 else
@@ -35,11 +37,29 @@ else
     # Mount the image
     sudo mkdir -p /mnt/my_bootable
 
-    sudo mount -o loop "$image_file" /mnt/my_bootable
-
+    sudo mount -o loop,rw "$image_file" /mnt/my_bootable
+    sudo mkdir -p /mnt/my_bootable/bin
+    sudo mkdir -p /mnt/my_bootable/etc
+    sudo mkdir -p /mnt/my_bootable/home
+    sudo mkdir -p /mnt/my_bootable/mnt
+    sudo mkdir -p /mnt/my_bootable/tmp
+    sudo mkdir -p /mnt/my_bootable/usr
+    sudo mkdir -p /mnt/my_bootable/var
+    sudo mkdir -p /mnt/my_bootable/boot
+    sudo mkdir -p /mnt/my_bootable/media
+    sudo mkdir -p /mnt/my_bootable/sys
+    sudo mkdir -p /mnt/my_bootable/dev
+    sudo mkdir -p /mnt/my_bootable/proc
+    sudo mkdir -p /mnt/my_bootable/lib
+    sudo mkdir -p /mnt/my_bootable/sbin
+    sudo mkdir -p /mnt/my_bootable/opt
+    sudo mkdir -p /mnt/my_bootable/root
+    sudo mkdir -p /mnt/my_bootable/gui
+    sudo mkdir -p /mnt/my_bootable/user
+    sudo mkdir -p /mnt/my_bootable/var/log
     # Copy your OS files and GRUB configuration
-    sudo cp -r "rootfs" /mnt/my_bootable/rootfs
-    sudo cp HackOS.bin /mnt/my_bootable/rootfs
+    
+    sudo cp HackOS.bin /mnt/my_bootable/boot
 
     # Install GRUB to the MBR (Master Boot Record)
     sudo grub-install --target=i386-pc --boot-directory=/mnt/my_bootable --force --no-floppy --modules="part_msdos fat" /dev/loop0
@@ -47,6 +67,7 @@ else
     sudo cat /mnt/my_bootable/grub/grubenv
     # sudo cp "simple.cfg" /mnt/my_bootable/grub/grub.cfg
     sudo cp -r "iso/boot/grub/." "/mnt/my_bootable/grub/"
+    sudo cp "mnt/my_bootable/gui/sunset.tga" "/mnt/my_bootable/gui"
     # Verify the root directory's LBA address using the file command
     # Calculate the LBA address for the root directory
     bytes_per_sector=$(sudo fdisk -l "$image_file" | grep "Sector size" | awk '{print $4}')

@@ -1011,6 +1011,7 @@ char *fl_fgets(char *s, int n, void *f)
 //-----------------------------------------------------------------------------
 int fl_fread(void * buffer, int size, int length, void *f )
 {
+    //printf("reading from");
     uint32 sector;
     uint32 offset;
     int copyCount;

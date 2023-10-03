@@ -11,6 +11,7 @@
 #include "kernel.h"
 #include "graphics.h"
 #include "multiboot.h"
+#include "stdio.h"
 ADDER_NAME_LIST addr_name;
 List myList;
 struct Function functions[MAX_FUNCTIONS];
@@ -601,4 +602,17 @@ const struct Function* resolve_function_name(uintptr_t address, const struct Fun
     }
     //printf("\n0x%016x",address);
     return result;
+}
+
+void asser_1t(int condition, const char* message) {
+    if (!condition) {
+        printf("Assertion failed:");
+        perror(message);
+        printf("\n");
+        
+    }
+}
+int assert(int x)
+{
+    printf("Assertion failed:");
 }

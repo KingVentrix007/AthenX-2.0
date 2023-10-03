@@ -29,12 +29,13 @@
 #include "man.h"
 #include "ssfs.h"
 #include "tui.h"
+
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
-char cwd[FATFS_MAX_LONG_FILENAME] = "/rootfs/";
+char cwd[FATFS_MAX_LONG_FILENAME] = "/root/";
 void display_available_commands(const char* cmd) {
     printf("\nAvailable commands:\n");
     printf("help - Display this list of commands\n");
@@ -68,7 +69,11 @@ void man(const char* cmd)
 }
 
 
-
+int set_cwd(char *s_cwd)
+{
+    //cwd = s_cwd;
+    strcpy(cwd,s_cwd);
+}
 void removeFirstNChars(char* str, int n) {
     int length = strlen(str);
 
@@ -307,8 +312,23 @@ void parse_command(const char* command) {
         //list_pci_devices();
         //printf("list");
     }
+    else if (strcmp(arguments[0],"load") == 0)
+    {
+        if(0== 0)
+        {
+            printf("load img\n");
+            sleep(2);
+            char path[FATFS_MAX_LONG_FILENAME] = "";
+            strcat(path,cwd);
+            strcat(path,"/");
+            strcat(path,arguments[1]);
+            //printf("HERE\n");
+            loadAndDrawImage(path,0,0);
+        }
+    }
     
-    else if (strcmp(arguments[0], "write") == 0)
+    
+    else if (strcmp(arguments[0], "fim") == 0)
     {
         if(arg_count >= 2)
         {
@@ -345,7 +365,7 @@ void parse_command(const char* command) {
     //         strcat(path,arguments[1]);
     //         printf("\n");
     //         printf("Writing file at: %s\n",path);
-    //         file = fopen(path,"ab");
+    //         file = fl_fopen(path,"ab");
     //         size_t dataLength = 0;
     //         while (out[dataLength] != '\0') {
     //             dataLength++;
@@ -380,7 +400,7 @@ void parse_command(const char* command) {
             printf("To many arguments");
         }
     }
-    else if(strcmp(arguments[0],"read") == 0)
+    else if(strcmp(arguments[0],"cat") == 0)
     {
        
         char path[FATFS_MAX_LONG_FILENAME] = "";
@@ -408,6 +428,24 @@ void parse_command(const char* command) {
         
        
     }
+    else if(strcmp(arguments[0],"pwd") == 0)
+    {
+        printf("%s\n",cwd);
+    }
+    else if (strcmp(arguments[0],"touch") == 0)
+    {
+        char path[FATFS_MAX_LONG_FILENAME] = "";
+        strcat(path,cwd);
+        strcat(path,"/");
+        strcat(path,arguments[1]);
+        FILE* file = fl_fopen(path, "a");
+
+        if (file == NULL) {
+        perror("Failed to open file"); // Print an error message if the file can't be opened
+        return 1; // Return an error code
+        }
+    }
+    
     else if(strcmp(arguments[0],"ls") == 0)
     {
         //char *cwd = kmalloc(sizeof(*cwd)); //Current working directory, in it's path
@@ -416,47 +454,80 @@ void parse_command(const char* command) {
         // fl_listdirectory("rootfs/");
         // fl_listdirectory("/rootfs");
         fl_listdirectory(cwd);
+        
     }
+    
     else if(strcmp(arguments[0],"cd") == 0)
     {
         if (arg_count >= 2) {
-            if (strcmp(arguments[1], "..") == 0) {
-                // Check if the current directory is the rootfs directory
-                if (strcmp(cwd, "rootfs") == 0 || strcmp(cwd, "/rootfs/") == 0) {
-                    // Allow going one level above rootfs
-                    strcpy(cwd, "/");
-                } else {
-                    // Find the last '/' character in the current directory path
-                    char* last_slash = strrchr(cwd, '/');
-                    
-                    if (last_slash != NULL) {
-                        // Remove the last directory from the current path
-                        *last_slash = '\0';
-                        strcat(cwd,"/");
-                    } else {
-                        // If there is no '/', set the current directory to rootfs
-                        strcpy(cwd, "rootfs/");
-                    }
-                }
-            } else {
-                char tmp[FATFS_MAX_LONG_FILENAME] = "";
-                strcat(tmp,cwd);
-                //strcat(tmp, "/");
-                strcat(tmp, arguments[1]);
-                
-                if (fl_is_dir(tmp) == 1) {
-                    strcpy(cwd, tmp);
-                } else {
-                    printf("%s is not a valid path\n", tmp);
-                }
-            }
-}
-
+    if (strcmp(arguments[1], "..") == 0) {
+        // Check if the current directory is the rootfs directory
+        if (strcmp(cwd, "root") == 0 || strcmp(cwd, "/root/") == 0) {
+            // Allow going one level above rootfs
+            strcpy(cwd, "/");
+        } else if (strstr(cwd, "/") != 0) {
+            // Find the last '/' character in the current directory path
+            char* last_slash = strrchr(cwd, '/');
             
+            if (last_slash != NULL) {
+                //printf("Here\n");
+                // Remove the last directory from the current path
+                *last_slash = '\0';
+                char* last_slash = strrchr(cwd, '/');
+            
+                if (last_slash != NULL) {
+                    //printf("Here23\n");
+                    // Remove the last directory from the current path
+                    *last_slash = '\0';
+                    
+                    }
+            } else {
+                // If there is no '/', set the current directory to rootfs
+                strcpy(cwd, "root");
+            }
+        }
+        if(cwd[strlen(cwd)-1] == '/' && cwd[strlen(cwd)-2] == '/')
+        {
+            cwd[strlen(cwd)-1] = '\0';
+        }
+        if(cwd[strlen(cwd)-1] != '/')
+        {
+            strcat(cwd,"/");
+        }
+    } else {
+        char tmp[FATFS_MAX_LONG_FILENAME];
+        strcpy(tmp,cwd);
+        if(tmp[strlen(tmp)-1] != '/')
+        {
+             strcat(tmp, "/");
+        }
+       
+        strcat(tmp, arguments[1]);
+        
+        if (fl_is_dir(tmp) == 1) {
+            strcpy(cwd, tmp);
+        } else {
+            printf("\n%s is not a valid path\n", tmp);
+        }
+        if(cwd[strlen(cwd)-1] == '/' && cwd[strlen(cwd)-2] == '/')
+        {
+            DEBUG("");
+            cwd[strlen(cwd)-1] = '\0';
+        }
+        if(cwd[strlen(cwd)-1] != '/')
+        {
+            strcat(cwd,"/");
+        }
+    }
+}
     }
     else if(strcmp(arguments[0],"rm") == 0)
     {
-        delete_file(arguments[1]);
+        char path[FATFS_MAX_LONG_FILENAME] = "";
+        strcat(path,cwd);
+        strcat(path,"/");
+        strcat(path,arguments[1]);
+        remove(path);
     }
     else if (strcmp(arguments[0],"cls") == 0)
     {

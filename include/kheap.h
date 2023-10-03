@@ -2,6 +2,7 @@
 #define KHEAP_H
 
 #include "types.h"
+#include "stddef.h"
 
 // a singly linked list heap block
 typedef struct _kheap_block {
@@ -35,7 +36,7 @@ void kheap_print_blocks();
  * to find best block to allocate
  * # Need to work on internal/external segmentaion problem
 */
-void *kmalloc(int size);
+void *kmalloc(size_t size);
 
 /**
  * allocate memory n * size & zeroing out

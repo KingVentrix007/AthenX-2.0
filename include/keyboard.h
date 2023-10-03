@@ -103,4 +103,6 @@ char* kb_getchar();
 // a blocking scan code read
 char kb_get_scancode();
 char *inter_key(int mode);
+int get_char();
+int unget_char(int c);
 #endif

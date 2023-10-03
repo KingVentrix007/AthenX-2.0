@@ -65,15 +65,20 @@ void vesa_putchar(char c)
     if (c == '\n' || c == '\r')
     {
        
-        if (vesa_row >= vbe_get_height()-8)
+        if (vesa_row >= vbe_get_height()-16)
         {
-            while(kb_get_scancode() != SCAN_CODE_KEY_DOWN);
-            vesa_scroll();
+            // int dirct = kb_get_scancode();
+            // while(dirct != SCAN_CODE_KEY_DOWN);
+            vesa_scroll(0);
+            printf("");
+           
+            
+            
             //printf("HERE");
         }
         else
         {
-             vesa_column = 0;
+            vesa_column = 0;
             vesa_row = vesa_row +16;
         }
         //  set_screen_x(0);

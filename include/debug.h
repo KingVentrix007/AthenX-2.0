@@ -59,4 +59,6 @@ char* findNextSpaceOrNewline(char* ptr);
 int parseMemoryMap(const char* mapData, struct Function* functions);
 unsigned long long parseHex(const char* str);
 const struct Function* resolve_function_name(uintptr_t address, const struct Function* functions, int numFunctions);
+
+// #define assert(condition) ((void)0)
 #endif

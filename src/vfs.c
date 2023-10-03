@@ -4,6 +4,7 @@
 
 #include "vfs.h"
 #include "ide.h"
+int fs_type;
 int init_disk(int disk)
 {
      int init_fs_ret = 0;
@@ -41,7 +42,7 @@ int init_disk(int disk)
                 return 2;
             }
                 
-        }
+}
         // else
         // {
              
@@ -49,20 +50,3 @@ int init_disk(int disk)
         //     return 1;
         // }
 
-FILES_SYSTEM file_system_info;
-int file_system_mode = -1;
-int initialize_file_system(int disk)
-{
-    int mode = init_disk(disk);
-    file_system_info.mode = mode;
-    file_system_info.num_sectors = get_sectors(disk);
-    file_system_mode = mode;
-    return mode;
-
-
-}
-
-int get_fs_mode()
-{
-    return file_system_mode;
-}

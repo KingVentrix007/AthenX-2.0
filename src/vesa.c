@@ -7,6 +7,7 @@
 #include "string.h"
 #include "types.h"
 #include "vesa_display.h"
+#include "timer.h"
 // vbe information
 VBE20_INFOBLOCK g_vbe_infoblock;
 VBE20_MODEINFOBLOCK g_vbe_modeinfoblock;
@@ -142,25 +143,24 @@ void vbe_putpixel(int x, int y, uint32 color) {
     uint32 i = y * g_width + x;
     *(g_vbe_buffer + i) = color;
 }
-void copy_text_line_above_and_clear(int pitch, int bpp, int srcLine, int destLine,int lineHeight) {
-    // Calculate the number of bytes per line
-    size_t bytesPerPixel = bpp / 8;
-    size_t bytesForTextLine = (size_t)(g_width * lineHeight * bytesPerPixel);
+void scroll_lines(int lines) {
+    //sleep(1);
+    int n = lines;
+    
+    // Calculate the number of bytes to copy and the destination address
+    size_t bytesToCopy = (g_width * (g_height - n)) * sizeof(uint32_t);
+    uint32_t* destination = g_vbe_buffer;
 
+    // Calculate the number of bytes to clear
+    size_t bytesToClear = n * g_width * sizeof(uint32_t);
 
+    // Perform the copy operation
+    memcpy(destination, g_vbe_buffer + (g_width * n), bytesToCopy);
 
-    // Calculate the addresses of the source and destination lines
-    void* srcAddr = g_vbe_buffer + (srcLine * pitch);
-    void* destAddr = g_vbe_buffer + (destLine * pitch);
-    if(srcAddr == destAddr)
-    {
-        logo();
+    // Fill the cleared lines with red pixels (you can change the color as needed)
+    for (size_t i = 0; i < bytesToClear / sizeof(uint32_t); i++) {
+        destination[bytesToCopy / sizeof(uint32_t) + i] = VBE_RGB(0, 0, 0);
     }
-    // Copy the source line to the destination line
-    memmove(destAddr, srcAddr, bytesForTextLine);
-    memset(srcAddr, 0, bytesForTextLine);
-    // Clear the source line
-   // memset(srcAddr, 0, bytesForTextLine);
 }
 void shift_text_lines_up() {
     int totalLines = g_height / 16; // Assuming each text line is 16 pixels high
@@ -168,17 +168,18 @@ void shift_text_lines_up() {
     // Start from the second last line and go upwards
     for (int line = 0; line <= totalLines; line++) {
         // Copy the current line to the line above it and clear the current line
-        copy_text_line_above_and_clear(g_width, 32, line, line - 1,8);
+        //copy_text_line_above_and_clear(g_width, 32, line, line - 1,8);
     }
 }
-void vesa_scroll()
+void vesa_scroll(int direct)
 {
+    scroll_lines(16);
+    set_screen_x(get_screen_x());
+    set_screen_y(0);
     //VGA_clear_screen(Default_screen_color);
      //copy_text_line_above_and_clear(Pitch, 32, 1, 0,16);
      //copy_text_line_above_and_clear(Pitch, 32, 2, 1,16);
-     clear_screen();
-     set_screen_x(0);
-     set_screen_y(0);
+     
     // //vesa_row = VGA_HEIGHT - 1;
 }
 
@@ -222,7 +223,7 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp) {
         /* The pitch is the amount of bytes between the start of each row. This isn't always bytes * width. */
         /* This should work for the basic 16 and 32 bpp modes (but not 24) */
         Pitch = g_width * PixelStride;
-        //BackBuffer = ((uint32 *) (kmalloc(g_height * Pitch)));
+        BackBuffer = ((uint32 *) (kmalloc(g_height * Pitch)));
 
     #endif
     printf_("END\n");

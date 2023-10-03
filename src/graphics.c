@@ -1120,9 +1120,9 @@ void draw_image_stb(unsigned char* image_data, int image_width, int image_height
  *   int - 0 if successful, -1 if an error occurred.
  */
 int loadAndDrawImage(const char *filename, int screen_x, int screen_y) {
-    FILE *file = fopen(filename, "rb");
+    FILE *file = fl_fopen(filename, "rb");
     if (!file) {
-        printf("Failed to open file %s\n", filename);
+        // Failed to open the file
         return -1;
     }
 
@@ -1131,37 +1131,57 @@ int loadAndDrawImage(const char *filename, int screen_x, int screen_y) {
     long size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    // Read the entire file into memory
+
+    printf("HELP\n");
+    sleep(5);
     unsigned char *fileData = (unsigned char *)kmalloc(size);
-    if (!fileData) {
-        printf("Failed to allocate memory for file data\n");
+    printf("DONT HELP\n");
+    // sleep(5);
+    if (fileData == NULL) {
+        perror("Memory alloc error\n");
+        
         fclose(file);
         return -1;
     }
-
-    fread(fileData, 1, size, file);
+    // printf("@%d",__LINE__);
+    // sleep(5);
+    fl_fread(fileData, 1, size, file);
+    //   printf("\n@%d",__LINE__);
+    //sleep(100);
     fclose(file);
-
+    //   printf("\n@%d",__LINE__);
+    // sleep(1);
+    //sleep(5);
+    printf("here");
     // Parse the TGA image
     unsigned int *imageData = tga_parse(fileData, size);
 
     kfree(fileData);
-
+    if(fileData == NULL)
+    {
+        printf("FileData is null\n");
+    }
     if (!imageData) {
-        printf("Failed to parse TGA image\n");
+        printf("Failed to parse image data: %d");
         // Failed to parse the TGA image
         return -1;
+    }
+    else
+    {
+        printf("Image data");
+        
+        
     }
 
     int width = imageData[0];
     int height = imageData[1];
 
-    // Draw the image pixel by pixel
-    for (int y = 0; y < height; y++) {
+    // Draw the image pixel by pixel, accounting for upside-down images
+    for (int y = height - 1; y >= 0; y--) {
         for (int x = 0; x < width; x++) {
             unsigned int pixel = imageData[2 + y * width + x];
             int color = VBE_RGB((pixel >> 16) & 0xFF, (pixel >> 8) & 0xFF, pixel & 0xFF);
-            vbe_putpixel(screen_x + x, screen_y + y, color);
+            vbe_putpixel(screen_x + x, screen_y + (height - 1 - y), color);
         }
     }
 
@@ -1184,109 +1204,92 @@ int loadAndDrawImage(const char *filename, int screen_x, int screen_y) {
  * Return:
  *   unsigned int* - Pointer to the parsed image data (no dynamic memory allocation).
  */
-unsigned int *tga_parse(unsigned char *ptr, int size) {
+unsigned int *tga_parse(unsigned char *ptr, int size)
+{
     unsigned int *data;
     int i, j, k, x, y, w = (ptr[13] << 8) + ptr[12], h = (ptr[15] << 8) + ptr[14], o = (ptr[11] << 8) + ptr[10];
     int m = ((ptr[1]? (ptr[7]>>3)*ptr[5] : 0) + 18);
-
-    if (w < 1 || h < 1) return NULL;
-
-    // Assuming a fixed buffer size based on max resolution (1024x700) and 32bpp
-    // Adjust this buffer size as needed for your specific use case.
-    unsigned int fixedBuffer[1280 * 720];
-    data = fixedBuffer;
-
-    switch (ptr[2]) {
+ 
+    if(w<1 || h<1) return 0;
+    // printf("\n@%d",__LINE__);
+    // sleep(1);
+    printf("Requesting memory of size %d\n",(1280*1280+2));
+    data = (unsigned int*)kmalloc((1280*1280+2));
+    if(!data){
+        printf("Data error\n");
+        return NULL;
+        }
+      
+ 
+    switch(ptr[2]) {
         case 1:
-            if (ptr[6] != 0 || ptr[4] != 0 || ptr[3] != 0 || (ptr[7] != 24 && ptr[7] != 32)) {
-                return NULL;
-            }
-            for (y = i = 0; y < h; y++) {
-                k = ((!o ? h - y - 1 : y) * w);
-                for (x = 0; x < w; x++) {
-                    j = ptr[m + k++] * (ptr[7] >> 3) + 18;
-                    data[2 + i++] = ((ptr[7] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
+            if(ptr[6]!=0 || ptr[4]!=0 || ptr[3]!=0 || (ptr[7]!=24 && ptr[7]!=32)) {kfree(data); return NULL; }
+            for(y=i=0; y<h; y++) {
+                k = ((!o?h-y-1:y)*w);
+                for(x=0; x<w; x++) {
+                    j = ptr[m + k++]*(ptr[7]>>3) + 18;
+                    data[2 + i++] = ((ptr[7]==32?ptr[j+3]:0xFF) << 24) | (ptr[j+2] << 16) | (ptr[j+1] << 8) | ptr[j];
                 }
             }
             break;
         case 2:
-            if (ptr[5] != 0 || ptr[6] != 0 || ptr[1] != 0 || (ptr[16] != 24 && ptr[16] != 32)) {
-                return NULL;
-            }
-            for (y = i = 0; y < h; y++) {
-                j = ((!o ? h - y - 1 : y) * w * (ptr[16] >> 3));
-                for (x = 0; x < w; x++) {
-                    data[2 + i++] = ((ptr[16] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
-                    j += ptr[16] >> 3;
+            if(ptr[5]!=0 || ptr[6]!=0 || ptr[1]!=0 || (ptr[16]!=24 && ptr[16]!=32)) { kfree(data); return NULL; }
+            for(y=i=0; y<h; y++) {
+                j = ((!o?h-y-1:y)*w*(ptr[16]>>3));
+                for(x=0; x<w; x++) {
+                    data[2 + i++] = ((ptr[16]==32?ptr[j+3]:0xFF) << 24) | (ptr[j+2] << 16) | (ptr[j+1] << 8) | ptr[j];
+                    j += ptr[16]>>3;
                 }
             }
             break;
         case 9:
-            if (ptr[6] != 0 || ptr[4] != 0 || ptr[3] != 0 || (ptr[7] != 24 && ptr[7] != 32)) {
-                return NULL;
-            }
+            if(ptr[6]!=0 || ptr[4]!=0 || ptr[3]!=0 || (ptr[7]!=24 && ptr[7]!=32)) { kfree(data); return NULL; }
             y = i = 0;
-            for (x = 0; x < w * h && m < size;) {
+            for(x=0; x<w*h && m<size;) {
                 k = ptr[m++];
-                if (k > 127) {
-                    k -= 127;
-                    x += k;
-                    j = ptr[m++] * (ptr[7] >> 3) + 18;
-                    while (k--) {
-                        if (!(i % w)) {
-                            i = ((!o ? h - y - 1 : y) * w);
-                            y++;
-                        }
-                        data[2 + i++] = ((ptr[7] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
+                if(k > 127) {
+                    k -= 127; x += k;
+                    j = ptr[m++]*(ptr[7]>>3) + 18;
+                    while(k--) {
+                        if(!(i%w)) { i=((!o?h-y-1:y)*w); y++; }
+                        data[2 + i++] = ((ptr[7]==32?ptr[j+3]:0xFF) << 24) | (ptr[j+2] << 16) | (ptr[j+1] << 8) | ptr[j];
                     }
                 } else {
-                    k++;
-                    x += k;
-                    while (k--) {
-                        j = ptr[m++] * (ptr[7] >> 3) + 18;
-                        if (!(i % w)) {
-                            i = ((!o ? h - y - 1 : y) * w);
-                            y++;
-                        }
-                        data[2 + i++] = ((ptr[7] == 32 ? ptr[j + 3] : 0xFF) << 24) | (ptr[j + 2] << 16) | (ptr[j + 1] << 8) | ptr[j];
+                    k++; x += k;
+                    while(k--) {
+                        j = ptr[m++]*(ptr[7]>>3) + 18;
+                        if(!(i%w)) { i=((!o?h-y-1:y)*w); y++; }
+                        data[2 + i++] = ((ptr[7]==32?ptr[j+3]:0xFF) << 24) | (ptr[j+2] << 16) | (ptr[j+1] << 8) | ptr[j];
                     }
                 }
             }
+            printf("HELP ME\n");
             break;
         case 10:
-            if (ptr[5] != 0 || ptr[6] != 0 || ptr[1] != 0 || (ptr[16] != 24 && ptr[16] != 32)) {
-                return NULL;
-            }
+            if(ptr[5]!=0 || ptr[6]!=0 || ptr[1]!=0 || (ptr[16]!=24 && ptr[16]!=32)) { free(data); return NULL; }
             y = i = 0;
-            for (x = 0; x < w * h && m < size;) {
+            for(x=0; x<w*h && m<size;) {
                 k = ptr[m++];
-                if (k > 127) {
-                    k -= 127;
-                    x += k;
-                    while (k--) {
-                        if (!(i % w)) {
-                            i = ((!o ? h - y - 1 : y) * w);
-                            y++;
-                        }
-                        data[2 + i++] = ((ptr[16] == 32 ? ptr[m + 3] : 0xFF) << 24) | (ptr[m + 2] << 16) | (ptr[m + 1] << 8) | ptr[m];
+                if(k > 127) {
+                    k -= 127; x += k;
+                    while(k--) {
+                        if(!(i%w)) { i=((!o?h-y-1:y)*w); y++; }
+                        data[2 + i++] = ((ptr[16]==32?ptr[m+3]:0xFF) << 24) | (ptr[m+2] << 16) | (ptr[m+1] << 8) | ptr[m];
                     }
-                    m += ptr[16] >> 3;
+                    m += ptr[16]>>3;
                 } else {
-                    k++;
-                    x += k;
-                    while (k--) {
-                        if (!(i % w)) {
-                            i = ((!o ? h - y - 1 : y) * w);
-                            y++;
-                        }
-                        data[2 + i++] = ((ptr[16] == 32 ? ptr[m + 3] : 0xFF) << 24) | (ptr[m + 2] << 16) | (ptr[m + 1] << 8) | ptr[m];
-                        m += ptr[16] >> 3;
+                    k++; x += k;
+                    while(k--) {
+                        if(!(i%w)) { i=((!o?h-y-1:y)*w); y++; }
+                        data[2 + i++] = ((ptr[16]==32?ptr[m+3]:0xFF) << 24) | (ptr[m+2] << 16) | (ptr[m+1] << 8) | ptr[m];
+                        m += ptr[16]>>3;
                     }
                 }
             }
+             printf("HELP ME\n");
             break;
         default:
-            return NULL;
+            kfree(data); printf("ERROR\n");return NULL;
     }
     data[0] = w;
     data[1] = h;

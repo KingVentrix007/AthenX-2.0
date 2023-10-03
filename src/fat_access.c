@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 int fatfs_init(struct fatfs *fs)
 {
-    DEBUG("");
+    // D//EBUG("");
     uint8 num_of_fats;
     uint16 reserved_sectors;
     uint32 FATSz;

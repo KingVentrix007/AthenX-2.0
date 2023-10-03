@@ -42,12 +42,12 @@ iso: HackOS.bin
 	cp HackOS.bin iso/boot/HackOS.bin
 	cp LDout.map iso/boot/grub/
 	./calculate_size_and_write.sh
-	sudo grub-mkrescue --output=HackOS.iso iso
+#sudo grub-mkrescue --output=HackOS.iso iso
 
 run: iso MAIN
 	truncate -s 0 pipe
 	bash ./run.sh
-	qemu-system-i386 -name "MAIN" -drive file=AthenX.img,format=raw -drive file=my_disk_image.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
+	qemu-system-i386 -name "MAIN" -drive file=AthenX.img,format=raw -serial pipe:pipe -vga std -device intel-hda  -device ac97 -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56 > /dev/null 2>&1
 #	@make stop_pulseaudio
 run-fat: iso
 	bash ./run.sh

@@ -115,6 +115,7 @@ int main_exit(int exit_code,int subcode, char function[100],bool text,Decode_Fun
                 printf_("{/330:255,0,0}");
                  TIME time = get_time();
                 printf("[%02d:%02d:%02d] ERROR: Function %s exited with error 0x%04x (Subcode 0x%04X)",time.h,time.m,time.s,function,exit_code,subcode);
+                
                 printf("\n");
                 printf_("{/330:0,255,0}");
                 get_time();

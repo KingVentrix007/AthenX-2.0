@@ -27,6 +27,8 @@ int saveEnvironmentVariables(const char* filename, const char* variables[], int 
  * Return:
  *   int - The number of variables loaded, or -1 if there was an issue.
  */
-int loadEnvironmentVariables(const char* filename, char* variables[], int maxVariables);
+int loadEnvironmentVariables(const char* filename, char*** variables, int maxVariables);
 
+
+void init_env(char* env_vars[], int numVars);
 #endif

@@ -44,7 +44,8 @@
 #include "write.h"
 #include "tui.h"
 #include "env.h"
-
+// #define STB_IMAGE_IMPLEMENTATION
+// #include "stb_image.h"
 KERNEL_MEMORY_MAP g_kmap;
 MULTIBOOT_INFO *multi_boot_info;
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
@@ -281,11 +282,12 @@ void kmain(unsigned long magic, unsigned long addr) {
         // put the memory bitmap at the start of the available memory
         pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
         // initialize atleast 1MB blocks of memory for our heap
-        pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
+        pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 10000);
+        
         // initialize heap 256 blocks(1MB)
         //multi_boot_info = mboot_info;
         //memcpy(multi_boot_info, mboot_info,sizeof(multi_boot_info));
-        void *start = pmm_alloc_blocks(256);
+        void *start = pmm_alloc_blocks(PMM_BLOCK_SIZE);
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         //@ Gets screen size from memory
@@ -297,8 +299,73 @@ void kmain(unsigned long magic, unsigned long addr) {
          keyboard_init();
         //kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
         int ret = display_init(0,x,y,32);
-       
+        printf("\nTotal memory size = %d",end-start);
         ata_init();
+        clear_screen();
+        set_screen_x(0);
+        set_screen_y(0);
+         fl_init();
+          if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
+        {
+            printf("ERROR: Failed to init file system\n");
+            //return -1;
+        }
+        else
+        {
+            
+        }
+        
+        
+         const char* filename = "/var/env.txt";
+         FILE *f = fl_fopen(filename,"r");
+        if(f != NULL)
+        {
+            fl_fclose(f);
+            char** env_vars = NULL;
+            int maxVariables = 10; // Set the initial maximum number of variables.
+
+            int numLoaded = loadEnvironmentVariables(filename, &env_vars, maxVariables);
+            init_env(env_vars,numLoaded);
+            if (numLoaded > 0) {
+                printf("Loaded %d environmental variables:\n", numLoaded);
+                for (int i = 0; i < numLoaded; i++) {
+                    //printf("%s\n", env_vars[i]);
+                    free(env_vars[i]);
+                }
+                free(env_vars);
+            } else if (numLoaded == -1) {
+                printf("Error opening the file.\n");
+            } else {
+                printf("Memory allocation error.\n");
+            }
+        }
+        else
+        {
+            const char* filename = "/var/env.txt";
+            const char* env_vars[] = {
+            "HOME=/root/",
+            "BOOT=42",
+            "JUNK=FILES"
+            // Add more environmental variables as needed.
+        };
+
+        int saveResult = saveEnvironmentVariables(filename, env_vars, sizeof(env_vars) / sizeof(env_vars[0]));
+        
+        if (saveResult == 0) {
+            printf("Environmental variables saved successfully.\n");
+        } else {
+            printf("Error saving environmental variables.\n");
+        }
+        }
+         if (loadAndDrawImage("/gui/sunset.tga", 0, 0) == 0) {
+        printf("succsess\n");
+        set_screen_x(0);
+        set_screen_y(0);
+        } else {
+            // Error occurred
+        }
+       
+        //'fl_listdirectory("/");
          printf("Mod count: %d\n", mboot_info->mods_count);
         uint32_t initrd_size = 0;
         uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
@@ -306,11 +373,24 @@ void kmain(unsigned long magic, unsigned long addr) {
         printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
         char output[71629] = {0};
         memcpy(output, initrd_location, initrd_size);
-       
+        unsigned char* bios_start = (unsigned char*)0xE0000;
+            unsigned int bios_length = 0x20000;  // 128 KB
+
+            struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
+
+            if (rsdp) {
+                printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
+                //printf("Version: %d\n",rsdp->Revision);
+            
+                // Access other information in the RSDP as needed
+            } else {
+                printf("RSDP not found.\n");
+            }
+        perror("this is a test");
         // uint8_t* initrd_location2 = locate_initrd(mboot_info, &initrd_size);
         // uint8_t* initrd_end_location2 = initrd_location2 + initrd_size;
         // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location2, initrd_end_location2, initrd_size);
-        int boot_device = mboot_info->boot_device;
+        //int boot_device = mboot_info->boot_device;
          
         timer_init();//!DO NOT PUT BEFORE INIT VESA
         //sleep(100000);
@@ -323,6 +403,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // }
         if(strstr(output,"Memory Configuration") != NULL)
         {
+            //printf("\nFound initrid\n");
             get_adder_map(output);
         }
         else if (strstr(output,"INSTALL") != NULL)
@@ -338,18 +419,19 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("\n\nSHUT DOWN THE PC AND REMOVE THE INSTALL MEDIUM\n");
             for(;;);
         }
+         
        
-        char* mode = logo();
-         printf("HELLO");
-        set_screen_x(0);
-        set_screen_y(0);
-        clear_screen();
-        if(strcmp(mode,"u") == 0)
-        {
-           clear_screen();
-            tui_main(0,"");
-        }
-        printf("boot %d\n",mboot_info->boot_device);
+        //char* mode = logo();
+        //  printf("HELLO");
+        // set_screen_x(0);
+        // set_screen_y(0);
+        // clear_screen();
+        // if(strcmp(mode,"u") == 0)
+        // {
+        //    clear_screen();
+        //     tui_main(0,"");
+        // }
+        // printf("boot %d\n",mboot_info->boot_device);
        
         //printf_("%s\n",mode);
         //cmd_handler("cls");
@@ -388,7 +470,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // debug_HBA_MEM(hba_mem_ptr);
         //testRead(hba_mem_ptr);
         init_pci_device();
-        printf("%s\n",__TIME__);
+       // printf("%s\n",__TIME__);
         //printf("GOT HERE");
        
          //printf("H\n");
@@ -416,41 +498,18 @@ void kmain(unsigned long magic, unsigned long addr) {
         // strcpy(img.name,"Low resolution logo image" );
         // //draw_low_res_img(img);
         // IMAGE bg_img;
-          fl_init();
-          if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
-        {
-            printf("ERROR: Failed to init file system\n");
-            //return -1;
-        }
-        else
-        {
-            
-        }
-        fl_listdirectory("/");
-         const char* filename = "/rootfs/environment.txt";
-        char* loaded_vars[100]; // Adjust the size as needed.
-        int numLoaded = loadEnvironmentVariables(filename, loaded_vars, 10);
-        if (numLoaded > 0) {
-        printf("Loaded %d environmental variables:\n", numLoaded);
-        for (int i = 0; i < numLoaded; i++) {
-            printf("%s\n", loaded_vars[i]);
-            free(loaded_vars[i]); // Free allocated memory.
-        }
-    } else {
-        printf("Error loading environmental variables.\n");
-    }
+        
+        // char** loaded_vars = NULL; // Adjust the size as needed.
+        // int numLoaded = loadEnvironmentVariables(filename, loaded_vars, 10);
+        
 
-        // if (loadAndDrawImage("/rootfs/splash.tga", 0, 0) == 0) {
-        // printf("succsess\n");
-        // } else {
-        //     // Error occurred
-        // }
+       
 
         //f_chdir("rootfs/");
         // FILE *file;
-        // file = fopen("/rootfs/cat.txt", "w");
+        // file = fl_fopen("/rootfs/cat.txt", "w");
 
-        // file = fopen("/grub/grub.cfg", "r");
+        // file = fl_fopen("/grub/grub.cfg", "r");
         // if (file == NULL) {
         //     printf("Error opening file");
         // }
@@ -501,19 +560,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             fpu_enable();
             printf("Initialization complete\nAthenX %s:%d.%d.%d started successfully with %d errors\n",VERSION_MAIN,VERSION_SUB_MAIN,VERSION_SUB_MINOR,VERSION_SUB_PATCH,get_num_errors());
             
-            // unsigned char* bios_start = (unsigned char*)0xE0000;
-            // unsigned int bios_length = 0x20000;  // 128 KB
-
-            //struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
-
-            // if (rsdp) {
-            //     printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
-            //     //printf("Version: %d\n",rsdp->Revision);
             
-            //     // Access other information in the RSDP as needed
-            // } else {
-            //     printf("RSDP not found.\n");
-            // }
             //char *dumbb = "DUMB";
             //beep();
             //dummy_start();
@@ -737,7 +784,7 @@ void terminal_main()
     {    
             //beep();
            
-            char *c = kb_getchar();
+            char *c = get_chr();
             int ticks = get_ticks();
             
             if(ticks >= 500)

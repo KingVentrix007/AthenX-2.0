@@ -2,18 +2,30 @@
 #include "keyboard.h"
 #include "string.h"
 #include "stdarg.h"
+#include "fat_filelib.h"
+#include "printf.h"
+IO_STREAM std_stream;
 char get_chr() {
-    
-    char c;
-    while(1==1)
+    int scan = get_char();
+    if(scan != EOF || (scan >= 32 && scan <= 126))
     {
-        c = kb_getchar();
-        if(c != '\0')
+        //printf("%c", scan);
+        return scan;
+    }
+    else if(scan != -10)
+    {
+        if(unget_char(scan) != EOF)
         {
-            printf("%c",c);
-
-            return c;
+            //printf("%c",scan);
+            return -1;
         }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
 
     }
     // do {
@@ -99,3 +111,49 @@ void scanf(char* format, ...) {
 
     
 
+int perror(char *string)
+{
+    printf("%s\n",string);
+    FILE * err;
+    if(fl_is_dir("/var/log/") == 0)
+    {
+         err = fl_fopen("/var/log/err.txt", "a");
+        if(err==NULL)
+        {
+            printf("FAILED");
+        }
+        fl_fwrite("\n",sizeof(char),strlen("\n"),err);
+        fl_fwrite(string,sizeof(char),strlen(string),err);
+        fl_fclose(err);
+    }
+    else
+    {
+        fl_createdirectory("/var/log/");
+    }
+   
+    //exit_main();
+    
+}
+
+// voidfind(const char* path, const char* extension) {
+//     FL_DIR* dir;
+//     fl_dirent* entry;
+
+//     if ((dir = opendir(path)) == NULL) {
+//         perror("Failed to open directory");
+//         return;
+//     }
+
+//     while ((entry = readdir(dir)) != NULL) {
+//         if (entry->is_dir == 0) { // Check if it's a regular file
+//             const char* file_name = entry->filename;
+//             const char* file_extension = strrchr(file_name, '.');
+
+//             if (file_extension != NULL && strcmp(file_extension, extension) == 0) {
+//                 printf("%s/%s\n", path, file_name);
+//             }
+//         }
+//     }
+
+//     closedir(dir);
+// }

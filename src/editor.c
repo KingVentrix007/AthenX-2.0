@@ -137,7 +137,7 @@ int is_c_file(const char* filename) {
 int displayFileContents(const char* filename) {
     if (!is_c_file(filename)) {
         // If it's not a .c file, just print the plain text
-        FILE* file = fopen(filename, "r");
+        FILE* file = fl_fopen(filename, "r");
         if (file == NULL) {
             printf("Error: Unable to open file '%s'\n", filename);
             return -1;
@@ -152,7 +152,7 @@ int displayFileContents(const char* filename) {
         return 0;
     }
 
-    FILE* file = fopen(filename, "r");
+    FILE* file = fl_fopen(filename, "r");
     if (file == NULL) {
         printf("Error: Unable to open file '%s'\n", filename);
         return -1;
@@ -235,7 +235,7 @@ size_t length_of_last_line(const char *buffer) {
     return last_line_length;
 }
 int ftruncate(const char* fileName) {
-    FILE* file = fopen(fileName, "w"); // Open the file for writing (truncates to zero length)
+    FILE* file = fl_fopen(fileName, "w"); // Open the file for writing (truncates to zero length)
     if (file == NULL) {
         printf("Error opening file for truncation");
         return -1;
@@ -348,7 +348,7 @@ int fim(char buffer[MAX_FILE_SIZE+10],const char* fileName)
     FILE *fp;
     //ftruncate(fileName);
     fl_remove(fileName);
-    fp = fopen(fileName,"w");
+    fp = fl_fopen(fileName,"w");
     
     // char tmp[bytes_read];
     // memset(tmp,0,bytes_read);
@@ -385,7 +385,7 @@ int fim(char buffer[MAX_FILE_SIZE+10],const char* fileName)
 // Function to save the buffer contents to a file
 size_t read_file_into_buffer(const char* filename, char* buffer, size_t buffer_size) {
      //printf("\npath = %s\n",filename);
-    FILE* file = fopen(filename, "rb"); // Open the file in binary read mode
+    FILE* file = fl_fopen(filename, "rb"); // Open the file in binary read mode
     if (file == NULL) {
         printf("Error opening file\n");
         return 0; // Return 0 to indicate an error

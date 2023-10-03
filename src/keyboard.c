@@ -6,6 +6,9 @@
 #include "isr.h"
 #include "types.h"
 #include "string.h"
+#include "stdio.h"
+
+IO_STREAM kb_buffer;
 
 static BOOL g_caps_lock = FALSE;
 static BOOL g_shift_pressed = FALSE;
@@ -166,11 +169,27 @@ void keyboard_handler(REGISTERS *r) {
                 break;
         }
     }
+    kb_buffer.buffer_pos++; 
+    kb_buffer.buffer[kb_buffer.buffer_pos] = (int)g_ch;
+    //printf("%c",kb_buffer.buffer[kb_buffer.buffer_pos]);
+    
+    
 }
 
 void keyboard_init() {
+    // for (size_t i = 0; i < IO_BUFFER_SIZE; i++)
+    // {
+    //     kb_buffer.buffer[i] = 0;
+
+    // }
+    kb_buffer.buffer_pos = 1;
+    kb_buffer.buffer[0] = '\0';
+    
     isr_register_interrupt_handler(IRQ_BASE + 1, keyboard_handler);
 }
+
+
+
 
 // a blocking character read
 char* kb_getchar() {
@@ -288,6 +307,43 @@ char *inter_key(int mode)
                 // if caps in on, covert to upper
                 
         
+    }
+
+}
+int get_char()
+{
+    
+    int chr = kb_buffer.buffer[kb_buffer.buffer_pos];
+    if(chr == '\0')
+    {
+        return EOF;
+    }
+    kb_buffer.buffer[kb_buffer.buffer_pos];
+    if(kb_buffer.buffer_pos > 0)
+    {
+        kb_buffer.buffer_pos--;
+    }
+    
+    return chr;
+}
+
+int unget_char(int c)
+{
+    kb_buffer.buffer_pos++;
+    if(kb_buffer.buffer_pos >= IO_BUFFER_SIZE)
+    {
+        //printf("EOF");
+        return -10;
+    }
+    kb_buffer.buffer[kb_buffer.buffer_pos] = c;
+    if(kb_buffer.buffer[kb_buffer.buffer_pos] == c)
+    {
+        return c;
+    }
+    else
+    {
+        //printf("EOF 3");
+        return EOF;
     }
 
 }

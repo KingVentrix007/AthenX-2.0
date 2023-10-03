@@ -6,6 +6,9 @@
 #include "pmm.h"
 #include "string.h"
 #include "terminal.h"
+#include "stddef.h"
+#include "debug.h"
+#include "stdio.h"
 // start & end addresses pointing to memory
 void *g_kheap_start_addr = NULL, *g_kheap_end_addr = NULL;
 unsigned long g_total_size = 0;
@@ -24,6 +27,7 @@ int kheap_init(void *start_addr, void *end_addr) {
     g_kheap_start_addr = start_addr;
     g_kheap_end_addr = end_addr;
     g_total_size = end_addr - start_addr;
+    printf_("total size ->%d\n",g_total_size);
     g_total_used_size = 0;
     return 0;
 }
@@ -32,16 +36,20 @@ int kheap_init(void *start_addr, void *end_addr) {
  * increase the heap memory by size & get its address
 */
 void *kbrk(int size) {
-    FUNC_ADDR_NAME(&kbrk,1,"i");
+    FUNC_ADDR_NAME(&kbrk, 1, "i");
     void *addr = NULL;
     if (size <= 0)
         return NULL;
-    // check memory is available or not
-    if ((int)(g_total_size - g_total_used_size) <= size)
+    // Check if memory is available or not
+    if (g_total_size - g_total_used_size < size + sizeof(void*)) {
+         printf("(kbrk)Memory allocation failed: Not enough free space:\nrequested: %d \n| total %d \n| extra nedded %d\n",size,g_total_size,g_total_size-size);
+            
+        sleep(10);
         return NULL;
-    // add start addr with total previously used memory and difference between each data block pointer
-    addr = g_kheap_start_addr + g_total_used_size + size + sizeof(void *);
-    g_total_used_size += size + sizeof(void *);
+    }
+    // Add start address with total previously used memory and difference between each data block pointer
+    addr = g_kheap_start_addr + g_total_used_size;
+    g_total_used_size += size + sizeof(void*);
     return addr;
 }
 
@@ -106,24 +114,39 @@ KHEAP_BLOCK *allocate_new_block(int size) {
  * to find best block to allocate
  * # Need to work on internal/external segmentaion problem
 */
-void *kmalloc(int size) {
-    FUNC_ADDR_NAME(&kmalloc,1,"i");
+void *kmalloc(size_t size) {
+    //printf("Allocting memory of size ->%d\n",size);
+    FUNC_ADDR_NAME(&kmalloc, 1, "i");
     if (size <= 0)
         return NULL;
     if (g_head == NULL) {
+        // Initialize the heap if it's empty
         g_head = (KHEAP_BLOCK *)kbrk(sizeof(KHEAP_BLOCK));
+        if (g_head == NULL) {
+            printf("Memory allocation failed: Not enough free space for initial block: requested %d | total %d | extra nedded %d\n",size,g_total_size,g_total_size-size);
+            sleep(10);
+            return NULL;
+        }
         g_head->metadata.is_free = FALSE;
         g_head->metadata.size = size;
         g_head->next = NULL;
         g_head->data = kbrk(size);
+        if (g_head->data == NULL) {
+            printf("Memory allocation failed: Not enough free space for data: requested %d | total %d | extra nedded %d\n",size,g_total_size,g_total_size-size);
+            sleep(10);
+            sleep(10);
+            return NULL;
+        }
         return g_head->data;
     } else {
         KHEAP_BLOCK *worst = worst_fit(size);
         if (worst == NULL) {
             KHEAP_BLOCK *new_block = allocate_new_block(size);
-            new_block->metadata.is_free = FALSE;
-            new_block->metadata.size = size;
-            new_block->data = kbrk(size);
+            if (new_block == NULL) {
+                perror("Memory allocation failed: Not enough free space for a new block.\n");
+                sleep(10);
+                return NULL;
+            }
             return new_block->data;
         } else {
             worst->metadata.is_free = FALSE;
@@ -133,18 +156,21 @@ void *kmalloc(int size) {
     return NULL;
 }
 
+
 /**
  * allocate memory n * size & zeroing out
 */
 void *kcalloc(int n, int size) {
-    FUNC_ADDR_NAME(&kcalloc,2,"ii");
+    FUNC_ADDR_NAME(&kcalloc, 2, "ii");
     if (n < 0 || size < 0)
         return NULL;
-    void *mem = kmalloc(n * size);
-    memset(mem, 0, n * size);
+    size_t total_size = n * size;
+    void *mem = kmalloc(total_size);
+    if (mem != NULL) {
+        memset(mem, 0, total_size);
+    }
     return mem;
 }
-
 /**
  * allocate a new block of memory
  * copy previous block data & set free the previous block
