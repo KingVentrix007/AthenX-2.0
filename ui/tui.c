@@ -89,10 +89,10 @@ int printArrayWithSelection(char* arr[], int arrSize) {
 }
 int text_input_start = 0;
 int text_input_end = 0;
-bool cursor_visible = true;
+bool cursor_visible_tui = true;
 
-void toggle_cursor_visibility() {
-    cursor_visible = !cursor_visible;
+void toggle_cursor_visibility_tui() {
+    cursor_visible_tui = !cursor_visible_tui;
 }
 
 void repaint_rect()
@@ -180,7 +180,7 @@ void tui_main(int argc, char *argv[]) {
                 reset_ticks();
             }
              if (ticks >= 50) {
-                toggle_cursor_visibility();
+                toggle_cursor_visibility_tui();
                 reset_ticks();
             }
              
@@ -270,7 +270,7 @@ void tui_main(int argc, char *argv[]) {
                
                 
             }
-             if (cursor_visible) {
+             if (cursor_visible_tui) {
                 draw_square_cursor(get_screen_y(),get_screen_x(),VBE_RGB(0, 0, 255));
             } else {
                undraw_square(get_screen_y(),get_screen_x());

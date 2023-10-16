@@ -10,6 +10,7 @@
 #include "../include/font.h"
 #include "../include/display.h"
 #include "../include/keyboard.h"
+#include "../include/fonts.h"
 size_t vesa_row;
 size_t vesa_column;
 //static uint16_t *const VGA_MEMORY = (uint16_t *)0xb8000;
@@ -237,10 +238,10 @@ void undraw_square(int x, int y) {
 }
 
 void draw_character_1d(char character, int x, int y, int font_width, int font_height) {
-    if (character < 0 || character >= sizeof(arr_8x16_font) / (font_width * font_height)) {
-        // Character not in font, handle error or return
-        return;
-    }
+    // if (character < 0 || character >= sizeof(arr_8x16_font) / (font_width * font_height)) {
+    //     // Character not in font, handle error or return
+    //     return;
+    // }
     
     const unsigned char *font_data = &arr_8x16_font[character * font_width * font_height];
     

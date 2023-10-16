@@ -44,6 +44,8 @@
 #include "../include/write.h"
 #include "../include/tui.h"
 #include "../include/env.h"
+#include "../include/syscall.h"
+#include "virt.h"
 // #define STB_IMAGE_IMPLEMENTATION
 // #include "../include/stb_image.h"
 KERNEL_MEMORY_MAP g_kmap;
@@ -282,14 +284,15 @@ void kmain(unsigned long magic, unsigned long addr) {
         // put the memory bitmap at the start of the available memory
         pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
         // initialize atleast 1MB blocks of memory for our heap
-        pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 10000);
+        pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
         
         // initialize heap 256 blocks(1MB)
         //multi_boot_info = mboot_info;
         //memcpy(multi_boot_info, mboot_info,sizeof(multi_boot_info));
-        void *start = pmm_alloc_blocks(PMM_BLOCK_SIZE);
+        void *start = pmm_alloc_blocks(20);
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
+        
         //@ Gets screen size from memory
         
         
@@ -304,6 +307,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         clear_screen();
         set_screen_x(0);
         set_screen_y(0);
+        init_virt();
+        printf("kernel memory start address = %p\n",mboot_info->addr);
          fl_init();
           if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
         {
@@ -391,7 +396,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // uint8_t* initrd_end_location2 = initrd_location2 + initrd_size;
         // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location2, initrd_end_location2, initrd_size);
         //int boot_device = mboot_info->boot_device;
-         
+        display_init(0,1280,1024,32);
         timer_init();//!DO NOT PUT BEFORE INIT VESA
         //sleep(100000);
         // char* cmdline = ((uint32_t*)mboot_info->cmdline);
@@ -420,7 +425,15 @@ void kmain(unsigned long magic, unsigned long addr) {
             for(;;);
         }
          
+       isr_register_interrupt_handler((IRQ_BASE+10),sys_handler);
+       isr_register_interrupt_handler((IRQ_BASE+11),int_print);
        
+    
+        // Call your custom system call with the desired arguments
+        
+        
+        //printf("Custom syscall result: %d\n", result);
+
         //char* mode = logo();
         //  printf("HELLO");
         // set_screen_x(0);
@@ -768,6 +781,7 @@ void terminal_main()
     // #endif
     char cwd_at[FATFS_MAX_LONG_FILENAME] = "";
     strcpy(cwd_at,get_cwd());
+    
      printf("%s>",cwd_at);
      //int x = 1/0;
      
@@ -834,6 +848,7 @@ void terminal_main()
                 //set_terminal_row(0);
                  strcpy(cwd_at,get_cwd());
                 printf("\n%s>",cwd_at);
+                //printf("looped\n");
                 
                 //crude_song();
             }
@@ -882,6 +897,7 @@ void terminal_main()
             //undraw_square(get_screen_x(),get_screen_y());
             
              //printf_("CAY");
+             
             
             
     }

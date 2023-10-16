@@ -1,3 +1,5 @@
+#include "../include/elf_exe.h"
+#include "exe.h"
 #include "../include/fat_filelib.h"
 #include "../include/installer.h"
 #include "../include/kheap.h"
@@ -314,17 +316,13 @@ void parse_command(const char* command) {
     }
     else if (strcmp(arguments[0],"load") == 0)
     {
-        if(0== 0)
-        {
-            printf("load img\n");
-            sleep(2);
-            char path[FATFS_MAX_LONG_FILENAME] = "";
-            strcat(path,cwd);
-            strcat(path,"/");
-            strcat(path,arguments[1]);
-            //printf("HERE\n");
-            loadAndDrawImage(path,0,0);
-        }
+       //load_exe_elf("/sys/test_2");
+        char* file_path = "/sys/test"; // Replace with the path to your binary or ELF file
+        int *ret;
+        load_elf_file(file_path);
+        //printf("\nloaded\n");
+        //process_execute(file_path,arg_count,arguments,&ret);
+        //return ret;
     }
     
     
@@ -619,7 +617,7 @@ void parse_command(const char* command) {
     }
     else if(strcmp(arguments[0],"rle") == 0)
     {
-        main();
+        //main();
         
     }
     else if(strcmp(arguments[0],"fs") == 0)

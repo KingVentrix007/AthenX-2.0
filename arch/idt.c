@@ -15,6 +15,7 @@
 #include "../include/isr.h"
 #include "../include/8259_pic.h"
 #include "../include/debug.h"
+#include "../include/isr.h"
 IDT g_idt[NO_IDT_DESCRIPTORS];
 IDT_PTR g_idt_ptr;
 
@@ -86,6 +87,9 @@ void idt_init() {
     idt_set_entry(45, (uint32)irq_13, 0x08, 0x8E);
     idt_set_entry(46, (uint32)irq_14, 0x08, 0x8E);
     idt_set_entry(47, (uint32)irq_15, 0x08, 0x8E);
+    idt_set_entry(48, (uint32)irq_16, 0x80, 0x8E);
+    idt_set_entry(49, (uint32)irq_17, 0x08, 0x8E);
+    //idt_set_entry(48, (uint32)sys_handler, 0x08,0x8E);
     idt_set_entry(128, (uint32)exception_128, 0x08, 0x8E);
 
     load_idt((uint32)&g_idt_ptr);

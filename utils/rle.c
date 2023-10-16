@@ -47,7 +47,7 @@ int rle_decode(int* input_array, int input_size, int** output_array, int rows, i
     return output_index;
 }
 
-int main() {
+int main_rls() {
     int rows = 320;
     int cols = 200;
 

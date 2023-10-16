@@ -1,3 +1,4 @@
+#include "../include/image.h"
 #include "../include/kheap.h"
 #include "../include/fat_filelib.h"
 #include "../include/background.h"

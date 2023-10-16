@@ -219,6 +219,25 @@ char* kb_getchar() {
     return c;
 }
 
+char* kb_getchar_w() {
+    int count = 0;
+    //printf_("HERE");
+    char *c;
+    
+    while(g_ch <= 0)
+    {
+        // count++;
+        // if(count >= 100)
+        // {
+        //    return '\0'; 
+        // }
+    };
+    c = g_ch;
+    g_ch = 0;
+    g_scan_code = 0;
+    //printf("CX");
+    return c;
+}
 char kb_get_scancode() {
     char code;
     int count = 0;
@@ -256,6 +275,7 @@ char *inter_key(int mode)
 {
     int key = get_input(key);
     if(key == -1) return -1;
+    char out; // Move the declaration here
     switch (key) {
         case 0x48: // Up Arrow
             return "\u2191";
@@ -290,7 +310,7 @@ char *inter_key(int mode)
         case 0x58: // F12
             return "\u23B2";
         default:
-                char out = g_scan_code_chars[key];
+                out = g_scan_code_chars[key];
                 // if caps in on, covert to upper
                 if (g_caps_lock) {
                     // if shift is pressed before

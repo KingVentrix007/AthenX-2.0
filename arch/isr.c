@@ -1,3 +1,4 @@
+// filename: isr.c
 #include "../include/keyboard.h"
 #include "../include/printf.h"
 #include "../include/string.h"
@@ -11,9 +12,13 @@
 #include "../include/display.h"
 #include "../include/timer.h"
 #include "../include/kernel.h"
+#include "../include/sys_handler.h"
+#include "../include/x86_reg.h"
+#include "../include/syscall.h"
 // For both exceptions and irq interrupt
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
 int isr_count = 0;
+volatile uint32_t *syscall_return = 0;
 // for more details, see Intel manual -> Interrupt & Exception Handling
 char *exception_messages[32] = {
     "Division By Zero",
@@ -66,6 +71,21 @@ void isr_end_interrupt(int num) {
     pic8259_eoi(num);
 }
 
+void push_value_to_stack(uint32_t value) {
+    asm volatile (
+        "push %0\n" // Push the value onto the stack
+        :
+        : "r" (value)
+    );
+}
+uint32_t get_value_from_stack() {
+    uint32_t value;
+    asm volatile (
+        "pop %0\n" // Pop the value from the stack into a variable
+        : "=r" (value)
+    );
+    return value;
+}
 /**
  * invoke isr routine and send eoi to pic,
  * being called in irq.asm
@@ -73,14 +93,35 @@ void isr_end_interrupt(int num) {
 void isr_irq_handler(REGISTERS *reg) {
     if (g_interrupt_handlers[reg->int_no] != NULL) {
         ISR handler = g_interrupt_handlers[reg->int_no];
+        if(reg->int_no == 42)
+        {
+            //print_registers(reg,"HOLA");
+        }
+        
         handler(reg);
+        if(reg->int_no == 42)
+        {
+            //  uint32_t ret = get_EAX();
+            // printf("\nret->%d\n",ret);
+            // asm volatile (
+            //     "pop %0"            // Pop the value from the stack into ret
+            //     : "=r" (ret)        // Output operand: ret
+            // );
+            // printf("\nret->%d\n",ret);
+            // asm volatile (
+            //     "pop %0"            // Pop the value from the stack into ret
+            //     : "=r" (ret)        // Output operand: ret
+            // );
+            // printf("ret->%d\n",ret);
+            //print_registers(reg,"HOLA");
+        }
     }
     pic8259_eoi(reg->int_no);
 }
 
 static void print_registers(REGISTERS *reg, char caller[100]) {
 
-    printf("%s REGISTERS:\n",caller);
+    printf("%s REGISTERS:\n","");
     printf("err_code=%d\n", reg->err_code);
     printf("eax=0x%x, ebx=0x%x, ecx=0x%x, edx=0x%x\n", reg->eax, reg->ebx, reg->ecx, reg->edx);
     printf("edi=0x%x, esi=0x%x, ebp=0x%x, esp=0x%x\n", reg->edi, reg->esi, reg->ebp, reg->esp);
@@ -475,21 +516,21 @@ REGISTERS *get_regs()
  */
 void isr_exception_handler(REGISTERS reg) {
     //cls_screen(COLOR_BLUE);
-    screen_of_death();
-    clear_display();
+    //screen_of_death();
+    //clear_display();
     //set_cursor_x(900);
     //set_screen_y(900+200);
     //printf("FAILURE");
-    set_screen_x(0);
-    set_screen_y(0);
+    //set_screen_x(0);
+    //set_screen_y(0);
     printf_("Software Failed Successfully\n");
-
+    printf_("Failded\n");
     if (reg.int_no < 32) {
-       
+        printf("32\n");
         if(isr_count<=5){
-            
+            printf_("5\n");
              isr_count++;
-             sleep(100);
+             //sleep(100);
               printf_("{/330:255,0,0}");
             printf("EXCEPTION: %s\n", exception_messages[reg.int_no]);
               
@@ -513,6 +554,7 @@ void isr_exception_handler(REGISTERS reg) {
                 //printf_("Address 0x%x not found in the list.\n", targetAddress);
             }
             print_list(reg.eip);
+            for(;;);
             //kheap_print_blocks();
             //print_stack_trace(reg.ebp);
             asm("sti");
@@ -552,3 +594,127 @@ uint32_t *resolve_symbol(uint32_t* addr)
     //return addr;
     
 }
+
+
+
+int my_system_call(uint32_t syscall_number, uint32_t arg1) {
+    int result;
+    
+    asm volatile (
+        "movl %[syscall_number], %%eax   \n"  // Set system call number in eax
+        "movl %[arg1], %%ebx              \n"  // Set argument 1 in ebx
+        "int $0x80                         \n"  // Trigger the system call
+        "movl %%eax, %[result]            \n"  // Store the result in 'result'
+        : [result] "=r" (result)
+        : [syscall_number] "r" (syscall_number), [arg1] "r" (arg1)
+        : "eax", "ebx"
+    );
+    
+    return result;
+}
+
+int sys_handler(REGISTERS *reg)
+{
+    char *chr;
+    switch (reg->eax)
+    {
+    case 0x81:
+        handle_print_system_call(reg);
+        break;
+    case 0x82:
+    
+        chr = handler_get_char_system_call(reg);
+        //printf("CHR->%c\n", chr);
+         __asm__("movl %0, %%eax" : : "r"(64));
+        //printf("%s",chr);
+        //return chr;
+        //__asm__("iret");
+        return 64;
+        break;
+    case 0x83:
+        ///printf("EBX->%d\n",reg->ebx);
+        // printf("ds: %d\n", reg->ds);
+        // printf("edi: %d\n", reg->edi);
+        // printf("esi: %d\n", reg->esi);
+        // printf("ebp: %d\n", reg->ebp);
+        
+        // printf("ebx: %d\n", reg->ebx);
+        // printf("edx: %d\n", reg->edx);
+        // printf("ecx: %d\n", reg->ecx);
+        // printf("eax: %d\n", reg->eax);
+        
+        // printf("int_no: %d\n", reg->int_no);
+        // printf("err_code: %d\n", reg->err_code);
+        // printf("eip: %d\n", reg->eip);
+        // printf("cs: %d\n", reg->cs);
+        // printf("eflags: %d\n", reg->eflags);
+        // printf("useresp: %d\n", reg->useresp);
+        // printf("ss: %d\n", reg->ss);
+        
+        // set_EDX(38);
+        // set_ECX(38);
+        // uint32_t edx = get_EDX();
+        // printf(" edx: %d\n", edx);
+        // set_ret(10);
+        // asm("pushl %0" :: "r"(10) : "memory");
+          
+        *syscall_return = 10;
+        return 10;
+        //push_value_to_stack(10);
+        // asm volatile (
+        //     "pusha" // Push the value in EAX onto the stack
+        //     );
+        // // // __asm__("pusha");
+        // // // __asm__("pusha");
+        // // //return chr;
+        // //__asm__("popa");
+        // __asm__("ret");
+      
+        //printf("HELLO");
+        break;
+    default:
+        printf("0x%x is un unknown system call\n",(reg->eax));
+        break;
+    }
+}
+
+int copy_from_user(void *dst, const void *src, size_t size) {
+    // Check for NULL pointers
+    if (dst == NULL || src == NULL) {
+        return -1; // Return an error code indicating invalid pointers
+    }
+
+    // Perform the copy
+    for (size_t i = 0; i < size; i++) {
+        // Use the following line to ensure it works on both little-endian and big-endian systems
+        ((unsigned char *)dst)[i] = ((const unsigned char *)src)[i];
+    }
+
+    return 0; // Return 0 to indicate success
+}
+
+
+
+
+
+int int_print(REGISTERS* reg)
+{
+    // printf("int print\n");
+    //   printf("ds: %d\n", reg->ds);
+    //     printf("edi: %d\n", reg->edi);
+    //     printf("esi: %d\n", reg->esi);
+    //     printf("ebp: %d\n", reg->ebp);
+    //     printf("esp: %d\n", reg->esp);
+    //     printf("ebx: %d\n", reg->ebx);
+    //     printf("edx: %d\n", reg->edx);
+    //     printf("ecx: %d\n", reg->ecx);
+    //     printf("eax: %d\n", reg->eax);
+        // printf("int_no: %d\n", reg->int_no);
+        // printf("err_code: %d\n", reg->err_code);
+        // printf("eip: %d\n", reg->eip);
+        // printf("cs: %d\n", reg->cs);
+        // printf("eflags: %d\n", reg->eflags);
+        // printf("useresp: %d\n", reg->useresp);
+        // printf("ss: %d\n", reg->ss);
+}
+

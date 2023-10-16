@@ -42,6 +42,7 @@ typedef void (*ISR)(REGISTERS *);
  */
 void isr_register_interrupt_handler(int num, ISR handler);
 
+static void print_registers(REGISTERS *reg, char caller[100]);
 /*
  * turn off current interrupt
 */
@@ -112,7 +113,8 @@ extern void irq_12();
 extern void irq_13();
 extern void irq_14();
 extern void irq_15();
-
+extern void irq_16();
+extern void irq_17();
 // IRQ default constants
 #define IRQ_BASE            0x20
 #define IRQ0_TIMER          0x00
@@ -137,4 +139,45 @@ void inspect_stack_frame(int* ebp,int *esp, int total_params, const char* param_
 void extractLocalVars(int* esp, int* ebp) ;
 uint32_t *unwind_stack(REGISTERS *reg,int search_level);
 REGISTERS *get_regs();
+
+int my_system_call(uint32_t syscall_number, uint32_t arg1);
+int sys_handler(REGISTERS *reg);
+int int_print(REGISTERS* reg);
+#include <stdint.h>
+
+// Function to set the value of EAX register
+void set_EAX(uint32_t value);
+
+// Function to set the value of EBX register
+void set_EBX(uint32_t value);
+
+// Function to set the value of ECX register
+void set_ECX(uint32_t value);
+
+// Function to set the value of EDX register
+void set_EDX(uint32_t value);
+
+// Function to set the value of ESI register
+void set_ESI(uint32_t value);
+
+// Function to set the value of EDI register
+void set_EDI(uint32_t value);
+
+// Function to get the value of EAX register
+uint32_t get_EAX();
+
+// Function to get the value of EBX register
+uint32_t get_EBX();
+
+// Function to get the value of ECX register
+uint32_t get_ECX();
+
+// Function to get the value of EDX register
+uint32_t get_EDX();
+
+// Function to get the value of ESI register
+uint32_t get_ESI();
+
+// Function to get the value of EDI register
+uint32_t get_EDI();
 #endif

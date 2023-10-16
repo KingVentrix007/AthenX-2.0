@@ -16,9 +16,12 @@ if [ -f "$image_file" ]; then
   # sudo umount /mnt/AthenX
   
   # Copy HackOS.bin into the rootfs folder
-  echo "Contents of the mount point and its subdirectories:"
+ 
+  sudo cp "HackOS.bin" "/mnt/AthenX/boot"
+  sudo cp "prog/test" "/mnt/AthenX/sys"
+  sudo cp "grub/grub.cfg" "/mnt/AthenX/grub/grub.cfg"
+   echo "Contents of the mount point and its subdirectories:"
   ls -R /mnt/AthenX
-  sudo cp "../HackOS.bin" "/mnt/AthenX/boot"
 
   # sudo cp "src/cmdhandler.c" "/mnt/AthenX/rootfs/cmd.c"
   # Unmount the image
@@ -67,7 +70,8 @@ else
     sudo cat /mnt/AthenX/grub/grubenv
     # sudo cp "simple.cfg" /mnt/AthenX/grub/grub.cfg
     sudo cp -r "grub/." "/mnt/AthenX/grub/"
-    sudo cp "mnt/AthenX/gui/sunset.tga" "/mnt/AthenX/gui"
+    sudo cp "LDout.map" "/mnt/AthenX/var"
+     sudo cp "prog/test" "/mnt/AthenX/sys"
     # Verify the root directory's LBA address using the file command
     # Calculate the LBA address for the root directory
     bytes_per_sector=$(sudo fdisk -l "$image_file" | grep "Sector size" | awk '{print $4}')
