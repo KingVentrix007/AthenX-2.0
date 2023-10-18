@@ -115,6 +115,7 @@ extern void irq_14();
 extern void irq_15();
 extern void irq_16();
 extern void irq_17();
+extern void system_call_handler();
 // IRQ default constants
 #define IRQ_BASE            0x20
 #define IRQ0_TIMER          0x00

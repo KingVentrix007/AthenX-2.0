@@ -613,70 +613,7 @@ int my_system_call(uint32_t syscall_number, uint32_t arg1) {
     return result;
 }
 
-int sys_handler(REGISTERS *reg)
-{
-    char *chr;
-    switch (reg->eax)
-    {
-    case 0x81:
-        handle_print_system_call(reg);
-        break;
-    case 0x82:
-    
-        chr = handler_get_char_system_call(reg);
-        //printf("CHR->%c\n", chr);
-         __asm__("movl %0, %%eax" : : "r"(64));
-        //printf("%s",chr);
-        //return chr;
-        //__asm__("iret");
-        return 64;
-        break;
-    case 0x83:
-        ///printf("EBX->%d\n",reg->ebx);
-        // printf("ds: %d\n", reg->ds);
-        // printf("edi: %d\n", reg->edi);
-        // printf("esi: %d\n", reg->esi);
-        // printf("ebp: %d\n", reg->ebp);
-        
-        // printf("ebx: %d\n", reg->ebx);
-        // printf("edx: %d\n", reg->edx);
-        // printf("ecx: %d\n", reg->ecx);
-        // printf("eax: %d\n", reg->eax);
-        
-        // printf("int_no: %d\n", reg->int_no);
-        // printf("err_code: %d\n", reg->err_code);
-        // printf("eip: %d\n", reg->eip);
-        // printf("cs: %d\n", reg->cs);
-        // printf("eflags: %d\n", reg->eflags);
-        // printf("useresp: %d\n", reg->useresp);
-        // printf("ss: %d\n", reg->ss);
-        
-        // set_EDX(38);
-        // set_ECX(38);
-        // uint32_t edx = get_EDX();
-        // printf(" edx: %d\n", edx);
-        // set_ret(10);
-        // asm("pushl %0" :: "r"(10) : "memory");
-          
-        *syscall_return = 10;
-        return 10;
-        //push_value_to_stack(10);
-        // asm volatile (
-        //     "pusha" // Push the value in EAX onto the stack
-        //     );
-        // // // __asm__("pusha");
-        // // // __asm__("pusha");
-        // // //return chr;
-        // //__asm__("popa");
-        // __asm__("ret");
-      
-        //printf("HELLO");
-        break;
-    default:
-        printf("0x%x is un unknown system call\n",(reg->eax));
-        break;
-    }
-}
+
 
 int copy_from_user(void *dst, const void *src, size_t size) {
     // Check for NULL pointers

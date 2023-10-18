@@ -17,7 +17,7 @@ OBJS = $(SRCS:.c=.o)
 all: $(PROGRAM)
 
 $(PROGRAM): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^ ../obj/arch/sys_call.o ../obj/arch/syscall.o ../libc/libc.a
+	$(CC) $(LDFLAGS) -o $@ $^ ../obj/arch/syscall.o ../libc/libc.a
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

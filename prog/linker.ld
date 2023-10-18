@@ -2,7 +2,7 @@ OUTPUT_FORMAT("elf32-i386");
 ENTRY(main);
 
 SECTIONS {
-    . = 9M; /* Set the load address to 1MB (adjust as needed) */
+    . = 15M; /* Set the load address to 1MB (adjust as needed) */
 
     .text : {
         *(.text)

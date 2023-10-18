@@ -396,7 +396,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // uint8_t* initrd_end_location2 = initrd_location2 + initrd_size;
         // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location2, initrd_end_location2, initrd_size);
         //int boot_device = mboot_info->boot_device;
-        display_init(0,1280,1024,32);
+        // display_init(0,1280,1024,32);
         timer_init();//!DO NOT PUT BEFORE INIT VESA
         //sleep(100000);
         // char* cmdline = ((uint32_t*)mboot_info->cmdline);
@@ -425,8 +425,8 @@ void kmain(unsigned long magic, unsigned long addr) {
             for(;;);
         }
          
-       isr_register_interrupt_handler((IRQ_BASE+10),sys_handler);
-       isr_register_interrupt_handler((IRQ_BASE+11),int_print);
+        //isr_register_interrupt_handler((IRQ_BASE+10),sys_handler);
+       //isr_register_interrupt_handler((IRQ_BASE+11),int_print);
        
     
         // Call your custom system call with the desired arguments

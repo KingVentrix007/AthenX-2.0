@@ -319,7 +319,9 @@ void parse_command(const char* command) {
        //load_exe_elf("/sys/test_2");
         char* file_path = "/sys/test"; // Replace with the path to your binary or ELF file
         int *ret;
+        printf("\n");
         load_elf_file(file_path);
+        printf("\nloaded\n");
         //printf("\nloaded\n");
         //process_execute(file_path,arg_count,arguments,&ret);
         //return ret;

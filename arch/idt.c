@@ -16,6 +16,8 @@
 #include "../include/8259_pic.h"
 #include "../include/debug.h"
 #include "../include/isr.h"
+#include "../include/sys_handler.h"
+
 IDT g_idt[NO_IDT_DESCRIPTORS];
 IDT_PTR g_idt_ptr;
 
@@ -81,15 +83,16 @@ void idt_init() {
     idt_set_entry(39, (uint32)irq_7, 0x08, 0x8E);
     idt_set_entry(40, (uint32)irq_8, 0x08, 0x8E);
     idt_set_entry(41, (uint32)irq_9, 0x08, 0x8E);
-    idt_set_entry(42, (uint32)irq_10, 0x08, 0x8E);
+    idt_set_entry(42, (uint32)system_call_handler, 0x08, 0x8E);
     idt_set_entry(43, (uint32)irq_11, 0x08, 0x8E);
     idt_set_entry(44, (uint32)irq_12, 0x08, 0x8E);
     idt_set_entry(45, (uint32)irq_13, 0x08, 0x8E);
     idt_set_entry(46, (uint32)irq_14, 0x08, 0x8E);
     idt_set_entry(47, (uint32)irq_15, 0x08, 0x8E);
-    idt_set_entry(48, (uint32)irq_16, 0x80, 0x8E);
+    // idt_set_entry(48, (uint32)irq_16, 0x80, 0x8E);
+    // idt_set_entry(48, (uint32)sys_handler, 0x08,0x8E);
     idt_set_entry(49, (uint32)irq_17, 0x08, 0x8E);
-    //idt_set_entry(48, (uint32)sys_handler, 0x08,0x8E);
+    
     idt_set_entry(128, (uint32)exception_128, 0x08, 0x8E);
 
     load_idt((uint32)&g_idt_ptr);

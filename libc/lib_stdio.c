@@ -25,7 +25,7 @@ char *get_char()
 {
     char *chr;
     
-    int res = system_call(0x82,0,0);
+    int res = syscall(0x82,0,0);
     printf("res->%d",(res));
     char str[2]; // Create a string of length 2 (1 for the character and 1 for the null terminator).
     str[0] = (char)res;
@@ -47,14 +47,8 @@ int pop_value() {
 }
 int  test_ret(int in)
 {
-    int pls_work;
-    
-    int  r =  pop_value(); // if(r == 10)
-    // {
-    //     r = 78;
-    // }
-    printf("ret->%d\n",r);
-    return pls_work;
+    int ret = syscall(0x83,0,0);
+    return ret;
 }
 
 int printf(const char* format, ...) {
@@ -76,7 +70,7 @@ int printf(const char* format, ...) {
 
     // Print the formatted text to the standard output (you can replace this with your own output mechanism).
    
-    system_call(0x81,buffer,0);
+    syscall(0x81,(int)buffer,0);
     // for (int i = 0; i < chars_written; i++) {
     //     system_call(0x81,buffer);
     // }
@@ -163,7 +157,7 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list ap) {
 
 int puts(char *string)
 {
-    system_call(0x81,string,0);
+    syscall(0x81,string,0);
 }
 
 

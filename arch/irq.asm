@@ -1,7 +1,6 @@
-; filename irq.asm
 section .text
     extern isr_irq_handler
-    extern sys_handler
+
 irq_handler:
     pusha                 ; push all registers
     mov ax, ds
@@ -14,22 +13,7 @@ irq_handler:
     mov gs, ax
 
     push esp
-    
-    ; Load the interrupt number from the stack
-    mov eax, [esp+28]
-
-    cmp eax, 42            ; Compare the interrupt number to 42
-    jne not_42             ; If it's not 42, jump to not_42
-
-    ; Call dummy_func if the interrupt is 42
-    call sys_handler
-    jmp mod_done
-
-not_42:
-    call isr_irq_handler  ; Call isr_irq_handler for other interrupts
-    
-     jne mod_done
-done:
+    call isr_irq_handler
     pop esp
 
     pop ebx                ; restore kernel data segment
@@ -38,27 +22,13 @@ done:
     mov fs, bx
     mov gs, bx
 
-    popa
-    add esp, 0x8            ; restore stack for error not been pushed
+    popa                ; restore all registers
+    add esp, 0x8        ; restore stack for erro no been pushed
 
-    sti                     ; re-enable interrupts
+    sti                 ; re-enable interrupts
     iret
 
-mod_done:
-    ; The modified done label
-    pop eax                ; Restore all registers except EAX
 
-    pop ebx                ; restore kernel data segment
-    mov ds, bx
-    mov es, bx
-    mov fs, bx
-    mov gs, bx
-
-    popa
-    add esp, 0x8            ; restore stack for error not been pushed
-
-    sti                     ; re-enable interrupts
-    iret
 %macro IRQ 2
   global irq_%1
   irq_%1:
@@ -67,6 +37,7 @@ mod_done:
     push byte %2
     jmp irq_handler
 %endmacro
+
 
 
 IRQ 0, 32

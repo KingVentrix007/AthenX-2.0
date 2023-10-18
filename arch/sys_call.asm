@@ -1,16 +1,49 @@
-section .text
+; ----------------------------------------------------------------
+extern system_call_handler_c
+global system_call_handler
 
-global system_call
+system_call_handler:
+    cli
+    mov eax, [ebp + 8]    ; syscall_number
+    mov ebx, [ebp + 12]   ; param1
+    mov ecx, [ebp + 16]   ; param2
 
-system_call:
-    ; Arguments:
-    ;   [esp+4]  - syscall_number
-    ;   [esp+8]  - arg1
-    ;   [esp+12] - results (pointer)
+   
+    push edx
+    push esi
+    push edi
+    push ebp
+    push edx
+    push ecx
+    push ebx
     
-    mov     eax, [esp+4]          ; Load syscall_number into eax
-    mov     ebx, [esp+8]          ; Load arg1 into ebx
-    int     42                    ; Trigger the system call
-    mov     [esp+12], eax         ; Store the result in results
+   
+    push ecx
+     push ebx
+    push eax
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    ; call handler
+    ; mov edi, esp
     
-    ret
+    call system_call_handler_c
+
+    ; restore registers
+    pop ebx
+    pop ecx
+    pop edx
+    pop ebp
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    ;pop eax
+    add esp, 4 ; skip pushed eax - return result for system_call_handle_c
+
+    sti
+    iretd

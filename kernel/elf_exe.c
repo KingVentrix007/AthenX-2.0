@@ -6,6 +6,7 @@
 #include "../include/exe.h"
 #include "../include/i386.h"
 #include "../include/kernel.h"
+#include "../include/debug.h"
 addr original_esp;
 addr original_ebp;
 
@@ -18,7 +19,29 @@ typedef struct {
 typedef struct {
     uint32_t esp;
 } KernelContext;
-
+// Define a structure to store register values
+typedef struct {
+    uint32_t ebp;
+    uint32_t esp;
+} RegisterState;
+void save_register_state(RegisterState* state) {
+    __asm__ volatile (
+        "movl %%ebp, %0\n\t"  // Move the value of ebp into state->ebp
+        "movl %%esp, %1\n\t"  // Move the value of esp into state->esp
+        : "=r" (state->ebp), "=r" (state->esp)  // Output operands
+        :
+        : "memory"
+    );
+}
+void restore_register_state(RegisterState* state) {
+    __asm__ volatile (
+        "movl %0, %%ebp\n\t"  // Move the value in state->ebp into ebp
+        "movl %1, %%esp\n\t"  // Move the value in state->esp into esp
+        :
+        : "r" (state->ebp), "r" (state->esp)  // Input operands
+        : "memory"
+    );
+}
 // Load ELF executable into memory.
 // Define memory layout constants
 #define KERNEL_START_ADDR   0x1000  // Adjust as needed
@@ -53,21 +76,22 @@ int is_kernel_memory_overlap(Elf32_Phdr* segment) {
     return 0;  // No overlap
 }
 void switch_to_user_mode(UserProcessContext *user_context, KernelContext *kernel_context) {
+    FUNC_ADDR_NAME(&switch_to_user_mode,2,"uu");
     // Save the kernel context
     asm volatile (
         "movl %%esp, %0"
         : "=r" (kernel_context->esp)
     );
-
+     printf("here");
     // Load the user process context
     asm volatile (
         "mov %0, %%esp \n"  // Load ESP
-        "push $10          \n" // Push the value 10 onto the stack
+       
         "call *%1"          // Call the entry point
         :
         : "r" (user_context->esp), "r" (user_context->eip)
     );
-
+    printf("\nhere2");
     // Restore the kernel context
     asm volatile (
         "mov %0, %%esp"
@@ -118,18 +142,36 @@ void load_elf_executable(uint8_t* elf_data) {
     user_context.esp = (uint32_t)&process_stack[8192]; // Set ESP to the top of the stack
     user_context.eip = (uint32_t)entry_point; // Set EIP to the entry point
 
-    // Create a context for the kernel
-    KernelContext kernel_context;
+    // // Create a context for the kernel
+    KernelContext* kernel_context;
 
-    // Switch to user mode
-    switch_to_user_mode(&user_context, &kernel_context);
-    //entry_point();
+    // // Switch to user mode
+    // switch_to_user_mode(&user_context, &kernel_context);
+    // asm volatile (
+    //     "movl %%esp, %0"
+    //     : "=r" (kernel_context->esp)
+    // // );
+    // RegisterState *state;
+    // save_register_state(state);
+    // printf("Loaded at 0x%x\n",entry_point);
+    entry_point();
+    // restore_register_state(state);
+    // printf("exited");
+    // exit_elf(kernel_context);
 
     // Clear loaded memory and resources
-    memset(elf_data, 0, sizeof(elf_data));
+    // memset(elf_data, 0, sizeof(elf_data));
     // Reset loaded kernel memory if needed
 }  // Reset loaded kernel memory if needed
-
+void exit_elf(KernelContext* location)
+{
+     asm volatile (
+        "mov %0, %%esp"
+        :
+        : "r" (location->esp)
+    );
+    terminal_main();
+}
 void load_elf_file(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
