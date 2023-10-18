@@ -114,6 +114,15 @@ void load_elf_executable(uint8_t* elf_data) {
 
     // Read program headers.
     Elf32_Phdr* program_headers = (Elf32_Phdr*)(elf_data + elf_header->e_phoff);
+    // uint8_t* user_stack = &process_stack[8192]; // Set ESP to the top of the stack
+
+    // // Calculate the initial stack pointer
+    // uint32_t* esp = (uint32_t*)(user_stack + 8192);
+
+    // Push dummy values for argc, argv, and envp
+    // *(--esp) = 0;  // envp (NULL-terminated)
+    // *(--esp) = 0;  // argv (NULL-terminated)
+    // *(--esp) = 0;  // argc
 
     // Iterate through program headers and load loadable segments.
     for (int i = 0; i < elf_header->e_phnum; i++) {
@@ -137,40 +146,70 @@ void load_elf_executable(uint8_t* elf_data) {
     //(uint32_t)&__kernel_section_end + 
     //(uint32_t)&__kernel_section_end+
     // Read entry point and jump to it.
-    void (*entry_point)() = (void (*)())(elf_header->e_entry);
-    UserProcessContext user_context;
-    user_context.esp = (uint32_t)&process_stack[8192]; // Set ESP to the top of the stack
-    user_context.eip = (uint32_t)entry_point; // Set EIP to the entry point
+    // void (*entry_point)() = (void (*)())(elf_header->e_entry);
+    uint8_t* user_stack = &process_stack[8192]; // Set ESP to the top of the stack
+     uint32_t* old_esp;
+     asm volatile("movl %%esp, %0" : "=r"(old_esp));
+    // Calculate the initial stack pointer
+    uint32_t* esp = (uint32_t*)(user_stack + 8192);
 
-    // // Create a context for the kernel
-    KernelContext* kernel_context;
-
-    // // Switch to user mode
-    // switch_to_user_mode(&user_context, &kernel_context);
-    // asm volatile (
-    //     "movl %%esp, %0"
-    //     : "=r" (kernel_context->esp)
-    // // );
-    // RegisterState *state;
-    // save_register_state(state);
-    // printf("Loaded at 0x%x\n",entry_point);
-     int eax, ebx, ecx, edx;
+    // Save the current register values
+    uint32_t eax, ebx, ecx, edx, ebp, esi, edi, eflags;
     asm volatile(
-        "movl %%eax, %0\n"
-        "movl %%ebx, %1\n"
-        "movl %%ecx, %2\n"
-        "movl %%edx, %3\n"
-        : "=m"(eax), "=m"(ebx), "=m"(ecx), "=m"(edx)
+        "pushfl\n"
+        "popl %0\n"
+        "pushl %%edi\n"
+        "pushl %%esi\n"
+        "pushl %%ebp\n"
+        "pushl %%edx\n"
+        "pushl %%ecx\n"
+        "pushl %%ebx\n"
+        "pushl %%eax\n"
+        : "=m"(eflags), "=m"(edi), "=m"(esi), "=m"(ebp), "=m"(edx), "=m"(ecx), "=m"(ebx), "=m"(eax)
     );
+
+    // Push the saved register values onto the stack
+    *(--esp) = eax;
+    *(--esp) = ebx;
+    *(--esp) = ecx;
+    *(--esp) = edx;
+    *(--esp) = ebp;
+    *(--esp) = esi;
+    *(--esp) = edi;
+    *(--esp) = eflags;
+
+    // Push dummy values for argc, argv, and envp
+    *(--esp) = 0;  // envp (NULL-terminated)
+    *(--esp) = 0;  // argv (NULL-terminated)
+    *(--esp) = 0;  // argc
+
+    // Set the stack pointer (ESP) to the initial value
+    asm volatile("movl %0, %%esp" : : "r"(esp));
+
+    // Read entry point and jump to it.
+    void (*entry_point)() = (void (*)())(elf_header->e_entry);
     entry_point();
-     asm volatile(
-        "movl %0, %%eax\n"
-        "movl %1, %%ebx\n"
-        "movl %2, %%ecx\n"
-        "movl %3, %%edx\n"
-        :
-        : "m"(eax), "m"(ebx), "m"(ecx), "m"(edx)
+    asm volatile("movl %0, %%esp" : : "r"(old_esp));
+    printf("Finished exectuin of elf file\n");
+
+    // Restore the saved register values
+    asm volatile(
+        "popl %0\n" // Pop EFLAGS into EAX
+        "popfl"
+        : "=m"(eflags)
     );
+    asm volatile(
+        "popl %0\n"
+        "popl %1\n"
+        "popl %2\n"
+        "popl %3\n"
+        "popl %4\n"
+        "popl %5\n"
+        "popl %6\n"
+        "popl %7\n"
+        : "=m"(eax), "=m"(ebx), "=m"(ecx), "=m"(edx), "=m"(ebp), "=m"(esi), "=m"(edi), "=m"(eflags)
+    );
+    printf("exiting the loader script\n");
     // restore_register_state(state);
     // printf("exited");
     // exit_elf(kernel_context);
