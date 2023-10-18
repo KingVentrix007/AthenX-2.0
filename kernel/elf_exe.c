@@ -154,7 +154,23 @@ void load_elf_executable(uint8_t* elf_data) {
     // RegisterState *state;
     // save_register_state(state);
     // printf("Loaded at 0x%x\n",entry_point);
+     int eax, ebx, ecx, edx;
+    asm volatile(
+        "movl %%eax, %0\n"
+        "movl %%ebx, %1\n"
+        "movl %%ecx, %2\n"
+        "movl %%edx, %3\n"
+        : "=m"(eax), "=m"(ebx), "=m"(ecx), "=m"(edx)
+    );
     entry_point();
+     asm volatile(
+        "movl %0, %%eax\n"
+        "movl %1, %%ebx\n"
+        "movl %2, %%ecx\n"
+        "movl %3, %%edx\n"
+        :
+        : "m"(eax), "m"(ebx), "m"(ecx), "m"(edx)
+    );
     // restore_register_state(state);
     // printf("exited");
     // exit_elf(kernel_context);
