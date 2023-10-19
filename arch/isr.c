@@ -119,7 +119,7 @@ void isr_irq_handler(REGISTERS *reg) {
     pic8259_eoi(reg->int_no);
 }
 
-static void print_registers(REGISTERS *reg, char caller[100]) {
+void print_registers(REGISTERS *reg, char caller[100]) {
 
     printf("%s REGISTERS:\n","");
     printf("err_code=%d\n", reg->err_code);

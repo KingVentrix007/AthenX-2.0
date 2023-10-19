@@ -187,3 +187,9 @@ void prepare_args(uint32_t* args, const char* format, ...) {
 
     va_end(arg_list);
 }
+
+
+void exit()
+{
+    syscall(0x80,0,0);
+}

@@ -14,6 +14,6 @@ int main() {
     // int rev = reverse_int(c);
     // printf("reverse ret value: %d\n",rev);
 
-
+    exit();
     // return 0;
 }

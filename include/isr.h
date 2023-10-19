@@ -42,7 +42,7 @@ typedef void (*ISR)(REGISTERS *);
  */
 void isr_register_interrupt_handler(int num, ISR handler);
 
-static void print_registers(REGISTERS *reg, char caller[100]);
+void print_registers(REGISTERS *reg, char caller[100]);
 /*
  * turn off current interrupt
 */

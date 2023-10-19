@@ -3,7 +3,7 @@ extern system_call_handler_c
 global system_call_handler
 
 system_call_handler:
-    cli
+    ; cli
     mov eax, [ebp + 8]    ; syscall_number
     mov ebx, [ebp + 12]   ; param1
     mov ecx, [ebp + 16]   ; param2

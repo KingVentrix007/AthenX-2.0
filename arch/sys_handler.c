@@ -35,6 +35,7 @@ char* handler_get_char_system_call(REGISTERS *reg)
      
     
 }
+#define SYSCALL_EXIT 0x80
 #define SYSCALL_PRINT 0x81
 #define SYSCALL_TEST_RET 0x83
 int system_call_handler_c(int syscall_number, int param1, int param2) {
@@ -58,7 +59,8 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             break;
 
         // Add more cases for other system calls as needed
-
+        case SYSCALL_EXIT:
+            asm volatile("jmp process_kernel_return");
         default:
             printf("IDK - >%d(0x%x)\n",syscall_number,syscall_number);
             // Handle unknown system calls or errors

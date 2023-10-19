@@ -7,6 +7,7 @@
 #include "../include/i386.h"
 #include "../include/kernel.h"
 #include "../include/debug.h"
+#include "../include/isr.h"
 addr original_esp;
 addr original_ebp;
 
@@ -24,6 +25,22 @@ typedef struct {
     uint32_t ebp;
     uint32_t esp;
 } RegisterState;
+
+
+bool check_overlap(uintptr_t kernel_start, uintptr_t kernel_end, Elf32_Ehdr* elf_header) {
+    uintptr_t elf_start = (uintptr_t)elf_header;
+    uintptr_t elf_end = elf_start + elf_header->e_ehsize; // Adjust this as needed based on ELF structure.
+
+    // Check for overlap by comparing the addresses.
+    if (elf_end < kernel_start || elf_start > kernel_end) {
+        // No overlap, return false.
+        return false;
+    } else {
+        // Overlap detected, return true.
+        return true;
+    }
+}
+
 void save_register_state(RegisterState* state) {
     __asm__ volatile (
         "movl %%ebp, %0\n\t"  // Move the value of ebp into state->ebp
@@ -101,6 +118,7 @@ void switch_to_user_mode(UserProcessContext *user_context, KernelContext *kernel
 }
 // Function to load and execute an ELF executable
 void load_elf_executable(uint8_t* elf_data) {
+    FUNC_ADDR_NAME(&load_elf_executable,1,"u");
     // Verify ELF magic number.
     Elf32_Ehdr* elf_header = (Elf32_Ehdr*)elf_data;
     if (elf_header->e_ident[EI_MAG0] != ELFMAG0 ||
@@ -115,7 +133,7 @@ void load_elf_executable(uint8_t* elf_data) {
     // Read program headers.
     Elf32_Phdr* program_headers = (Elf32_Phdr*)(elf_data + elf_header->e_phoff);
     // uint8_t* user_stack = &process_stack[8192]; // Set ESP to the top of the stack
-
+    uint32_t marker_value = 0xDEADBEEF;
     // // Calculate the initial stack pointer
     // uint32_t* esp = (uint32_t*)(user_stack + 8192);
 
@@ -123,12 +141,21 @@ void load_elf_executable(uint8_t* elf_data) {
     // *(--esp) = 0;  // envp (NULL-terminated)
     // *(--esp) = 0;  // argv (NULL-terminated)
     // *(--esp) = 0;  // argc
-
+    bool over = check_overlap(__kernel_section_start,__kernel_section_end,elf_header);
+    if(over)
+    {
+        printf("Overlap detected\n");
+        return -1;
+    }
+    else
+    {
+        printf("Continuing execution\n");
+    }
     // Iterate through program headers and load loadable segments.
     for (int i = 0; i < elf_header->e_phnum; i++) {
         if (program_headers[i].p_type == PT_LOAD) {
             // Calculate the load address by adding p_vaddr to __kernel_section_end
-            uint8_t* load_address = (uint8_t*)(uint32_t)(program_headers[i].p_paddr);
+            uint8_t* load_address = (uint8_t*)(uint32_t)(program_headers[i].p_vaddr);
 
             // Allocate memory and copy segment data.
             uint8_t* file_data = elf_data + program_headers[i].p_offset;
@@ -147,68 +174,80 @@ void load_elf_executable(uint8_t* elf_data) {
     //(uint32_t)&__kernel_section_end+
     // Read entry point and jump to it.
     // void (*entry_point)() = (void (*)())(elf_header->e_entry);
-    uint8_t* user_stack = &process_stack[8192]; // Set ESP to the top of the stack
-     uint32_t* old_esp;
-     asm volatile("movl %%esp, %0" : "=r"(old_esp));
-    // Calculate the initial stack pointer
-    uint32_t* esp = (uint32_t*)(user_stack + 8192);
+    // uint8_t* user_stack = &process_stack[8192]; // Set ESP to the top of the stack
+    // sizeof(user_stack);
+    uintptr_t original_esp;
+    uintptr_t original_ebp;
+    unsigned int flags;
+    // asm volatile("pushf; pop %0" : "=g"(flags));
+    REGISTERS *regs;
+    regs = get_regs();
+    // print_registers(regs,"");
+     asm volatile("pusha;");
 
-    // Save the current register values
-    uint32_t eax, ebx, ecx, edx, ebp, esi, edi, eflags;
-    asm volatile(
-        "pushfl\n"
-        "popl %0\n"
-        "pushl %%edi\n"
-        "pushl %%esi\n"
-        "pushl %%ebp\n"
-        "pushl %%edx\n"
-        "pushl %%ecx\n"
-        "pushl %%ebx\n"
-        "pushl %%eax\n"
-        : "=m"(eflags), "=m"(edi), "=m"(esi), "=m"(ebp), "=m"(edx), "=m"(ecx), "=m"(ebx), "=m"(eax)
-    );
+  // Save 'esp' and 'ebp' so stack can be restored after process exits
+  asm volatile(
+      "movl %%esp, %0;"
+      "movl %%ebp, %1;"
+      : "=m"(original_esp),
+        "=m"(original_ebp));
 
-    // Push the saved register values onto the stack
-    *(--esp) = eax;
-    *(--esp) = ebx;
-    *(--esp) = ecx;
-    *(--esp) = edx;
-    *(--esp) = ebp;
-    *(--esp) = esi;
-    *(--esp) = edi;
-    *(--esp) = eflags;
-
-    // Push dummy values for argc, argv, and envp
-    *(--esp) = 0;  // envp (NULL-terminated)
-    *(--esp) = 0;  // argv (NULL-terminated)
-    *(--esp) = 0;  // argc
-
-    // Set the stack pointer (ESP) to the initial value
-    asm volatile("movl %0, %%esp" : : "r"(esp));
-
+  // Set up a new stack for the process (userspace stack)
+  asm volatile("movl %0, %%esp" ::"r"(process_stack + sizeof(process_stack)));
+//   asm volatile("movl %%esp, %%ebp;");
     // Read entry point and jump to it.
-    void (*entry_point)() = (void (*)())(elf_header->e_entry);
-    entry_point();
-    asm volatile("movl %0, %%esp" : : "r"(old_esp));
+    // void (*entry_point)() = (void (*)())(elf_header->e_entry);
+    // entry_point();
+    asm volatile("movl %0, %%eax;"    // Save entry_point before switching stack frames
+               "movl %%esp, %%ebp;" // Set up the 'ebp' for the process' stack
+               "jmp *%%eax;"        // Jump to the binary to start execution
+               :
+               : "m"(elf_header->e_entry));
+    asm volatile(".global process_kernel_return;"
+               "process_kernel_return:");
+    printf("exit succefull 1/5\n");
+    asm volatile(
+      "movl %0, %%esp;"
+      "movl %1, %%ebp;"
+      :
+      : "m"(original_esp),
+        "m"(original_ebp));
+    printf("exit succefull 2/5\n");
+    // asm volatile("push %0; popf" :: "g"(flags));
+    asm("popa");
+    // printf("Exited\n");
+//     uint32_t stack_marker;
+//    asm volatile (
+//         "movl %%esp, %0"    // Move ESP into esp_value
+//         : "=r" ()  // Output: esp_value
+//     );
+
+//     if (stack_marker != marker_value) {
+//         printf("Error: Stack corrupted or not returning to terminal code.\n");
+//     }
+
     printf("Finished exectuin of elf file\n");
+    REGISTERS *end_regs;
+    end_regs = get_regs();
+    // print_registers(end_regs,"");
 
     // Restore the saved register values
-    asm volatile(
-        "popl %0\n" // Pop EFLAGS into EAX
-        "popfl"
-        : "=m"(eflags)
-    );
-    asm volatile(
-        "popl %0\n"
-        "popl %1\n"
-        "popl %2\n"
-        "popl %3\n"
-        "popl %4\n"
-        "popl %5\n"
-        "popl %6\n"
-        "popl %7\n"
-        : "=m"(eax), "=m"(ebx), "=m"(ecx), "=m"(edx), "=m"(ebp), "=m"(esi), "=m"(edi), "=m"(eflags)
-    );
+    // asm volatile(
+    //     "popl %0\n" // Pop EFLAGS into EAX
+    //     "popfl"
+    //     : "=m"(eflags)
+    // );
+    // asm volatile(
+    //     "popl %0\n"
+    //     "popl %1\n"
+    //     "popl %2\n"
+    //     "popl %3\n"
+    //     "popl %4\n"
+    //     "popl %5\n"
+    //     "popl %6\n"
+    //     "popl %7\n"
+    //     : "=m"(eax), "=m"(ebx), "=m"(ecx), "=m"(edx), "=m"(ebp), "=m"(esi), "=m"(edi), "=m"(eflags)
+    // );
     printf("exiting the loader script\n");
     // restore_register_state(state);
     // printf("exited");
@@ -216,6 +255,9 @@ void load_elf_executable(uint8_t* elf_data) {
 
     // Clear loaded memory and resources
     // memset(elf_data, 0, sizeof(elf_data));
+    printf("returning\n");
+    return 0;
+    
     // Reset loaded kernel memory if needed
 }  // Reset loaded kernel memory if needed
 void exit_elf(KernelContext* location)
@@ -250,6 +292,7 @@ void load_elf_file(const char* filename) {
     fclose(file);
     //printf("%d\n",__LINE__);
     load_elf_executable(elf_data);
+    printf("Exited to prime\n");
     //printf("HERE");
     // Now, you can parse the ELF data and load it into memory as described in the previous responses.
 
