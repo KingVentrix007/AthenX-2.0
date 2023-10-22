@@ -39,6 +39,29 @@ char get_chr() {
     // }
     // return c;
 }
+
+char* get_char_block()
+{
+    char c;
+    while(1)
+    {
+        c = kb_getchar();
+        if(c == '\0')
+        {
+            
+        }
+        else
+        {
+            // printf("\nChar->(%c)(%d)", c,c);
+            return c;
+        }
+    }
+    // while((c = get_char()) != '\0' && (c < 32 || c > 127))
+    // {
+        
+    //     return c;
+    // }
+}
 int get_int() {
     int result = 0;
     int sign = 1;

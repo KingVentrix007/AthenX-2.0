@@ -31,6 +31,12 @@
         "tuple": "c",
         "type_traits": "c",
         "types.h": "c",
-        "vga.h": "c"
+        "vga.h": "c",
+        "x86_reg.h": "c",
+        "stdio.h": "c",
+        "kernel.h": "c",
+        "fat_filelib.h": "c",
+        "fileio.h": "c",
+        "shell.h": "c"
     }
 }

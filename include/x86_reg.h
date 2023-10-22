@@ -2,7 +2,7 @@
 #define X86_REGISTER_UTILS_H
 
 #include <stdint.h>
-
+#include "isr.h"
 // Function to set the value of EAX register
 void set_EAX(uint32_t value);
 
@@ -39,4 +39,5 @@ uint32_t get_ESI();
 // Function to get the value of EDI register
 uint32_t get_EDI();
 
+void set_regs(REGISTERS* regs) ;
 #endif // X86_REGISTER_UTILS_H

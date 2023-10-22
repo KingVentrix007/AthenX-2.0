@@ -70,11 +70,14 @@ typedef struct sFL_FILE
 
     struct fat_node         list_node;
 } FL_FILE;
+typedef struct {
+    char name[256]; // Adjust the size as needed
+} Entry;
 
 //-----------------------------------------------------------------------------
 // Prototypes
 //-----------------------------------------------------------------------------
-
+#define MAX 100
 // External
 void                fl_init(void);
 void                fl_attach_locks(void (*lock)(void), void (*unlock)(void));
@@ -106,11 +109,12 @@ int                 fl_readdir(FL_DIR *dirls, fl_dirent *entry);
 int                 fl_closedir(FL_DIR* dir);
 
 // Extensions
-void                fl_listdirectory(const char *path);
+void fl_listdirectory(const char *path, Entry dirs[MAX], Entry files[MAX], int *dir_count, int *file_count);
 int                 fl_createdirectory(const char *path);
 int                 fl_is_dir(const char *path);
 
 int                 fl_format(uint32 volume_sectors, const char *name);
+
 
 // Test hooks
 #ifdef FATFS_INC_TEST_HOOKS

@@ -1,26 +1,41 @@
-
+# Define the compiler and flags
 CC = i686-elf-gcc
-CFLAGS = -m32 -std=gnu99 -ffreestanding -O2 -nostdlib -I../libc/
+CFLAGS = -m32 -std=gnu99 -ffreestanding -O2 -O0 -nostdlib -I../libc/
 LDFLAGS = -T linker.ld -nostdlib
+LIBS = ../obj/arch/syscall.o ../libc/libc.a
 
-PROGRAM = test
+# Find all subdirectories in the current directory
+SUBDIRS := $(wildcard */)
 
-# Path to the folder containing object files
-OBJ_DIR = ../obj
+# Filter out any directories you want to exclude (if necessary)
+EXCLUDE_DIRS :=
+SUBDIRS := $(filter-out $(EXCLUDE_DIRS),$(SUBDIRS))
 
-# Include all .o files from subfolders of OBJ_DIR
-KERNEL_OBJS = $(shell find $(OBJ_DIR) -name '*.o')
+# List of source files to compile in each subdirectory
+SRC_FILES := $(wildcard $(addsuffix *.c, $(SUBDIRS)))
 
-SRCS = test.c
-OBJS = $(SRCS:.c=.o)
+# List of corresponding output binary names
+OUT_FILES := $(patsubst %/,%,$(SUBDIRS))
 
-all: $(PROGRAM)
+# Directory for output binaries
+OUTPUT_DIR = ../programs
 
-$(PROGRAM): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^ ../obj/arch/syscall.o ../libc/libc.a
+# Full paths to output binaries
+OUTPUT_PATHS := $(addprefix $(OUTPUT_DIR)/, $(OUT_FILES))
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# Targets to build all programs
+all: $(OUTPUT_PATHS)
 
+# Rule to build each program from its source files
+$(OUTPUT_DIR)/%: %/*.c | $(OUTPUT_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
+
+# Create the output directory if it doesn't exist
+$(OUTPUT_DIR):
+	mkdir -p $(OUTPUT_DIR)
+
+# Clean rule to remove generated files
 clean:
-	rm -f $(OBJS) $(PROGRAM)
+	rm -f $(OUTPUT_PATHS)
+
+.PHONY: all clean

@@ -46,6 +46,8 @@
 #include "../include/env.h"
 #include "../include/syscall.h"
 #include "virt.h"
+#include "../include/exe.h"
+#include "../include/elf_exe.h"
 // #define STB_IMAGE_IMPLEMENTATION
 // #include "../include/stb_image.h"
 KERNEL_MEMORY_MAP g_kmap;
@@ -391,7 +393,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             } else {
                 printf("RSDP not found.\n");
             }
-        perror("this is a test");
+        // perror("this is a test");
         // uint8_t* initrd_location2 = locate_initrd(mboot_info, &initrd_size);
         // uint8_t* initrd_end_location2 = initrd_location2 + initrd_size;
         // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location2, initrd_end_location2, initrd_size);
@@ -556,8 +558,20 @@ void kmain(unsigned long magic, unsigned long addr) {
         
         
         
-        
-
+        // char *path = "/sys/shell";
+        // load_elf_file(path);
+        // ProgramEntry programs[MAX_PROGRAMS];
+        ProgramEntry programs[MAX_PROGRAMS];
+        int program_count = 0;
+        const char *directory = "/sys/"; //Path to program directory
+        find_programs(directory,programs,&program_count);
+        printf("%d programs found\n",program_count);
+        // printf("Programs:\n");
+       printf("ELF Programs in %s:\n", directory);
+    for (int i = 0; i < program_count; i++) {
+        printf("%d: %s\n",i+1, programs[i].name);
+    }
+        load_elf_file("/sys/shell");
         if (ret < 0) {
             ERROR("failed to init vesa graphics\n");
             sleep(4);

@@ -510,6 +510,7 @@ REGISTERS *get_regs()
         return regs;
 
 }
+
 /**
  * invoke exception routine,
  * being called in exception.asm

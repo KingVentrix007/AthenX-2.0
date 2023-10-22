@@ -21,22 +21,22 @@ int reverse_int(int value) {
     }
     return reversed;
 }
-char *get_char()
-{
-    char *chr;
+// char *get_char()
+// {
+//     char *chr;
     
-    int res = syscall(0x82,0,0);
-    printf("res->%d",(res));
-    char str[2]; // Create a string of length 2 (1 for the character and 1 for the null terminator).
-    str[0] = (char)res;
-    str[1] = '\0';
-    if(res == 'C' || res == 'c')
-    {
-        printf("\nWE GOT C\n");
-    }
-    //printf("%s",chr);
-    return res;
-}
+//     int res = syscall(0x82,0,0);
+//     printf("res->%d",(res));
+//     char str[2]; // Create a string of length 2 (1 for the character and 1 for the null terminator).
+//     str[0] = (char)res;
+//     str[1] = '\0';
+//     if(res == 'C' || res == 'c')
+//     {
+//         printf("\nWE GOT C\n");
+//     }
+//     //printf("%s",chr);
+//     return res;
+// }
 int pop_value() {
     int result;
     asm volatile (
@@ -70,7 +70,7 @@ int printf(const char* format, ...) {
 
     // Print the formatted text to the standard output (you can replace this with your own output mechanism).
    
-    syscall(0x81,(int)buffer,0);
+    syscall(SYS_PRINT,(int)buffer,0);
     // for (int i = 0; i < chars_written; i++) {
     //     system_call(0x81,buffer);
     // }
@@ -132,7 +132,19 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list ap) {
             }
             
             format += 2; // Move format pointer past '%d'.
-        } else {
+        } else if (*format == '%' && *(format + 1) == 'c') {
+            // Handle the '%c' format specifier (character).
+            char c = va_arg(ap, int); // Get a character from va_list.
+
+            if (chars_written < (int)size - 1) {
+                buffer[chars_written++] = c; // Copy the character to the buffer.
+            } else {
+                // Buffer full, terminate the loop.
+                break;
+            }
+
+            format += 2; // Move format pointer past '%c'.
+        }else {
             // Copy regular characters to the buffer.
             if (chars_written < (int)size - 1) {
                 buffer[chars_written++] = *format;
@@ -142,6 +154,7 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list ap) {
             }
             format++;
         }
+        
     }
 
     // Null-terminate the buffer.
@@ -192,4 +205,15 @@ void prepare_args(uint32_t* args, const char* format, ...) {
 void exit()
 {
     syscall(0x80,0,0);
+}
+
+
+char *get_char()
+{
+    char c = (char*)syscall(SYS_GETCHAR,90,0);
+    return c;
+}
+int clear_screen()
+{
+    syscall(SYS_SCREEN_CTRL,0,0);
 }

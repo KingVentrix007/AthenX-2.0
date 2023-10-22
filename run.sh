@@ -18,7 +18,18 @@ if [ -f "$image_file" ]; then
   # Copy HackOS.bin into the rootfs folder
  
   sudo cp "HackOS.bin" "/mnt/AthenX/boot"
-  sudo cp "prog/test" "/mnt/AthenX/sys"
+  # Define the source directory
+  SRC_DIR="programs" # Change this to the actual source directory
+
+  # Define the destination directory
+  DEST_DIR="/mnt/AthenX/sys"
+
+  # Copy all files from the source directory to the destination directory
+  for file in "$SRC_DIR"/*; do
+      if [ -f "$file" ]; then
+          sudo cp "$file" "$DEST_DIR"
+      fi
+  done
   sudo cp "grub/grub.cfg" "/mnt/AthenX/grub/grub.cfg"
    echo "Contents of the mount point and its subdirectories:"
   ls -R /mnt/AthenX

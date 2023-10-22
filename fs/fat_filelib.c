@@ -1465,11 +1465,11 @@ int fl_createdirectory(const char *path)
 // fl_listdirectory: List a directory based on a path
 //-----------------------------------------------------------------------------
 #if FATFS_DIR_LIST_SUPPORT
-void fl_listdirectory(const char *path)
+void fl_listdirectory(const char *path, Entry dirs[MAX], Entry files[MAX], int *dir_count, int *file_count)
 {
     FL_DIR dirstat;
 
-    // If first call to library, initialise
+    // If first call to library, initialize
     CHECK_FL_INIT();
 
     FL_LOCK(&_fs);
@@ -1482,19 +1482,26 @@ void fl_listdirectory(const char *path)
 
         while (fl_readdir(&dirstat, &dirent) == 0)
         {
-#if FATFS_INC_TIME_DATE_SUPPORT
-            int d,m,y,h,mn,s;
-            fatfs_convert_from_fat_time(dirent.write_time, &h,&m,&s);
-            fatfs_convert_from_fat_date(dirent.write_date, &d,&mn,&y);
-            FAT_PRINTF(("%02d/%02d/%04d  %02d:%02d      ", d,mn,y,h,m));
-#endif
-
+            // Assuming 'dirs' and 'files' are arrays of Entry structures
+            // Increment counts and append to the respective buffer
             if (dirent.is_dir)
             {
+                if (*dir_count < MAX)
+                {
+                    strncpy(dirs[*dir_count].name, dirent.filename, sizeof(dirs[*dir_count].name) - 1);
+                    dirs[*dir_count].name[sizeof(dirs[*dir_count].name) - 1] = '\0'; // Ensure null-terminated
+                    (*dir_count)++;
+                }
                 FAT_PRINTF(("-  %s <DIR>\n", dirent.filename));
             }
             else
             {
+                if (*file_count < MAX)
+                {
+                    strncpy(files[*file_count].name, dirent.filename, sizeof(files[*file_count].name) - 1);
+                    files[*file_count].name[sizeof(files[*file_count].name) - 1] = '\0'; // Ensure null-terminated
+                    (*file_count)++;
+                }
                 FAT_PRINTF(("-  %s [%d bytes]\n", dirent.filename, dirent.size));
             }
         }

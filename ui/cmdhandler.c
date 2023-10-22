@@ -317,11 +317,20 @@ void parse_command(const char* command) {
     else if (strcmp(arguments[0],"load") == 0)
     {
        //load_exe_elf("/sys/test_2");
-        char* file_path = "/sys/test"; // Replace with the path to your binary or ELF file
+       if(arg_count == 1)
+       {
+        char* file_path = "/sys/shell"; // Replace with the path to your binary or ELF file
         int *ret;
         printf("\n");
         load_elf_file(file_path);
-        printf("\nloaded\n");
+        
+       }else if (arg_count >= 2)
+       {
+         printf("\n");
+         load_elf_file(arguments[1]);
+       }
+       
+        
         //printf("\nloaded\n");
         //process_execute(file_path,arg_count,arguments,&ret);
         //return ret;
@@ -453,7 +462,7 @@ void parse_command(const char* command) {
         // fl_listdirectory("rootfs");
         // fl_listdirectory("rootfs/");
         // fl_listdirectory("/rootfs");
-        fl_listdirectory(cwd);
+        // fl_listdirectory(cwd);
         
     }
     

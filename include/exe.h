@@ -17,7 +17,11 @@ typedef struct executable
   addr program_break;
   executable_type type;
 } executable;
-
+typedef struct {
+    char name[256]; // Adjust the size as needed
+} ProgramEntry;
+#define MAX_PROGRAMS 100
 void load_elf_file(const char* filename);
 
+void find_programs(const char *path,ProgramEntry programs[MAX_PROGRAMS], int *program_count);
 #endif

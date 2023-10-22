@@ -4,6 +4,7 @@ global system_call_handler
 
 system_call_handler:
     ; cli
+    sti
     mov eax, [ebp + 8]    ; syscall_number
     mov ebx, [ebp + 12]   ; param1
     mov ecx, [ebp + 16]   ; param2
@@ -45,5 +46,5 @@ system_call_handler:
     ;pop eax
     add esp, 4 ; skip pushed eax - return result for system_call_handle_c
 
-    sti
+    
     iretd
