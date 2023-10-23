@@ -29,6 +29,8 @@
 #define SYS_IS_DIR 26
 #define SYS_CREATE 27
 #define SYS_RM 28
+#define SYS_TERMINAL 29
+#define SYS_TELL 30
 typedef struct param_struct
 {
     char* param1;
@@ -36,5 +38,13 @@ typedef struct param_struct
     // int param3;
     // int param4;
 }parameters;
+typedef struct term_struct
+{
+    /* data */
+    int x;
+    int y;
+    uint32_t color;
+}terminal_struct;
+
 int syscall(int syscall_number, int param1, int param2);
 #endif

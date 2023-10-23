@@ -208,3 +208,16 @@ void kfree(void *addr) {
     }
 }
 
+void* malloc_aligned(size_t size, size_t alignment) {
+    void* mem = kmalloc(size + alignment - 1);
+    
+    if (mem == NULL) {
+        // Handle allocation failure.
+        return NULL;
+    }
+    
+    // Calculate the aligned pointer within the allocated memory.
+    void* aligned_mem = (void*)(((uintptr_t)(mem + alignment - 1) / alignment) * alignment);
+    
+    return aligned_mem;
+}

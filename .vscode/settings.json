@@ -37,6 +37,7 @@
         "kernel.h": "c",
         "fat_filelib.h": "c",
         "fileio.h": "c",
-        "shell.h": "c"
+        "shell.h": "c",
+        "cmdhandler.h": "c"
     }
 }

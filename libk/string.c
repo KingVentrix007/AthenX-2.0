@@ -637,3 +637,24 @@ size_t strcspn(const char* str, const char* reject) {
     }
     return length;
 }
+char* strdup(const char* str) {
+    if (str == NULL) {
+        return NULL;
+    }
+
+    // Calculate the length of the input string
+    size_t length = strlen(str) + 1;
+
+    // Allocate memory for the duplicated string
+    char* duplicate = (char*)malloc(length);
+
+    if (duplicate == NULL) {
+        // Memory allocation failed
+        return NULL;
+    }
+
+    // Copy the input string into the newly allocated memory
+    strcpy(duplicate, str);
+     return duplicate;
+}
+   

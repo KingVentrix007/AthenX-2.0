@@ -19,7 +19,7 @@ int strcmp(const char *s1, char *s2);
 int strcpy(char *dst, const char *src);
 char *ctos(char s[2], const char c);
 void strcat(char *dest, const char *src);
-char *strncpy(char *dst, const char *src, size_t n);
+// char *strncpy(char *dst, const char *src, size_t n);
 int isspace(char c);
 
 int isalpha(char c);
@@ -42,4 +42,5 @@ int isxdigit(int c);
 long strtol(const char* str, char** endptr, int base);
 bool isalnum(int c);
 size_t strcspn(const char* str, const char* reject);
+char* strdup(const char* str);
 #endif

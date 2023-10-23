@@ -6,6 +6,7 @@
 #include "stddef.h"
 #include "stdint.h"
 #include "fileio.h"
+#include "memory.h"
 // Declare the custom printf_lib function
 // int printf(const char* format, ...);
 
@@ -24,6 +25,7 @@ int create_file(const char * path);
 int fl_is_dir(char *path);
 int rm_file(const char * path);
 int fprintf(const char* filename, const char* format, ...) ;
+
 // Add other declarations for custom functions or types if needed
 
 #endif /* LIB_STDIO_H */

@@ -1,8 +1,7 @@
 #include "../libc/stdio.h"
-#include "../libc/fileio.h"
 #include "../libc/maths.h"
 #include "../libc/string.h"
-#include "../libc/printf.h"
+#include "../libc/stdlib.h"
 #include "shell.h" 
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
@@ -21,8 +20,8 @@ int main(int argc, char **argv)
     strcpy(cwd, argv[1]);
     printf("Welcome to the shell!\n");
     printf("\nShell>");
-    char buf[1001];
-
+    // char buf[1001];
+    char *buf = (char*)malloc(1001);
     while(1==1)
     {
         char c = get_char();
@@ -173,7 +172,7 @@ int shell(char buf[1001]) {
         {
             strcat(cwd,"/");
         }
-    } else {
+    } else { 
         char tmp[260];
         strcpy(tmp,cwd);
         if(tmp[strlen(tmp)-1] != '/')
@@ -211,6 +210,12 @@ int shell(char buf[1001]) {
         
         create_file(tmp);
     }
+    else if (strcmp(arguments[0],"term" ) == 0)
+    {
+        
+        set_terminal_state(100,100,255,0,0);
+    }
+    
     
     
 

@@ -1,4 +1,4 @@
-#include "elf.h"
+#include <elf.h>
 #include "../include/fat_filelib.h"
 #include "../include/kheap.h"
 #include "string.h"
@@ -10,6 +10,7 @@
 #include "../include/isr.h"
 #include "../include/x86_reg.h"
 #include "printf.h"
+#define PT_GNU_STACK	(PT_LOOS + 0x474e551)
 addr original_esp;
 addr original_ebp;
 
@@ -33,6 +34,7 @@ typedef struct {
 struct elf_exe {
     uint8_t* elf_start; // Pointer to the start address of the ELF file
     int priority;       // Priority number (not used in this code)
+    uint32_t stack_size; // Size of the stack
     // Add any other necessary members here
 };
 
@@ -53,23 +55,31 @@ struct elf_exe {
  * Return:
  *   [Description of the return value, if applicable]
  */
-void run_elf(struct elf_exe elf) {
+void run_elf(struct elf_exe elf, int myArgc,char* myArgv[]) {
     // Define a stack aligned to 16 bytes
-    uint8_t stack[4096] __attribute__((aligned(16)));
+    uint8_t stack;
+    if(elf.stack_size > 0)
+    {
+        stack = process_stack;
+    }
+    else
+    {
+        stack = malloc_aligned(4096,16);
+    }
     memset(stack, 0, sizeof(stack));
     // Set up the stack pointer (ESP) to point to the top of the stack
     asm volatile (
         "mov %0, %%esp" // Set the stack pointer
         :
-        : "r"(&stack[4096])
+        : "r"(&stack)
     );
 
     // Load and run the ELF executable
     void (*elf_entry)(int, char*[]) = (void (*)(int, char*[]))(elf.elf_start); // Assuming ELF entry point is at offset 24
 
 // Define arguments similar to argc and argv
-    int myArgc = 3;
-    char* myArgv[] = {"Tristan", "/root/", "arg2"};
+    // int myArgc = 3;
+    // char* myArgv[] = {"Tristan", "/root/", "arg2"};
 
     // Call the ELF entry point function with the arguments
     elf_entry(myArgc, myArgv);
@@ -84,8 +94,9 @@ void run_elf(struct elf_exe elf) {
     asm volatile (
         "mov %0, %%esp"
         :
-        : "r"(&stack[4096])
+        : "r"(&stack)
     );
+    kfree(stack);
 }
 
 
@@ -192,9 +203,10 @@ void switch_to_user_mode(UserProcessContext *user_context, KernelContext *kernel
     );
 }
 // Function to load and execute an ELF executable
-void load_elf_executable(uint8_t* elf_data) {
+void load_elf_executable(uint8_t* elf_data,int myArgc,char* myArgv[]) {
     FUNC_ADDR_NAME(&load_elf_executable,1,"u");
     // Verify ELF magic number.
+    size_t stack_size = 0;
     Elf32_Ehdr* elf_header = (Elf32_Ehdr*)elf_data;
     
     if (elf_header->e_ident[EI_MAG0] != ELFMAG0 ||
@@ -245,10 +257,20 @@ void load_elf_executable(uint8_t* elf_data) {
             // Copy data.
             memcpy(load_address, file_data, file_size);
         }
+        if (program_headers[i].p_type == PT_GNU_STACK) {
+            stack_size = program_headers[i].p_memsz;
+            break;
+        }
     }
      struct elf_exe my_elf;
     my_elf.elf_start = (uint32_t*)(elf_header->e_entry);
-    run_elf(my_elf);
+    my_elf.stack_size = stack_size;
+    if (stack_size > 0) {
+        printf("Stack size: %zu bytes\n", stack_size);
+    } else {
+        printf("No stack size information found in the ELF header\n");
+    }
+    run_elf(my_elf,myArgc,myArgv);
     //(uint32_t)&__kernel_section_end + 
     //(uint32_t)&__kernel_section_end+
     // Read entry point and jump to it.
@@ -358,14 +380,14 @@ void exit_elf(KernelContext* location)
     );
     terminal_main();
 }
-void load_elf_file(const char* filename) {
+void load_elf_file(const char* filename, int argc, const char** argv) {
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
         // Handle file opening error.
         return;
     }
 
-    fseek(file, 0, SEEK_END);
+    fl_fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
@@ -380,7 +402,7 @@ void load_elf_file(const char* filename) {
     fread(elf_data, sizeof(uint8_t), file_size, file);
     fclose(file);
     //printf("%d\n",__LINE__);
-    load_elf_executable(elf_data);
+    load_elf_executable(elf_data,argc, argv);
     // printf("Exited to prime\n");
     //printf("HERE");
     // Now, you can parse the ELF data and load it into memory as described in the previous responses.

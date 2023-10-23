@@ -1,0 +1,83 @@
+
+#include "../include/syscall.h"
+#include "stddef.h"
+#define INT_MAX 2147483647
+#define INT_MIN -2147483648
+
+
+
+
+
+
+
+
+uint32_t atoi(const char *str)
+{
+    uint32_t sign = 1, base = 0, i = 0;
+
+    // if whitespaces then ignore.
+    while (str[i] == ' ')
+    {
+        i++;
+    }
+
+    // sign of number
+    if (str[i] == '-' || str[i] == '+')
+    {
+        sign = 1 - 2 * (str[i++] == '-');
+    }
+
+    // checking for valid input
+    while (str[i] >= '0' && str[i] <= '9')
+    {
+        // handling overflow test case
+        if (base > INT_MAX / 10 || (base == INT_MAX / 10 && str[i] - '0' > 7))
+        {
+            if (sign == 1)
+                return INT_MAX;
+            else
+                return INT_MIN;
+        }
+        base = 10 * base + (str[i++] - '0');
+    }
+    return base * sign;
+}
+
+/**
+ * Function Name: malloc
+ * Description: Memory allocation function.
+ *
+ * Parameters:
+ *   size (size_t) - Size of the memory to allocate.
+ *
+ * Return:
+ *   void* - A pointer to the allocated memory, or NULL if allocation fails.
+ */
+void* malloc(size_t size) {
+    void* memory = syscall(SYS_MMAP,size,0);
+    if (memory == NULL) {
+        // Allocation failed
+        printf("Memory allocation failed.\n");
+    }
+    return memory;
+}
+
+/**
+ * Function Name: free
+ * Description: Memory deallocation function.
+ *
+ * Parameters:
+ *   ptr (void*) - Pointer to the memory to deallocate.
+ *
+ * Return:
+ *   None
+ */
+void free(void* ptr) {
+    if (ptr != NULL) {
+        syscall(SYS_MUNMAP,ptr,0);
+    }
+}
+int exit()
+{
+    
+}

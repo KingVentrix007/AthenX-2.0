@@ -9,6 +9,7 @@
         "stdarg.h": "c",
         "stdio.h": "c",
         "stdint.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "shell.h": "c"
     }
 }

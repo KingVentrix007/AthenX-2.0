@@ -1,4 +1,5 @@
 #include "fileio.h"
+#include "printf.h"
 #include "../include/syscall.h"
 // fileio.c
 int fread(char *buffer,FILE *fp,size_t size)
@@ -55,7 +56,7 @@ int fprintf(const char* filename, const char* format, ...) {
     va_start(args, format);
     
     // Format the string using _vsnprintf_
-    int result = _vsnprintf_(buffer, sizeof(buffer), format, args);
+    int result = vsnprintf_(buffer, sizeof(buffer), format, args);
     va_end(args);
 
     if (result >= 0) {

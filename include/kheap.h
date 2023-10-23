@@ -56,4 +56,5 @@ void kfree(void *addr);
 #define malloc(size) kmalloc(size)
 #define free(ptr) kfree(ptr)
 #define realloc(ptr, size) krealloc(ptr, size)
+void* malloc_aligned(size_t size, size_t alignment);
 #endif

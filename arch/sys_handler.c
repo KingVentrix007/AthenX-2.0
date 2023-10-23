@@ -154,6 +154,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             parmss = (parameters *)param2;
             fl_fseek(fp,parmss->param1,parmss->param2);
             break;
+        
         case SYS_MMAP:
             result = kmalloc(param1);
             break;
@@ -222,6 +223,9 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
         case SYS_RM:
             remove(param1);
             break;
+        case SYS_TELL:
+            fp = (FILE *)param1;
+            result = fl_ftell(fp);
         case SYS_LIST_DIR:
             
            
@@ -238,6 +242,13 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             fp = fopen(param1, "a");
             fclose(fp);
             break;
+        case SYS_TERMINAL:
+            if(param1 == 0)
+            {
+                terminal_struct *term = (terminal_struct *)param2;
+                
+                vbe_putpixel(term->x,term->y,term->color);
+            }
         default:
             printf("Unknown syscall number\n");
             break;

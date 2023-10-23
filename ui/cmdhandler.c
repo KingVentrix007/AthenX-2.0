@@ -89,7 +89,16 @@ void removeFirstNChars(char* str, int n) {
         memmove(str, str + n, length - n + 1);
     }
 }
-void parse_command(const char* command) {
+int search_program(const char (*list)[20], int list_size, const char* target) {
+    for (int i = 0; i < list_size; i++) {
+        if (strcmp(list[i], target) == 0) {
+            return i;  // Match found, return the index
+        }
+    }
+    return -1;  // Match not found
+}
+
+void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
     FUNC_ADDR_NAME(&parse_command,1,"s");
     char command_copy[MAX_COMMAND_LENGTH];
     strcpy(command_copy, command);
@@ -322,12 +331,17 @@ void parse_command(const char* command) {
         char* file_path = "/sys/shell"; // Replace with the path to your binary or ELF file
         int *ret;
         printf("\n");
-        load_elf_file(file_path);
+        int myArgc = 3;
+        char* myArgv[] = {"Tristan", "/root/", "arg2"};
+
+        load_elf_file(file_path,myArgc,myArgv);
         
        }else if (arg_count >= 2)
        {
          printf("\n");
-         load_elf_file(arguments[1]);
+         int myArgc = 3;
+         char* myArgv[] = {"Tristan", "/root/", "arg2"};
+         load_elf_file(arguments[1],arg_count,arguments);
        }
        
         
@@ -651,7 +665,7 @@ void parse_command(const char* command) {
     {
         char output[1024];
         read_add(arguments[1],output);
-        cmd_handler(output);
+        
 
     }
     
@@ -726,17 +740,29 @@ void parse_command(const char* command) {
         printf("\n%c",data);
         text_editor(1024,data);
     }
+    
     else {
-        printf_("{/330:255,0,0}{/331:0,200,0}");
-        printf("\n[!] %s is not a valid command",arguments[0]);
-        printf_("{/330:0,255,0}{/331:0,0,0}");
+        int index = search_program(programs,2,arguments[0]);
+        if(index != -1)
+        {
+            char tmp[20] = "/sys/";
+            strcat(tmp,programs[index]);
+            load_elf_file(tmp,arg_count,arguments);
+        }
+        else
+        {
+            printf_("{/330:255,0,0}{/331:0,200,0}");
+            printf("\n[!] %s is not a valid command",arguments[0]);
+            printf_("{/330:0,255,0}{/331:0,0,0}");
+        }
+        
         // Handle invalid or unknown commands
         // For example: display an error message
     }
 }
-void cmd_handler(char *buffer[512])
+void cmd_handler(char *buffer[512],char programs[MAX_PROGRAMS][20])
 {
-    parse_command(buffer);
+    parse_command(buffer,programs);
     return;
     
 

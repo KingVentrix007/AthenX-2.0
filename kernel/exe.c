@@ -9,6 +9,13 @@
 #include "../include/x86_reg.h"
 #include "printf.h"
 #include "../include/kheap.h"
+#define MAX_ARRAY_SIZE 100
+char programs[MAX_ARRAY_SIZE][20];
+int num_programs = 0;
+int work()
+{
+
+}
 int is_elf(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -36,9 +43,31 @@ void append_program(const char *path, ProgramEntry programs[MAX_PROGRAMS], int *
         (*program_count)++;
     }
 }
-
-
-void find_programs(const char *path,ProgramEntry programs[MAX_PROGRAMS], int *program_count)
+int add_filename_to_array(const char* filename, char filename_array[][20], int array_size) {
+    if (strlen(filename) <= 20) {
+        if (array_size < MAX_ARRAY_SIZE) {
+            strcpy(filename_array[array_size], filename);
+            return 1;  // Successfully added the filename
+        } else {
+            printf("Error: Maximum array size reached.\n");
+            return 0;  // Unable to add the filename
+        }
+    } else {
+        printf("Error: Filename exceeds the maximum length of 20 characters.\n");
+        return 0;  // Unable to add the filename
+    }
+}
+void populate_list_from_filenames(char (*list)[20], int list_size) {
+    int i;
+    for (i = 0; i < list_size && i < num_programs; i++) {
+        strcpy(list[i], programs[i]);
+    }
+    // Fill the remaining elements with empty strings if the list is larger than the number of filenames
+    for (; i < list_size; i++) {
+        list[i][0] = '\0';
+    }
+}
+int find_programs(const char *path)
 {
     Entry dirs[MAX];
     Entry files[MAX];
@@ -47,7 +76,7 @@ void find_programs(const char *path,ProgramEntry programs[MAX_PROGRAMS], int *pr
     int file_count = 0;
     fl_listdirectory(path, dirs, files, &dir_count, &file_count);
     int count = 0;
-    program_count = 0;
+    
     // int count = 0;
      for (int i = 0; i < file_count; i++) {
         char tmp[1024] = "";
@@ -56,11 +85,16 @@ void find_programs(const char *path,ProgramEntry programs[MAX_PROGRAMS], int *pr
         strcat(tmp,files[i].name);
         if(is_elf(tmp) == 0)
         {
-            append_program(tmp,programs,&count);
-            printf("Program %d %s\n",&count,programs[count--].name);
+            if (add_filename_to_array(files[i].name, programs, num_programs)) {
+            num_programs++;
+    }
             
         }
     }
+    for (int i = 0; i < num_programs; i++) {
+        printf("Filename %d: %s\n", i + 1, programs[i]);
+    }
+
 }
 
 
@@ -80,13 +114,15 @@ typedef struct {
 struct exe_file {
     uint8_t* exe_start;
     int priority;
+    uint32_t stack_size;
 };
 
 
 
 
 
-void run_exe(struct exe_file exe, uint8_t* stack) {
+void run_exe(struct exe_file exe) {
+    uint32 stack = 0;    
     // Check if the stack is 16-byte aligned
     if ((uintptr_t)stack % 16 != 0) {
         printf("Error: Stack is not 16-byte aligned.\n");
@@ -174,7 +210,7 @@ void load_exe_file(const char* filename, uint8_t* stack) {
     my_exe.priority = 0;  // You can set the priority as needed
 
     // Run the EXE file
-    run_exe(my_exe, stack);
+    run_exe(my_exe);
 
     // Free the allocated memory for the EXE data
     free(exe_data);

@@ -1,12 +1,11 @@
 #include <stdbool.h>
 #include "../include/string.h"
 #include "../include/bool.h"
-#include "../include/types.h"
+
 #include "../include/stddef.h"
 
 
-#define INT_MAX 2147483647
-#define INT_MIN -2147483648
+
 #define EPS 1.073741824e-16
 
 void *memset(void *dst, char c, uint32 n) {
@@ -142,11 +141,11 @@ int strlen(const char *s) {
         len++;
     return len;
 }
-void * malloc(int nbytes)
-{
-	char variable[nbytes];
-	return &variable;
-}
+// void * malloc(int nbytes)
+// {
+// 	char variable[nbytes];
+// 	return &variable;
+// }
 int strcmp(const char *s1, char *s2) {
     int i = 0;
 
@@ -187,37 +186,7 @@ bool backspace(char *buffer) {
         return false;
     }
 }
-uint32_t atoi(const char *str)
-{
-    uint32_t sign = 1, base = 0, i = 0;
 
-    // if whitespaces then ignore.
-    while (str[i] == ' ')
-    {
-        i++;
-    }
-
-    // sign of number
-    if (str[i] == '-' || str[i] == '+')
-    {
-        sign = 1 - 2 * (str[i++] == '-');
-    }
-
-    // checking for valid input
-    while (str[i] >= '0' && str[i] <= '9')
-    {
-        // handling overflow test case
-        if (base > INT_MAX / 10 || (base == INT_MAX / 10 && str[i] - '0' > 7))
-        {
-            if (sign == 1)
-                return INT_MAX;
-            else
-                return INT_MIN;
-        }
-        base = 10 * base + (str[i++] - '0');
-    }
-    return base * sign;
-}
 void strcat(char *dest, const char *src) {
     char *end = (char *)dest + strlen(dest);
     memcpy((void *)end, (void *)src, strlen(src));

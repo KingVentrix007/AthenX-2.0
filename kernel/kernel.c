@@ -52,6 +52,8 @@
 // #include "../include/stb_image.h"
 KERNEL_MEMORY_MAP g_kmap;
 MULTIBOOT_INFO *multi_boot_info;
+char programs[MAX_PROGRAMS][20];
+int program_count = 0;
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
 //     if (mb_info->flags & (1 << 3)) {
 //         uint32_t initramfs_start = mb_info->initramfs_start;
@@ -561,17 +563,24 @@ void kmain(unsigned long magic, unsigned long addr) {
         // char *path = "/sys/shell";
         // load_elf_file(path);
         // ProgramEntry programs[MAX_PROGRAMS];
-        ProgramEntry programs[MAX_PROGRAMS];
-        int program_count = 0;
+        
         const char *directory = "/sys/"; //Path to program directory
-        find_programs(directory,programs,&program_count);
+        program_count = find_programs(directory);
         printf("%d programs found\n",program_count);
         // printf("Programs:\n");
-       printf("ELF Programs in %s:\n", directory);
+        char list[100][20];
+
+    // Call the populate_list_from_filenames function to populate the list
+    populate_list_from_filenames(list, 100);
+
+    // Print the contents of the list
     for (int i = 0; i < program_count; i++) {
-        printf("%d: %s\n",i+1, programs[i].name);
+        printf("List element %d: %s\n", i, list[i]);
     }
-        load_elf_file("/sys/shell");
+    // for (int i = 0; i < program_count; i++) {
+    //     printf("%d: %s\n",i+1, programs[i]);
+    // }
+        // load_elf_file("/sys/shell");
         if (ret < 0) {
             ERROR("failed to init vesa graphics\n");
             sleep(4);
@@ -852,7 +861,7 @@ void terminal_main()
             {
                 //printf_("\n");
                 undraw_square(get_screen_y(),get_screen_x());
-                cmd_handler(buffer);
+                cmd_handler(buffer,programs);
                 memset(buffer, 0,sizeof(buffer));
                 
                 //next_line();

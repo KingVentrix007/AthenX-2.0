@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "syscall.h": "c",
+        "printf.h": "c",
+        "memory.h": "c",
+        "stdint.h": "c",
+        "stdarg.h": "c",
+        "stddef.h": "c",
+        "stdio.h": "c",
+        "stdbool.h": "c",
+        "string.h": "c",
+        "bool.h": "c"
+    }
+}

@@ -2,6 +2,7 @@
 #include "../include/syscall.h" // Include your kernel headers
 #include "stdio.h"
 #include "printf.h"
+
 // Simplified function to print a string using kernel's printf
 #include <stdarg.h>
 #include <stddef.h>
@@ -215,10 +216,10 @@ void prepare_args(uint32_t* args, const char* format, ...) {
 }
 
 
-void exit()
-{
-    syscall(0x80,0,0);
-}
+// void exit()
+// {
+//     syscall(0x80,0,0);
+// }
 
 
 char *get_char()
