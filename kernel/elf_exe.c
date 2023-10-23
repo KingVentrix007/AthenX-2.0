@@ -65,8 +65,14 @@ void run_elf(struct elf_exe elf) {
     );
 
     // Load and run the ELF executable
-    void (*elf_entry)(void) = (void (*)(void))(elf.elf_start); // Assuming ELF entry point is at offset 24
-    elf_entry();
+    void (*elf_entry)(int, char*[]) = (void (*)(int, char*[]))(elf.elf_start); // Assuming ELF entry point is at offset 24
+
+// Define arguments similar to argc and argv
+    int myArgc = 3;
+    char* myArgv[] = {"Tristan", "/root/", "arg2"};
+
+    // Call the ELF entry point function with the arguments
+    elf_entry(myArgc, myArgv);
     int ret = 0;
     asm volatile(
         "movl %%eax, %0" // Pop the top value from the stack and store it in ret

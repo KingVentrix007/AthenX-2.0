@@ -1,11 +1,12 @@
 
 #include "../include/syscall.h" // Include your kernel headers
-#include "lib_stdio.h"
+#include "stdio.h"
+#include "printf.h"
 // Simplified function to print a string using kernel's printf
 #include <stdarg.h>
 #include <stddef.h>
 #include "string.h"
-
+// stdio.c
 extern volatile uint32_t *syscall_ret;
 
 uint32_t reverse_uint32_user(uint32_t value) {
@@ -50,32 +51,44 @@ int  test_ret(int in)
     int ret = syscall(0x83,0,0);
     return ret;
 }
-
-int printf(const char* format, ...) {
-    char buffer[1000];
-    memset(buffer, 0, sizeof(buffer));
-    va_list args;
-    va_start(args, format);
-
-    // Call your custom my_vsnprintf function to format the text and store it in the buffer.
-    int chars_written = vsnprintf(buffer, sizeof(buffer), format, args);
-
-    va_end(args);
-
-    // Check for buffer overflow.
-    if (chars_written < 0) {
-        // Handle the error (e.g., return an error code).
-        return -1;
-    }
-
-    // Print the formatted text to the standard output (you can replace this with your own output mechanism).
-   
-    syscall(SYS_PRINT,(int)buffer,0);
-    // for (int i = 0; i < chars_written; i++) {
-    //     system_call(0x81,buffer);
-    // }
-    return chars_written;
+int ls(char *path)
+{
+    syscall(SYS_LIST_DIR,path,0);
 }
+int fl_is_dir(char *path)
+{
+    int r = syscall(SYS_IS_DIR,0,path);
+   
+    printf("%s->%d\n",path,r);
+     return r;
+    
+}
+
+// int printf(const char* format, ...) {
+//     char buffer[1000];
+//     memset(buffer, 0, sizeof(buffer));
+//     va_list args;
+//     va_start(args, format);
+
+//     // Call your custom my_vsnprintf function to format the text and store it in the buffer.
+//     int chars_written = vsnprintf(buffer, sizeof(buffer), format, args);
+
+//     va_end(args);
+
+//     // Check for buffer overflow.
+//     if (chars_written < 0) {
+//         // Handle the error (e.g., return an error code).
+//         return -1;
+//     }
+
+//     // Print the formatted text to the standard output (you can replace this with your own output mechanism).
+   
+//     syscall(SYS_PRINT,(int)buffer,0);
+//     // for (int i = 0; i < chars_written; i++) {
+//     //     system_call(0x81,buffer);
+//     // }
+//     return chars_written;
+// }
 
 int addToBuffer(char* buffer, const char* format, ...) {
     va_list args; // Define a variable argument list.

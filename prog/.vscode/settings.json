@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "maths.h": "c",
+        "printf.h": "c",
+        "string.h": "c",
+        "fileio.h": "c",
+        "lib_stdio.h": "c",
+        "stddef.h": "c",
+        "stdarg.h": "c",
+        "stdio.h": "c",
+        "stdint.h": "c",
+        "stdbool.h": "c"
+    }
+}

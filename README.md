@@ -114,7 +114,7 @@ Simply add any changes you want then and save them, then type 'make run' and wat
 * [X] VESA/VBE graphics driver
 * [X] Basic keyboard driver
 * [X] Basic IDE hard drive driver
-* [X] Custom filesystem called Algea-fs, Greek goddess of pain and sorrows,
+* [X] Custom filesystem called Algea-fs, Greek goddess of pain and sorrows(!deprecated),
   * [X] make file
   * [X] delete file
   * [x] list files
@@ -128,7 +128,11 @@ Simply add any changes you want then and save them, then type 'make run' and wat
   * [X] super basic superblock
   * [X] format disk function
 * [X] basic login function
+* [X] FAT 12/16/32
+* [X] Basic program loading
+* [X] Basic system calls (implemented as needed)
 * [X] basic text editor
+* [x] [x] Start [**`libc`**](docs/Manuals+roadmaps/libc.md#introduction) (functions implemented as needed)
 * [ ] Full Libc
 * [ ] Port some games
 * [ ] Make some games

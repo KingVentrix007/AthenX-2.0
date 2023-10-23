@@ -1,0 +1,13 @@
+{
+   "folders": [
+       {
+           "path": "."
+       }
+   ],
+   "settings": {
+       "code-runner.executorMap": {
+           "c": "make -C $dir",
+           "cpp": "make -C $dir"
+       }
+   }
+}

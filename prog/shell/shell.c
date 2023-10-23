@@ -1,8 +1,9 @@
-#include "../libc/lib_stdio.h"
+#include "../libc/stdio.h"
 #include "../libc/fileio.h"
 #include "../libc/maths.h"
 #include "../libc/string.h"
-#include "shell.h"
+#include "../libc/printf.h"
+#include "shell.h" 
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
 void Sappend(char *buf, char c) {
@@ -11,11 +12,13 @@ void Sappend(char *buf, char c) {
         // printf("C%c", c);
         buf[len] = c;
         // printf("B%c|", buf[len]);
-        buf[len + 1] = '\0';
+        buf[len + 1] = '\0'; 
     }
 }
-int main()
+char *cwd = "/";  
+int main(int argc, char **argv)
 {
+    strcpy(cwd, argv[1]);
     printf("Welcome to the shell!\n");
     printf("\nShell>");
     char buf[1001];
@@ -25,6 +28,7 @@ int main()
         char c = get_char();
         if (c == '\n') {
             // printf("\nBUFFER %s\n", buf);
+            printf("\n");
             if (shell(buf) == -567) {
                 
                 return -1;
@@ -64,6 +68,8 @@ int main()
 }
 
 
+
+
 int shell(char buf[1001]) {
 
 
@@ -97,7 +103,7 @@ int shell(char buf[1001]) {
     if(strcmp(arguments[0],"echo") == 0)
     {
         printf("%s\n", arguments[1]);
-    }
+    } 
     else if (strcmp(arguments[0],"cat") == 0)
     {
         FILE *file;
@@ -107,14 +113,127 @@ int shell(char buf[1001]) {
         printf("%s\n",data);
         fclose(file);
     }
-    else if (strcmp(arguments[1],"cls") == 0)
+    else if (strcmp(arguments[0],"cls") == 0)
     {
+        // printf("clear\n");
         clear_screen();
+    }
+    else if (strcmp(arguments[0],"ls") == 0)
+    {
+        ls(cwd);
+    }
+    else if (strcmp(arguments[0],"rm") == 0)
+    {
+        char tmp[1001];
+        strcpy(tmp,cwd);
+        strcat(tmp,"/");
+        strcat(tmp,arguments[1]);
+        rm_file(tmp);
     }
     
     else if (strcmp(arguments[0],"exit") == 0)
     {
-        return 0;
+        return -567;
+    }
+     
+    else if(strcmp(arguments[0],"cd") == 0)
+    {
+        if (arg_count >= 2) {
+    if (strcmp(arguments[1], "..") == 0) {
+        // Check if the current directory is the rootfs directory
+        if (strcmp(cwd, "root") == 0 || strcmp(cwd, "/root/") == 0) {
+            // Allow going one level above rootfs
+            strcpy(cwd, "/");
+        } else if (strstr(cwd, "/") != 0) {
+            // Find the last '/' character in the current directory path
+            char* last_slash = strrchr(cwd, '/');
+            
+            if (last_slash != NULL) {
+                //printf("Here\n");
+                // Remove the last directory from the current path
+                *last_slash = '\0';
+                char* last_slash = strrchr(cwd, '/');
+            
+                if (last_slash != NULL) {
+                    //printf("Here23\n");
+                    // Remove the last directory from the current path
+                    *last_slash = '\0';
+                    
+                    }
+            } else {
+                // If there is no '/', set the current directory to rootfs
+                strcpy(cwd, "root");
+            }
+        }
+        if(cwd[strlen(cwd)-1] == '/' && cwd[strlen(cwd)-2] == '/')
+        {
+            cwd[strlen(cwd)-1] = '\0';
+        }
+        if(cwd[strlen(cwd)-1] != '/')
+        {
+            strcat(cwd,"/");
+        }
+    } else {
+        char tmp[260];
+        strcpy(tmp,cwd);
+        if(tmp[strlen(tmp)-1] != '/')
+        {
+             strcat(tmp, "/");
+        }
+       
+        strcat(tmp, arguments[1]);
+        
+        if (fl_is_dir(tmp) == 1) {
+            strcpy(cwd, tmp);
+        } else {
+            printf("\n%s is not a valid path\n", tmp);
+        }
+        if(cwd[strlen(cwd)-1] == '/' && cwd[strlen(cwd)-2] == '/')
+        {
+            // DEBUG("");
+            cwd[strlen(cwd)-1] = '\0';
+        }
+        if(cwd[strlen(cwd)-1] != '/')
+        {
+            strcat(cwd,"/");
+        }
+    }
+}
+    }else if (strcmp(arguments[0],"pwd") == 0)
+    {
+        printf("%s\n",cwd);
+    }
+    else if (strcmp(arguments[0],"touch") == 0)
+    {
+        char *tmp = cwd;
+        strcat(tmp,"/");
+        strcat(tmp,arguments[1]);
+        
+        create_file(tmp);
+    }
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    else
+    {
+        printf("Invalid command %s\n", arguments[0]);
     }
     
     // char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];

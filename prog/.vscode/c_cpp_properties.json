@@ -1,0 +1,19 @@
+{
+    "configurations": [
+      {
+        "name": "Linux",
+        "includePath": [
+          "${workspaceFolder}/**",  // Include all subdirectories of the workspace
+          "../libc",  // Include the 'libc' directory
+          "../include/syscall.h", // Include all subdirectories of the workspace
+        ],
+        "defines": [],
+        "compilerPath": "/usr/bin/gcc",  // Path to your GCC compiler
+        "cStandard": "c11",
+        "cppStandard": "c++17",
+        "intelliSenseMode": "gcc-x64"
+      }
+    ],
+    "version": 4
+  }
+  

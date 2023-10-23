@@ -24,6 +24,11 @@
 #define SYS_PRINT 21
 #define SYS_GETCHAR 22
 #define SYS_SCREEN_CTRL 23
+#define SYS_PUTCHAR 24
+#define SYS_LIST_DIR 25
+#define SYS_IS_DIR 26
+#define SYS_CREATE 27
+#define SYS_RM 28
 typedef struct param_struct
 {
     char* param1;

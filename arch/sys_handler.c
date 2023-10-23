@@ -4,6 +4,8 @@
 #include "../include/keyboard.h"
 #include "../include/syscall.h"
 #include "../include/fat_filelib.h"
+#include "../include/kheap.h"
+#include "../include/exe.h"
 void handle_print_system_call(REGISTERS *reg) {
     // Assuming the message is stored in reg->eax
     const char *message = (const char *)reg->ebx;
@@ -90,12 +92,17 @@ int screen_ctrl()
 // #define SYSCALL_EXIT 0x80
 // #define SYSCALL_PRINT 0x81
 // #define SYSCALL_TEST_RET 0x83
+uint8_t process_stack_user[8192] __attribute__((aligned(16)));
 int system_call_handler_c(int syscall_number, int param1, int param2) {
     int result = 0;
      FILE *fp;
      parameters *parmss;
+     Entry dirs[MAX];
+    Entry files[MAX];
+     int dir_count = 0;
+            int file_count = 0;
     //  printf("SYSCALL %d -> \n", syscall_number);
-    // printf("\nsyscall_number: %d\n", syscall_number);
+    // printf("%d", syscall_number);
     // printf("param1: %d\n", param1);
     // printf("param2: %d\n", param2);
    switch (syscall_number) {
@@ -143,13 +150,15 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             fclose(fp);
             break;
         case SYS_LSEEK:
-            printf("SYSCALL SYS_LSEEK coming soon\n");
+            fp = (FILE *)param1;
+            parmss = (parameters *)param2;
+            fl_fseek(fp,parmss->param1,parmss->param2);
             break;
         case SYS_MMAP:
-            printf("SYSCALL SYS_MMAP coming soon\n");
+            result = kmalloc(param1);
             break;
         case SYS_MUNMAP:
-            printf("SYSCALL SYS_MUNMAP coming soon\n");
+            kfree(param1);
             break;
         case SYS_DUP:
             printf("SYSCALL SYS_DUP coming soon\n");
@@ -158,7 +167,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             printf("SYSCALL SYS_DUP2 coming soon\n");
             break;
         case SYS_EXECVE:
-            printf("SYSCALL SYS_EXECVE coming soon\n");
+            load_exe_file(param1, process_stack_user);
             break;
         case SYS_WAITPID:
             printf("SYSCALL SYS_WAITPID coming soon\n");
@@ -184,6 +193,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
         case SYS_SLEEP:
             printf("SYSCALL SYS_SLEEP coming soon\n");
             break;
+        
         case SYS_PRINT:
             printf("%s",param1);
             break;
@@ -199,6 +209,34 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
                 clear_screen();
                 printf("Clear screen\n");
             }
+            if(param1 == 1)
+            {
+                parmss = (parameters *)param2;
+                set_screen_x(parmss->param1);
+                set_screen_y(parmss->param2);
+            }
+            break;
+        case SYS_PUTCHAR:
+            printf("%c",param1);
+            break;
+        case SYS_RM:
+            remove(param1);
+            break;
+        case SYS_LIST_DIR:
+            
+           
+
+            // Call fl_listdirectory with the path and the buffers
+            fl_listdirectory(param1, dirs, files, &dir_count, &file_count);
+            break;
+        case SYS_IS_DIR:
+            result = (int)fl_is_dir(param2);
+            printf("PATH: %s == %d\n", param2,result);
+            // result = -909;
+            break;
+        case SYS_CREATE:
+            fp = fopen(param1, "a");
+            fclose(fp);
             break;
         default:
             printf("Unknown syscall number\n");

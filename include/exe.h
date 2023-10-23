@@ -22,6 +22,6 @@ typedef struct {
 } ProgramEntry;
 #define MAX_PROGRAMS 100
 void load_elf_file(const char* filename);
-
+void load_exe_file(const char* filename, uint8_t* stack);
 void find_programs(const char *path,ProgramEntry programs[MAX_PROGRAMS], int *program_count);
 #endif

@@ -48,10 +48,7 @@ typedef struct FL_FILE
 
     struct fat_node         list_node;
 } FILE;
-int fread(char *buffer,FILE *fp,size_t size);
-FILE* fopen(const char *filename,char* mode);
-int fwrite(const char *filename,char* buffer);
-void fclose(FILE *fp);
+
 
 #endif
 
