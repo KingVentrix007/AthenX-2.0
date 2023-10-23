@@ -317,7 +317,7 @@ int format_disk(int drive)
     memcpy(buf, &format, sizeof(format));
     int ret = 0;
     ret = ide_write_sectors(drive, 1, KERNEL_SECTOR_BASE+2, buf);
-    cmd_handler("set-xy");
+    // cmd_handler("set-xy");
     return ret;
 }
 

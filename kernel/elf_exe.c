@@ -57,15 +57,15 @@ struct elf_exe {
  */
 void run_elf(struct elf_exe elf, int myArgc,char* myArgv[]) {
     // Define a stack aligned to 16 bytes
-    uint8_t stack;
-    if(elf.stack_size > 0)
-    {
-        stack = process_stack;
-    }
-    else
-    {
-        stack = malloc_aligned(4096,16);
-    }
+    uint8_t stack = process_stack[8192];
+    // if(elf.stack_size > 0)
+    // {
+    //     stack = ;
+    // }
+    // else
+    // {
+    //     stack = malloc_aligned(4096,16);
+    // }
     memset(stack, 0, sizeof(stack));
     // Set up the stack pointer (ESP) to point to the top of the stack
     asm volatile (

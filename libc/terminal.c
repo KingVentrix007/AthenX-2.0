@@ -16,3 +16,10 @@ int set_terminal_state(int x, int y, int r, int g, int b)
     term->color = vbe_rgb(r, g, b);
     syscall(SYS_TERMINAL,0,term);
 };
+int set_pos(int x,int y)
+{
+    terminal_struct *term;
+    term->x = x; term->y = y;
+    // term->color = vbe_rgb(r, g, b);
+    syscall(SYS_TERMINAL,1,term);
+}

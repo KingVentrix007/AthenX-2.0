@@ -2,6 +2,7 @@
 #include "../libc/maths.h"
 #include "../libc/string.h"
 #include "../libc/stdlib.h"
+#include "../libc/terminal.h"
 #include "shell.h" 
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
@@ -20,6 +21,8 @@ int main(int argc, char **argv)
     strcpy(cwd, argv[1]);
     printf("Welcome to the shell!\n");
     printf("\nShell>");
+    // set_pos(100,100);
+    printf("Press any key to continue\n");
     // char buf[1001];
     char *buf = (char*)malloc(1001);
     while(1==1)

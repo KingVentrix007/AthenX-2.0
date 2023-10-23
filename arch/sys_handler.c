@@ -249,6 +249,13 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
                 
                 vbe_putpixel(term->x,term->y,term->color);
             }
+            else if(param1 == 1)
+            {
+                terminal_struct *term = (terminal_struct *)param2;
+                set_screen_x(term->x);
+                set_screen_y(term->y);
+            }
+            break;
         default:
             printf("Unknown syscall number\n");
             break;
