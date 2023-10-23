@@ -73,7 +73,7 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
 * qemu
 
      ```sh
-  please just google this part then tell me what you did. I cant figure out how I installed qemu
+  sudo apt install qemu-system
   ```
 
 * xorriso
@@ -81,7 +81,10 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
      ```sh
   sudo apt install xorriso
   ```
-
+* fdisk
+  ```sh
+    sudo apt install fdisk
+  ```
 ### Installation
 
 1. Clone repo
@@ -99,8 +102,13 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
     ``` sh
     make run
     ```
+    or
+    ``` sh
+    make
+    make run
+    ``````
 
-    in order to run the iso
+    in order to run the img
 
 ### Modifying
 
@@ -132,7 +140,7 @@ Simply add any changes you want then and save them, then type 'make run' and wat
 * [X] Basic program loading
 * [X] Basic system calls (implemented as needed)
 * [X] basic text editor
-* [x] [x] Start [**`libc`**](docs/Manuals+roadmaps/libc.md#introduction) (functions implemented as needed)
+* [x] [x] Start [**`libc`**](docs/Manuals+roadmaps/libc.md#introduction) [(functions implemented as needed)](docs/Manuals+roadmaps/libc-roadmap.md#disclaimer-these-functions-are-not-100-posixor-any-other-standerd-compliant-they-follow-loosly-to-the-athenxos-which-focuses-on-ease-of-implentation-based-on-how-the-porgrams-interact-with-the-syscalls-and-the-kernels)
 * [ ] Full Libc
 * [ ] Port some games
 * [ ] Make some games
