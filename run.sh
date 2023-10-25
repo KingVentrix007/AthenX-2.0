@@ -82,7 +82,7 @@ else
     # sudo cp "simple.cfg" /mnt/AthenX/grub/grub.cfg
     sudo cp -r "grub/." "/mnt/AthenX/grub/"
     sudo cp "LDout.map" "/mnt/AthenX/var"
-     sudo cp "prog/test" "/mnt/AthenX/sys"
+     sudo cp "userspace/test" "/mnt/AthenX/sys"
     # Verify the root directory's LBA address using the file command
     # Calculate the LBA address for the root directory
     bytes_per_sector=$(sudo fdisk -l "$image_file" | grep "Sector size" | awk '{print $4}')

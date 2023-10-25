@@ -151,6 +151,9 @@ Simply add any changes you want then and save them, then type 'make run' and wat
   * [ ] chat application
   * [ ] Basic utility apps
 
+## User programs
+
+Creating userspace programs for AthenX is always incouraged, please read this [documentation for more information](/docs/Manuals+roadmaps/Creating+running%20user%20programs.md)
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated** even if i don't add it to the main project.

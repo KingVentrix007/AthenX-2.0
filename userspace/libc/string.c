@@ -1,6 +1,6 @@
 #include <stdbool.h>
-#include "../include/string.h"
-#include "../include/bool.h"
+#include "string.h"
+#include "../../include/bool.h"
 
 #include "../include/stddef.h"
 

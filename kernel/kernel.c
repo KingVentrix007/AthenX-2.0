@@ -374,7 +374,6 @@ void kmain(unsigned long magic, unsigned long addr) {
             // Error occurred
         }
        
-        //'fl_listdirectory("/");
          printf("Mod count: %d\n", mboot_info->mods_count);
         uint32_t initrd_size = 0;
         uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
@@ -395,21 +394,9 @@ void kmain(unsigned long magic, unsigned long addr) {
             } else {
                 printf("RSDP not found.\n");
             }
-        // perror("this is a test");
-        // uint8_t* initrd_location2 = locate_initrd(mboot_info, &initrd_size);
-        // uint8_t* initrd_end_location2 = initrd_location2 + initrd_size;
-        // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location2, initrd_end_location2, initrd_size);
-        //int boot_device = mboot_info->boot_device;
-        // display_init(0,1280,1024,32);
+
         timer_init();//!DO NOT PUT BEFORE INIT VESA
-        //sleep(100000);
-        // char* cmdline = ((uint32_t*)mboot_info->cmdline);
-        // while (*cmdline != '\0') {
-        // // Output or store the character (e.g., using a serial port or video buffer)
-        // // ...
-        // printf("%c",cmdline);
-        // cmdline++;
-        // }
+
         if(strstr(output,"Memory Configuration") != NULL)
         {
             //printf("\nFound initrid\n");
@@ -418,8 +405,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         else if (strstr(output,"INSTALL") != NULL)
         {
            
-            // printf("HERE");
-            // tui_main(1,"install");
+
              clear_screen();
             int size = getSizeInSectors(output);
             printf("%d\n",2000);
@@ -429,141 +415,8 @@ void kmain(unsigned long magic, unsigned long addr) {
             for(;;);
         }
          
-        //isr_register_interrupt_handler((IRQ_BASE+10),sys_handler);
-       //isr_register_interrupt_handler((IRQ_BASE+11),int_print);
-       
-    
-        // Call your custom system call with the desired arguments
-        
-        
-        //printf("Custom syscall result: %d\n", result);
-
-        //char* mode = logo();
-        //  printf("HELLO");
-        // set_screen_x(0);
-        // set_screen_y(0);
-        // clear_screen();
-        // if(strcmp(mode,"u") == 0)
-        // {
-        //    clear_screen();
-        //     tui_main(0,"");
-        // }
-        // printf("boot %d\n",mboot_info->boot_device);
-       
-        //printf_("%s\n",mode);
-        //cmd_handler("cls");
-        
-       
-        // clear_screen();
-        // tui_main(0,"");
-       
-        //ext2_init();
-        //read_root_directory_inode();
-        //read_root_directory_inode();
-         //clear_screen();
-         //vbe_print_available_modes();
-        //printf_("%s,%d,%s",__FILE__,__LINE__,__FUNCTION__);
-        
-        //sleep(190000);
-        //print_drives();
-        //DEBUG(" ");
-        //init_fs();
-        //printf_("hello");
-        //init_ssfs();
-        partition_table tb;
-        //format_disk(0);
-        //init_fs();
-        //write_file(40);
-        HBA_MEM* hba_mem_ptr = (HBA_MEM*)HBA_MEM_BASE_ADDRESS;
-        // printf("SATA\n");
-        // setup(hba_mem_ptr);
-        // hba_mem_ptr->ports[PORT_NUM].clb = 0x2000000;
-        // hba_mem_ptr->ports[PORT_NUM].fb  = 0x3000000;
-
-        // hba_mem_ptr->ports[PORT_NUM].cmd = (1 << 4);
-        // //while ((hba_mem_ptr->ports[PORT_NUM].cmd & ((1<<15))) == 0);
-        // hba_mem_ptr->ports[PORT_NUM].cmd = 1;
-
-        // debug_HBA_MEM(hba_mem_ptr);
-        //testRead(hba_mem_ptr);
         init_pci_device();
-       // printf("%s\n",__TIME__);
-        //printf("GOT HERE");
        
-         //printf("H\n");
-         //printf("0x%16x\n",&kmain);
-       
-         //printf("T\n");
-         //printf("0x%x\n",addr);
-         //printf("MADE IT HERE");
-        //init_e82540EM_ethernet_card();
-        //printf_("CMP:");
-        // MacAddress osMac = read_mac_address();
-        // printf("\nMac Address: ");
-        // print_mac_address(&osMac);
-        // MacAddress eepMAc = read_eep_mac();
-        // printf("Eep Address: ");
-        // print_mac_address(&eepMAc);
-        //printf_("DONE");
-        //sleep(2000);
-        //access_grub_module(mboot_info);
-        // IMAGE img;
-        // img.ptrs.ptr = &athenx_logo;
-        // img.Bpp = 8;
-        // img.width = 1000;
-        // img.height = 700;
-        // strcpy(img.name,"Low resolution logo image" );
-        // //draw_low_res_img(img);
-        // IMAGE bg_img;
-        
-        // char** loaded_vars = NULL; // Adjust the size as needed.
-        // int numLoaded = loadEnvironmentVariables(filename, loaded_vars, 10);
-        
-
-       
-
-        //f_chdir("rootfs/");
-        // FILE *file;
-        // file = fl_fopen("/rootfs/cat.txt", "w");
-
-        // file = fl_fopen("/grub/grub.cfg", "r");
-        // if (file == NULL) {
-        //     printf("Error opening file");
-        // }
-
-        //  char ch;
-        //  while ((ch = fgetc(file)) != EOF) {
-        //     printf("%c",ch); // Print each character
-        // }
-        //  fclose(file);
-        //  printf("\n");
-        // bg_img.ptrs.ptr = &background;
-        // bg_img.Bpp = 8;
-        // bg_img.width = 1980;
-        // bg_img.height = 1080;
-        // strcpy(bg_img.name, "Low resolution background image" );
-        //printf("\n%d\n",sizeof(background)/512);
-        //char buffer_test[2073600] = {0};
-        //DEBUG("HERE");
-        //memset(buffer_test, 0, sizeof(buffer_test));
-        //memcpy(buffer_test,background,sizeof(buffer_test));
-        //DEBUG("HERE 2");
-        //ide_write_sectors(0,(2073600/512),900,(uint32)buffer_test);
-        //draw_low_res_img(bg_img);
-        //draw_hi_res_img(1980,1080);
-        //sleep(10000);
-        //ext2_init();
-        // FUNC_ADDR_NAME(&kmain);
-        // ADDER_NAME_LIST test;
-        // get_name_addr(&test);
-        // printf_("\n%s : 0x%x",test.names,test.addr);
-        
-        
-        
-        // char *path = "/sys/shell";
-        // load_elf_file(path);
-        // ProgramEntry programs[MAX_PROGRAMS];
-        
         const char *directory = "/sys/"; //Path to program directory
         program_count = find_programs(directory);
         printf("%d programs found\n",program_count);

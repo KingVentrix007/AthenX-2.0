@@ -1,6 +1,6 @@
 
-#include "../include/maths.h"
-#include "../include/bool.h"
+#include "maths.h"
+#include "../../include/bool.h"
 
 double max(double a, double b)
 {

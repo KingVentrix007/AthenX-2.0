@@ -256,6 +256,9 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
                 set_screen_y(term->y);
             }
             break;
+        case SYS_GET_SCAN:
+            return kb_get_scancode();
+            break;
         default:
             printf("Unknown syscall number\n");
             break;

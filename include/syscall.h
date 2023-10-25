@@ -31,6 +31,7 @@
 #define SYS_RM 28
 #define SYS_TERMINAL 29
 #define SYS_TELL 30
+#define SYS_GET_SCAN 31
 typedef struct param_struct
 {
     char* param1;

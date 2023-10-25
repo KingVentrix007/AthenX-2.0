@@ -40,11 +40,11 @@ $(OBJ_DIR)/%.o: %.asm
 # Define the all target and dependencies
 all: libc-f HackOS.bin user
 libc:
-	 (cd libc && make)
+	 (cd porg/libc && make)
 
 
 HackOS.bin: $(OBJ_FILES_C) $(OBJ_FILES_S) $(OBJ_FILES_ASM)
-	ld $(LDPARAMS) -o $@ $^ lib/libc.a
+	ld $(LDPARAMS) -o $@ $^
 
 # Output directory
 OUT_DIR = build
@@ -65,12 +65,12 @@ clean:
 
 
 libc-f:
-	(cd libc && make)
+	(cd userspace/libc && make)
 user:
-	(cd prog && make)
+	(cd userspace && make)
 
 lib-c:
-	(cd libc && make clean)
+	(cd userspace/libc && make clean)
 
 user-c:
-	(cd prog && make clean)
+	(cd userspace && make clean)

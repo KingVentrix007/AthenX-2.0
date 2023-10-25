@@ -1,5 +1,5 @@
 
-#include "../include/syscall.h" // Include your kernel headers
+#include "../../include/syscall.h" // Include your kernel headers
 #include "stdio.h"
 #include "printf.h"
 
@@ -230,4 +230,9 @@ char *get_char()
 int clear_screen()
 {
     syscall(SYS_SCREEN_CTRL,0,0);
+}
+
+int get_scan_code()
+{
+    
 }

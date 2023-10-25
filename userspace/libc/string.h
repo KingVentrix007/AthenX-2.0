@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 #include <stdbool.h>
-#include "../include/types.h"
+#include "../../include/types.h"
 #include <stddef.h>;
 #define swap(a, b) (a ^= b ^= a ^= b)
 void *memset(void *dst, char c, uint32 n);

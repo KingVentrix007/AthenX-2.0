@@ -1,8 +1,8 @@
 // hello.c
-#include "../libc/lib_stdio.h"
-#include "../libc/string.h"
-#include "../include/syscall.h"
-#include "../libc/fileio.h"
+#include "stdio.h"
+#include "string.h"
+// #include "../../include/syscall.h"
+
 int main() {
     printf("BASIC KEYBOARD\n");
     char buffer[1001];

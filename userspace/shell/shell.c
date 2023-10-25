@@ -1,8 +1,8 @@
-#include "../libc/stdio.h"
-#include "../libc/maths.h"
-#include "../libc/string.h"
-#include "../libc/stdlib.h"
-#include "../libc/terminal.h"
+#include "stdio.h"
+#include "maths.h"
+#include "string.h"
+#include "stdlib.h"
+#include "terminal.h"
 #include "shell.h" 
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
@@ -16,7 +16,7 @@ void Sappend(char *buf, char c) {
     }
 }
 char *cwd = "/";  
-int main(int argc, char **argv)
+int main(int argc, char argv[20][100])
 {
     strcpy(cwd, argv[1]);
     printf("Welcome to the shell!\n");
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
                 return -1;
             }
             memset(buf, 0, sizeof(buf));
-            printf("\n>");
+            printf("\nShell>");
 }
         else if (c == '\0')
         {

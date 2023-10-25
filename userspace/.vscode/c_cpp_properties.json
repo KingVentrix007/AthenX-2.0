@@ -4,8 +4,8 @@
         "name": "Linux",
         "includePath": [
           "${workspaceFolder}/**",  // Include all subdirectories of the workspace
-          "../libc",  // Include the 'libc' directory
-          "../include/syscall.h", // Include all subdirectories of the workspace
+          "libc",  // Include the 'libc' directory
+          ""../../include/syscall.h"", // Include all subdirectories of the workspace
         ],
         "defines": [],
         "compilerPath": "/usr/bin/gcc",  // Path to your GCC compiler

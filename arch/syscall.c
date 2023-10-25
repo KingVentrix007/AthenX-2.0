@@ -1,5 +1,5 @@
 #include "types.h"
-#include "../libc/string.h"
+
 #include "../include/syscall.h"
 #include <stdarg.h>
 

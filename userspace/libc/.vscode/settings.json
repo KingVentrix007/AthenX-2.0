@@ -9,6 +9,7 @@
         "stdio.h": "c",
         "stdbool.h": "c",
         "string.h": "c",
-        "bool.h": "c"
+        "bool.h": "c",
+        "scanf.h": "c"
     }
 }

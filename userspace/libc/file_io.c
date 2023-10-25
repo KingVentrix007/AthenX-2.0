@@ -1,6 +1,6 @@
 #include "fileio.h"
 #include "printf.h"
-#include "../include/syscall.h"
+#include "../../include/syscall.h"
 // fileio.c
 int fread(char *buffer,FILE *fp,size_t size)
 {
