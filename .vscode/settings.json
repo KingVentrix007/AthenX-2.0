@@ -38,6 +38,9 @@
         "fat_filelib.h": "c",
         "fileio.h": "c",
         "shell.h": "c",
-        "cmdhandler.h": "c"
+        "cmdhandler.h": "c",
+        "vesa_display.h": "c",
+        "bitmap.h": "c",
+        "font.h": "c"
     }
 }

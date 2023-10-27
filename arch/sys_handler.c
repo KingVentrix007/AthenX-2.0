@@ -6,6 +6,9 @@
 #include "../include/fat_filelib.h"
 #include "../include/kheap.h"
 #include "../include/exe.h"
+#include "../include/string.h"
+uintptr_t memory_alloated[1000];
+FILE files_opened[1000];
 void handle_print_system_call(REGISTERS *reg) {
     // Assuming the message is stored in reg->eax
     const char *message = (const char *)reg->ebx;
@@ -17,12 +20,12 @@ void handle_print_system_call(REGISTERS *reg) {
 }
 
 
-int handle_fwrite_system_call(const char *filename, const char *buffer) {
-    FILE *file = fopen(filename, "w");
-    if (file == NULL) {
-        // Error opening the file for writing
-        return 1;
-    }
+int handle_fwrite_system_call(FILE *file, char *buffer) {
+    // FILE *file = fopen(filename, "w");
+    // if (file == NULL) {
+    //     // Error opening the file for writing
+    //     return 1;
+    // }
 
     // Write the contents of the buffer to the file
     if (fputs(buffer, file) == EOF) {
@@ -35,28 +38,28 @@ int handle_fwrite_system_call(const char *filename, const char *buffer) {
     fclose(file);
 
     // Reopen the file for reading
-    file = fopen(filename, "r");
-    if (file == NULL) {
-        // Error opening the file for reading
-        return 3;
-    }
+    // file = fopen(filename, "r");
+    // if (file == NULL) {
+    //     // Error opening the file for reading
+    //     return 3;
+    // }
 
-    char readBuffer[1024]; // Assuming a maximum line length of 1024 characters
-    if (fgets(readBuffer, sizeof(readBuffer), file) == NULL) {
-        // Error reading from the file
-        fclose(file);
-        return 4;
-    }
+    // char readBuffer[1024]; // Assuming a maximum line length of 1024 characters
+    // if (fgets(readBuffer, sizeof(readBuffer), file) == NULL) {
+    //     // Error reading from the file
+    //     fclose(file);
+    //     return 4;
+    // }
 
-    // Close the file after reading
-    fclose(file);
+    // // Close the file after reading
+    // fclose(file);
 
-    // Compare the read data with the original buffer
-    if (strcmp(buffer, readBuffer) == 0) {
-        return 0; // Data matches
-    } else {
-        return -1; // Data doesn't match
-    }
+    // // Compare the read data with the original buffer
+    // if (strcmp(buffer, readBuffer) == 0) {
+    //     return 0; // Data matches
+    // } else {
+    //     return -1; // Data doesn't match
+    // }
 }
 
 char* handler_get_char_system_call(REGISTERS *reg)
@@ -139,7 +142,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             // result = fl_fread(param1, sizeof);
             break;
         case SYS_WRITE:
-            result = handle_fwrite_system_call((char *)param1,(char *) param2);
+            result = handle_fwrite_system_call((FILE *)param1,(char *)param2);
             break;
         case SYS_OPEN:
            fp = fopen(param1, param2);
@@ -154,7 +157,10 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             parmss = (parameters *)param2;
             fl_fseek(fp,parmss->param1,parmss->param2);
             break;
-        
+        case SYS_FSEEK:
+            fp = (FILE *)param1;
+            parmss = (parameters *)param2;
+            result = fl_fseek(fp,parmss->param3,parmss->param2);
         case SYS_MMAP:
             result = kmalloc(param1);
             break;
@@ -226,6 +232,11 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
         case SYS_TELL:
             fp = (FILE *)param1;
             result = fl_ftell(fp);
+        case SYS_FTELL:
+            fp = (FILE *)param1;
+            result = fl_ftell(fp);
+            break;
+        
         case SYS_LIST_DIR:
             
            
@@ -257,7 +268,13 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             }
             break;
         case SYS_GET_SCAN:
-            return kb_get_scancode();
+            result = (int)kb_get_scancode();
+            break;
+        case SYS_CALLOC:
+            return kcalloc(param1, param2);
+            break;
+        case SYS_REALLOC:
+            return krealloc(param1, param2);
             break;
         default:
             printf("Unknown syscall number\n");
@@ -266,4 +283,15 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
     pic8259_eoi(42);
     // printf("returning");
     return result;
+}
+
+int syscall_init()
+{
+    memset(memory_alloated, 0, sizeof(memory_alloated));
+    memset(files_opened, 0, sizeof(files_opened));
+}
+int syscall_destroy()
+{
+    memset(memory_alloated, 0, sizeof(memory_alloated));
+    memset(files_opened, 0, sizeof(files_opened));
 }

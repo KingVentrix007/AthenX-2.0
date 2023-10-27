@@ -472,7 +472,11 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
     else if(strcmp(arguments[0],"ls") == 0)
     {
         //char *cwd = kmalloc(sizeof(*cwd)); //Current working directory, in it's path
-        // fl_listdirectory("/");
+        Entry f[100];
+        Entry d[100];
+        int d_int = 0;
+        int f_int = 0;
+        fl_listdirectory(cwd,d,f,d_int,f_int);
         // fl_listdirectory("rootfs");
         // fl_listdirectory("rootfs/");
         // fl_listdirectory("/rootfs");
@@ -734,6 +738,7 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
     }
     else if(strcmp(arguments[0],"edit") == 0)
     {
+        
         char data[1024] = {0};
         memset(data,0,sizeof(data));
         read_add(arguments[1],data);
@@ -745,9 +750,11 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
         int index = search_program(programs,2,arguments[0]);
         if(index != -1)
         {
+            set_scroll_mode(1);
             char tmp[20] = "/sys/";
             strcat(tmp,programs[index]);
             load_elf_file(tmp,arg_count,arguments);
+            set_scroll_mode(0);
         }
         else
         {

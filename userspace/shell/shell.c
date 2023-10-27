@@ -12,7 +12,7 @@ void Sappend(char *buf, char c) {
         // printf("C%c", c);
         buf[len] = c;
         // printf("B%c|", buf[len]);
-        buf[len + 1] = '\0'; 
+        buf[len + 1] = '\0';  
     }
 }
 char *cwd = "/";  
@@ -217,6 +217,17 @@ int shell(char buf[1001]) {
     {
         
         set_terminal_state(100,100,255,0,0);
+    }
+    else if (strcmp("write",arguments[0]) == 0)
+    {
+        FILE *f = fopen("/var/fake.txt", "w");
+        fprintf(f,"%s\n",arguments[1]);
+        fclose(f);
+        FILE *q = fopen("/var/fake.txt", "r");
+        char buf[1024] = {0};
+        fread(buf,q,sizeof(buf));
+        printf("read %s from %s\n",buf,"/var/fake.txt");
+        fclose(q);
     }
     
     

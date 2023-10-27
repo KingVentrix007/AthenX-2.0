@@ -33,9 +33,9 @@ FILE* fopen(const char *filename,char* mode)
     return fp;
 
 }
-int fwrite(const char *filename,char* buffer)
+int fwrite(FILE *fp,char* buffer)
 {
-    syscall(SYS_WRITE, filename, buffer);
+    syscall(SYS_WRITE, fp, buffer);
 }
 void fclose(FILE *fp)
 {
@@ -50,8 +50,9 @@ int rm_file(const char * path)
 {
     syscall(SYS_RM,path,0);
 }
-int fprintf(const char* filename, const char* format, ...) {
+int fprintf(FILE *fp, const char* format, ...) {
     char buffer[4096]; // You can adjust the buffer size as needed.
+    memset(buffer, 0, sizeof(buffer));
     va_list args;
     va_start(args, format);
     
@@ -61,10 +62,48 @@ int fprintf(const char* filename, const char* format, ...) {
 
     if (result >= 0) {
         // Write the formatted string to the file using fwrite
-        if (fwrite(filename, buffer) == 0) {
+        if (fwrite(fp, buffer) == 0) {
             return 0; // Success
         }
     }
 
     return -1; // Error
+}
+
+
+
+
+/**
+ * Function Name: ftell
+ * Description: Returns the current file position indicator of the given stream.
+ *
+ * Parameters:
+ *   stream (FILE*) - A pointer to the FILE object representing the file.
+ *
+ * Return:
+ *   long - The current file position indicator if successful, or -1L if an error occurs.
+ */
+long ftell(FILE *fp)
+{
+    syscall(SYS_FTELL,fp,0);
+}
+
+/**
+ * Function Name: fseek
+ * Description: Repositions the file pointer associated with the given stream.
+ *
+ * Parameters:
+ *   stream (FILE*) - A pointer to the FILE object representing the file.
+ *   offset (long) - The number of bytes to move the file pointer.
+ *   whence (int) - The reference point for the offset (SEEK_SET, SEEK_CUR, or SEEK_END).
+ *
+ * Return:
+ *   int - 0 if successful, or a non-zero value if an error occurs.
+ */
+int fseek(FILE *f, long offset, int whence)
+{
+    parameters *parms;
+    parms->param3 = offset;
+    parms->param2 = whence;
+    syscall(SYS_FSEEK, f, parms);
 }

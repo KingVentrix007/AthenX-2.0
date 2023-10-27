@@ -32,10 +32,17 @@
 #define SYS_TERMINAL 29
 #define SYS_TELL 30
 #define SYS_GET_SCAN 31
+#define SYS_REALLOC 32
+#define SYS_CALLOC 33
+#define SYS_ALLIGEND_MEM 34
+#define SYS_FTELL 35
+#define SYS_FSEEK 36
 typedef struct param_struct
 {
     char* param1;
     int param2;
+    long param3;
+    
     // int param3;
     // int param4;
 }parameters;

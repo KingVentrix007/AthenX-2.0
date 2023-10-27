@@ -26,4 +26,5 @@ void undraw_square(int x, int y);
 void draw_square_cursor(int x, int y, int color);
 void draw_character_1d(char character, int x, int y, int font_width, int font_height);
 int putchar_vesa(int ic);
+int set_scroll_mode(int mode);
 #endif

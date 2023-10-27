@@ -30,11 +30,12 @@ if [ -f "$image_file" ]; then
           sudo cp "$file" "$DEST_DIR"
       fi
   done
+
   sudo cp "grub/grub.cfg" "/mnt/AthenX/grub/grub.cfg"
    echo "Contents of the mount point and its subdirectories:"
   ls -R /mnt/AthenX
 
-  # sudo cp "src/cmdhandler.c" "/mnt/AthenX/rootfs/cmd.c"
+    sudo cp "ui/cmdhandler.c" "/mnt/AthenX/root/cmd.c"
   # Unmount the image
   sudo umount /mnt/AthenX
 else

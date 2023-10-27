@@ -60,13 +60,17 @@ void vesa_putentryat(char c, uint8_t color, size_t x, size_t y)
     //bitmap_draw_char(c,x,y,VBE_RGB(0,255,0));
     
 }
-
+int scroll_auto = 0;
+int set_scroll_mode(int mode)
+{
+    scroll_auto = mode;
+}
 void vesa_putchar(char c)
 {
     if (c == '\n' || c == '\r')
     {
        
-        if (vesa_row >= vbe_get_height()-16)
+        if (vesa_row >= vbe_get_height()-16 && scroll_auto == 0)
         {
             // int dirct = kb_get_scancode();
             // while(dirct != SCAN_CODE_KEY_DOWN);
@@ -77,10 +81,14 @@ void vesa_putchar(char c)
             
             //printf("HERE");
         }
-        else
+        else if(0 == 0)
         {
             vesa_column = 0;
             vesa_row = vesa_row +16;
+        }
+        else
+        {
+
         }
         //  set_screen_x(0);
         // set_screen_y(0);

@@ -22,6 +22,7 @@ Our custom libc offers several key features:
 
 - **Extensibility:** The AthenX Custom Libc is designed to be extensible, allowing you to add additional functions as needed for your projects.
 
+- **Compatibility:** The AthenX Custom Libc is designed to be compatible with existing Standards(POSIXS) as well as the AthenXOS standerd.
 ## Getting Started
 
 This documentation will guide you through the various custom libc functions available in AthenX. Whether you're a system developer or a software application programmer, understanding these functions is essential for working with the AthenX operating system effectively.
@@ -310,12 +311,15 @@ int main() {
 
 # MEMORY MANAGEMENT FUNCTIONS
 
-- [atoi](#atoi)
+<!-- - [atoi](#atoi) -->
 - [malloc](#malloc)
 - [free](#free)
-- [exit](#exit)
+- [realloc](#realloc)
+- [calloc](#calloc)
+- [athenx_memalign](#athenx_memalign)
+<!-- - [exit](#exit) -->
 
-### `atoi`
+<!-- ### `atoi`
 
 **Description:**
 Converts a string to an integer.
@@ -330,7 +334,7 @@ Converts a string to an integer.
 ```c
 const char* numberStr = "12345";
 int number = atoi(numberStr);
-```
+``` -->
 
 ### `malloc`
 
@@ -365,26 +369,52 @@ void* memory = malloc(1024); // Allocate memory.
 // ... Use the allocated memory ...
 free(memory); // Deallocate the memory.
 ```
-
-### `exit`
-
+### `realloc`
 **Description:**
-Exit function.
+Memory reallocation function.
 
 **Parameters:**
-- None
+- ptr (void *) - Pointer to the previously allocated memory
+- size (size_t) - The new size, in bytes, for the memory blocks
 
-**Return:**
-- None
+**Returns:**
+- void* - A pointer to the reallocated memory block
 
 **Usage Example:**
 ```c
-int main() {
-    // Perform some operations.
-    // ...
-    exit(); // Exit the program.
-}
-```
+
+ // Allocate memory using malloc
+void* memory = malloc(1024);
+
+// Use the allocated memory here
+
+// Resize memory using realloc
+void* resized_memory = realloc(memory, 2048);
+
+// Use the resized memory here
+
+// Deallocate memory using free
+free(resized_memory);
+``````
+
+### `calloc`
+**Description:** Memory allocation function for initialized memory.
+
+**Parameters:**
+- num (size_t) - The number of elements to allocate memory for.
+- size (size_t) - The size, in bytes, of each element.
+
+**Return:**
+-  void* - A pointer to the allocated and zero-initialized memory block, or NULL if the allocation fails.
+```c
+// Allocate and initialize memory using calloc
+void* memory = calloc(10, sizeof(int));
+
+// Use the allocated and initialized memory here
+
+// Deallocate memory using free
+free(memory);
+``````
 
 
 # String Manipulation Functions

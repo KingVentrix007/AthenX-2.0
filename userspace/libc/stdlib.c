@@ -1,6 +1,7 @@
 
 #include "../../include/syscall.h"
 #include "stddef.h"
+#include "stdlib.h"
 #define INT_MAX 2147483647
 #define INT_MIN -2147483648
 
@@ -77,7 +78,39 @@ void free(void* ptr) {
         syscall(SYS_MUNMAP,ptr,0);
     }
 }
-int exit()
+/**
+ * Function Name: realloc
+ * Description: Memory reallocation function.
+ * This function changes the size of the memory block pointed to by ptr to the new size,
+ * preserving the existing data. If necessary, it may move the data to a new location.
+ *
+ * Parameters:
+ *   ptr (void*) - A pointer to the previously allocated memory block.
+ *   size (size_t) - The new size, in bytes, for the memory block.
+ *
+ * Return:
+ *   void* - A pointer to the reallocated memory block, or NULL if the reallocation fails.
+ */
+void* realloc(void* ptr, size_t size) {
+    return syscall(SYS_REALLOC,ptr, size);
+}
+/**
+ * Function Name: calloc
+ * Description: Memory allocation function for initialized memory.
+ * This function allocates a block of memory for an array of elements, each of a specified size,
+ * and initializes all its bits to zero.
+ *
+ * Parameters:
+ *   num (size_t) - The number of elements to allocate memory for.
+ *   size (size_t) - The size, in bytes, of each element.
+ *
+ * Return:
+ *   void* - A pointer to the allocated and zero-initialized memory block, or NULL if the allocation fails.
+ */
+void* calloc(size_t num, size_t size) {
+    return syscall(SYS_CALLOC, num, size);
+}
+int exit(int code)
 {
-    
+    return code;
 }

@@ -8,7 +8,7 @@ LIBS = ../obj/arch/syscall.o libc/libc.a
 SUBDIRS := $(wildcard */)
 
 # Filter out any directories you want to exclude (if necessary)
-EXCLUDE_DIRS := /libc/
+EXCLUDE_DIRS := libc/ kilo/
 SUBDIRS := $(filter-out $(EXCLUDE_DIRS),$(SUBDIRS))
 
 # List of source files to compile in each subdirectory

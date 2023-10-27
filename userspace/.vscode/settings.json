@@ -10,6 +10,54 @@
         "stdio.h": "c",
         "stdint.h": "c",
         "stdbool.h": "c",
-        "shell.h": "c"
-    }
+        "shell.h": "c",
+        "signal.h": "c",
+        "errno.h": "c",
+        "ioctl.h": "c",
+        "stdlib.h": "c",
+        "time.h": "c",
+        "types.h": "c",
+        "cstdlib": "c",
+        "atomic": "c",
+        "*.tcc": "c",
+        "cmath": "c",
+        "compare": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "random": "c",
+        "functional": "c",
+        "limits": "c",
+        "streambuf": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "memory": "c",
+        "new": "c",
+        "stdio_ext.h": "c",
+        "syscall.h": "c",
+        "memory.h": "c",
+        "editor.h": "c",
+        "file.h": "c"
+    },
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/libc", // Include your custom libc directory
+                "${workspaceFolder}/include/syscall.h" // Include the syscall.h file
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "forcedInclude": ["<path_to_your_header.h>"]
+        }
+    ],
+    "version": 4,
+    // "C_Cpp.default.includePath": [
+    //     "${workspaceFolder}/libc", // Include your custom libc directory
+    //     "/home/king/OsDev/basekernel/cross/lib/gcc/i686-elf/8.2.0/include" // Include the cross-compiler's include directory
+    // ]
+    
 }

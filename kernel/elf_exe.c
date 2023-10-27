@@ -278,7 +278,7 @@ void load_elf_file(const char* filename, int argc, const char** argv) {
 
     uint8_t* elf_data = (uint8_t*)malloc(file_size);
     if (elf_data == NULL) {
-        printf("Malloc error\n");
+        printf("Malloc error in elf\n");
         // Handle memory allocation error.
         fclose(file);
         return;

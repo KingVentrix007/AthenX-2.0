@@ -232,7 +232,8 @@ int clear_screen()
     syscall(SYS_SCREEN_CTRL,0,0);
 }
 
-int get_scan_code()
+int get_scan_code() 
+
 {
-    
+    return syscall(SYS_GET_SCAN,0,0);
 }

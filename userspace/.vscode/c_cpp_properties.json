@@ -1,19 +1,23 @@
 {
     "configurations": [
-      {
-        "name": "Linux",
-        "includePath": [
-          "${workspaceFolder}/**",  // Include all subdirectories of the workspace
-          "libc",  // Include the 'libc' directory
-          ""../../include/syscall.h"", // Include all subdirectories of the workspace
-        ],
-        "defines": [],
-        "compilerPath": "/usr/bin/gcc",  // Path to your GCC compiler
-        "cStandard": "c11",
-        "cppStandard": "c++17",
-        "intelliSenseMode": "gcc-x64"
-      }
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/libc",
+                "../include/**",
+                "/home/king/OsDev/basekernel/cross/lib/gcc/i686-elf/8.2.0/include/"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "forcedInclude": [
+                "<path_to_your_header.h>"
+            ],
+            "configurationProvider": "ms-vscode.makefile-tools"
+        }
     ],
     "version": 4
-  }
-  
+}
