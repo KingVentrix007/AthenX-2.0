@@ -96,6 +96,7 @@ int screen_ctrl()
 // #define SYSCALL_PRINT 0x81
 // #define SYSCALL_TEST_RET 0x83
 uint8_t process_stack_user[8192] __attribute__((aligned(16)));
+int ehco_mode = false;
 int system_call_handler_c(int syscall_number, int param1, int param2) {
     int result = 0;
      FILE *fp;
@@ -161,6 +162,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             fp = (FILE *)param1;
             parmss = (parameters *)param2;
             result = fl_fseek(fp,parmss->param3,parmss->param2);
+            break;
         case SYS_MMAP:
             result = kmalloc(param1);
             break;
@@ -206,6 +208,10 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             break;
         case SYS_GETCHAR:
             result = (int)get_char_block();
+            if(ehco_mode == true)
+            {
+                printf("%s",result);
+            }
             break;
             // printf("\nResult: (%c)(%d)n",result,result);
         case SYS_SCREEN_CTRL:
@@ -245,7 +251,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             fl_listdirectory(param1, dirs, files, &dir_count, &file_count);
             break;
         case SYS_IS_DIR:
-            result = (int)fl_is_dir(param2);
+            result = fl_is_dir(param1);
             printf("PATH: %s == %d\n", param2,result);
             // result = -909;
             break;
@@ -266,6 +272,18 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
                 set_screen_x(term->x);
                 set_screen_y(term->y);
             }
+            else if(param1 == 2)
+            {
+                AthenXTerminal *term = (AthenXTerminal *)param2;
+                if(term->auto_scroll  == true)
+                {
+                    set_scroll_mode(0);
+                }
+                else if(term->auto_scroll == false)
+                {
+                    set_scroll_mode(2);
+                }
+            }
             break;
         case SYS_GET_SCAN:
             result = (int)kb_get_scancode();
@@ -275,6 +293,43 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             break;
         case SYS_REALLOC:
             return krealloc(param1, param2);
+            break;
+        case SYS_LAZY_MAN:
+            man_main((char *)param1);
+            set_scroll_mode(1);
+            break;
+        case SYS_FWRITE:
+            fp = (FILE *)param1;
+            printf("%s  %s\n", fp->path,fp->filename);
+            struct file_io *io_write = (struct file_io *)param2;        
+            if(strcmp(fp->filename,"stdio") == 0 && strcmp(fp->path,"/dev") == 0)
+            {
+                // printf("here");
+                printf("%s\n",io_write->ptr);
+            }
+            else
+            {
+                result = fl_fwrite(io_write->ptr,io_write->size,io_write->count,fp);
+            }
+                
+            
+            break;
+        case SYS_FREAD:
+              fp = (FILE *)param1;
+            
+            struct file_io *io_read = (struct file_io *)param2;
+            if(strcmp(fp->filename,"stdio") && strcmp(fp->path,"/dev") == 0)
+            {
+                result = 1;
+                io_read->ptr = get_char();
+
+            }
+            else
+            {
+                result = fl_fread(io_read->ptr, io_read->size, io_read->count, fp);
+            }
+            
+            // printf("syscall output: \n%s",io_read->ptr);
             break;
         default:
             printf("Unknown syscall number\n");

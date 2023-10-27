@@ -275,6 +275,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     idt_init();
     //
     //ata_get_drive_by_model
+    set_scroll_mode(1);
     kassert(display_init(1,0,0,32),0,1);
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         mboot_info = (MULTIBOOT_INFO *)addr;
@@ -293,7 +294,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // initialize heap 256 blocks(1MB)
         //multi_boot_info = mboot_info;
         //memcpy(multi_boot_info, mboot_info,sizeof(multi_boot_info));
-        void *start = pmm_alloc_blocks(20);
+        void *start = pmm_alloc_blocks(50);
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
         

@@ -1,6 +1,7 @@
 #ifndef __SYSCALL__H
 #define __SYSCALL__H
 #include "types.h"
+#include "stddef.h"
 #define SYS_EXIT 1
 #define SYS_FORK 2
 #define SYS_READ 3
@@ -37,6 +38,9 @@
 #define SYS_ALLIGEND_MEM 34
 #define SYS_FTELL 35
 #define SYS_FSEEK 36
+#define SYS_LAZY_MAN 37
+#define SYS_FWRITE 38
+#define SYS_FREAD 39
 typedef struct param_struct
 {
     char* param1;
@@ -53,6 +57,19 @@ typedef struct term_struct
     int y;
     uint32_t color;
 }terminal_struct;
+
+struct file_io {
+    const void *ptr;
+    size_t size;
+    size_t count;
+};
+typedef struct {
+    uint32_t font_color;  // Font color (RGB value)
+    uint32_t bg_color;    // Background color (RGB value)
+    int echo_mode;        // Echo mode (1 for on, 0 for off)
+    int auto_scroll;      // Auto-scroll mode (1 for on, 0 for off)
+    // Add any other parameters you need here
+} AthenXTerminal;
 
 int syscall(int syscall_number, int param1, int param2);
 #endif

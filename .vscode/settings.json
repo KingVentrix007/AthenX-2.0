@@ -41,6 +41,8 @@
         "cmdhandler.h": "c",
         "vesa_display.h": "c",
         "bitmap.h": "c",
-        "font.h": "c"
+        "font.h": "c",
+        "display.h": "c",
+        "stdlib.h": "c"
     }
 }

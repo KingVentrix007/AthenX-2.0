@@ -1,6 +1,7 @@
 #include "stdlib.h"
-int start(int argc, char argv[20][100])
+#include "stdio.h"
+int _start(int argc, char argv[20][100])
 {
-    
-    return exit(main(argc, argv));
+    init_stdio();
+    return exit(main(argc, argv)); 
 }

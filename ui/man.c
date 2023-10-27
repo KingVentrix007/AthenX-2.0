@@ -1,6 +1,13 @@
 #include "../include/string.h"
 #include "../include/printf.h"
 #include "../include/display.h"
+#include "../include/fat_filelib.h"
+#include "../include/man.h"
+#include "../include/keyboard.h"
+#include "../include/vesa.h"
+#include "../include/vesa_display.h"
+#define MAX_CHUNKS 20
+#define MAX_LINES_PER_CHUNK 16
 void man_inspect()
 {
     printf("Inspect Command\n");
@@ -305,9 +312,76 @@ void man_main(const char* functionName) {
         man_inspect();
 
     }else {
-        printf("No manual page available for '%s'\n", functionName);
+        char path[50] = "/man/";
+        strcat(path,functionName);
+        strcat(path,".1");
+        FILE *f = fl_fopen(path,"rb");
+        if(f == NULL)
+        {
+            printf("Couldn't open name page for %s\n",functionName);
+            return -1;
+        }
+        char buffer[1000*4];
+        memset(buffer,0,sizeof(buffer));
+        fl_fread(buffer,sizeof(char),4000,f);
+        // printf("%s\n",buffer);
+        set_scroll_mode(2);
+        printf("%s\n",buffer);
+        // set_scroll_mode(0);
+    //     // display_large_man_page(buffer,600);
+    //       size_t max_chunk_size = 50;  // You can adjust the maximum chunk size as needed
+    //         char chunks[MAX_CHUNKS][MAX_LINES_PER_CHUNK][max_chunk_size];
+            
+    //         int chunk_count = store_buffer_in_chunks(buffer, max_chunk_size, chunks);
+            
+    //         for (int i = 0; i < chunk_count; i++) {
+    //             printf("Chunk %d:\n", i);
+    //             for (int j = 0; j < MAX_LINES_PER_CHUNK; j++) {
+    //                 if (chunks[i][j][0] != '\0') {
+    //                     printf("%s\n", chunks[i][j]);
+    //                 }
+    //             }
+    //             printf("\n");
+    //  }
+        set_scroll_mode(0);
+        // printf("No manual page available for '%s'\n", functionName);
     }
 }
+
+
+int store_buffer_in_chunks(const char* input_buffer, size_t max_chunk_size, char (*chunks)[MAX_LINES_PER_CHUNK][max_chunk_size]) {
+    const char* delimiter = "\n";  // Line delimiter
+
+    int chunk_count = 0;
+    size_t current_chunk_size = 0;
+
+    char* buffer_copy = strdup(input_buffer);  // Create a copy of the input buffer
+    char* token = strtok(buffer_copy, delimiter);
+    
+    while (token != NULL && chunk_count < MAX_CHUNKS) {
+        size_t line_size = strlen(token);
+        
+        if (current_chunk_size + line_size + 1 <= max_chunk_size) {
+            // Add this line to the current chunk
+            strcpy((*chunks)[chunk_count][current_chunk_size], token);
+            current_chunk_size += line_size + 1;  // Add 1 for the newline character
+        } else {
+            // Start a new chunk
+            current_chunk_size = 0;
+            chunk_count++;
+        }
+        
+        token = strtok(NULL, delimiter);
+    }
+
+    kfree(buffer_copy);  // Free the copy of the input buffer
+    return chunk_count + 1;  // Add 1 for the last chunk
+}
+
+
+
+
+
 
 int man_list()
 {

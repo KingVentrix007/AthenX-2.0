@@ -36,7 +36,11 @@
         "syscall.h": "c",
         "memory.h": "c",
         "editor.h": "c",
-        "file.h": "c"
+        "file.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c"
     },
     "configurations": [
         {

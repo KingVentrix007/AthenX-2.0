@@ -19,6 +19,7 @@ static uint16 *vesa_buffer;
 bool controlled_scroll = false;
 bool scroll = false;
 #define BUFFER_SIZE 1024
+int font_mode = 0; // 0 = normal, 1 = bold, 2= large
 
 static inline uint8_t make_color(enum vga_color fg, enum vga_color bg)
 {
@@ -33,7 +34,10 @@ static inline uint16_t make_vgaentry(char c, uint8_t color)
 }
 
 
-
+int set_font_mode(int mode)
+{
+    font_mode = mode;
+}
 
 
 void vesa_putentryat(char c, uint8_t color, size_t x, size_t y)
@@ -56,7 +60,18 @@ void vesa_putentryat(char c, uint8_t color, size_t x, size_t y)
         color = VBE_RGB(255,0,0);
         break;
     }
-     drawchar(c,x,y);
+    if(font_mode == 0)
+    {
+         drawchar(c,x,y);
+        
+    }
+    else if (font_mode == 1)
+    {
+         drawchar_bold(c,x,y);
+    }
+    
+    
+    
     //bitmap_draw_char(c,x,y,VBE_RGB(0,255,0));
     
 }
@@ -81,11 +96,38 @@ void vesa_putchar(char c)
             
             //printf("HERE");
         }
-        else if(0 == 0)
+        if(scroll_auto == 0)
         {
             vesa_column = 0;
             vesa_row = vesa_row +16;
         }
+        else if(scroll_auto == 1)
+        {
+            vesa_column = 0;
+            vesa_row = vesa_row +16;
+        }
+        else if (scroll_auto == 2)
+        {
+            if(vesa_row >= vbe_get_height()-16)
+            {
+                 char *cur = get_char();
+                while(cur != SCAN_CODE_KEY_DOWN)
+                {
+                    cur = get_char();
+                }
+                vesa_scroll(0);
+                printf("");
+            }
+            else
+            {
+                 vesa_column = 0;
+                vesa_row = vesa_row +16;
+            }
+           
+            
+
+        }
+        
         else
         {
 
@@ -201,6 +243,10 @@ void vesa_set_colors(enum vga_color font_color, enum vga_color background_color)
     default_bg_color = background_color;
 }
 
+char* get_font()
+{
+    return font8x16;
+}
 
 
 void drawchar(char character, int x, int y) {
@@ -228,7 +274,33 @@ void drawchar(char character, int x, int y) {
         }
     }
 }
+void drawchar_bold(char character, int x, int y) {
+    if (character < 0 || character >= sizeof(font8x16) / sizeof(font8x16[0])) {
+        // Character not in font, handle error or return
+        return;
+    }
 
+    const unsigned char *bitmap_data = font8x16[character];
+
+    // Draw the character twice to create a bold effect
+    for (int bold_factor = 0; bold_factor < 2; ++bold_factor) {
+        for (int row = 0; row < 16; ++row) {
+            for (int col = 0; col < 8; ++col) {
+                unsigned char pixel = bitmap_data[row];
+                if ((pixel >> (7 - col)) & 0x01) {
+                    // Draw the pixel at position (x + col, y + row + bold_factor)
+                    // Use your custom draw_pixel function here
+                    uint32 color = get_font_color();
+                    vbe_putpixel(x + col, y + row + bold_factor, color);
+                } else {
+                    // Draw the background pixel
+                    uint32 color = get_bg_color();
+                    vbe_putpixel(x + col, y + row + bold_factor, color);
+                }
+            }
+        }
+    }
+}
 void draw_square_cursor(int x, int y, int color) {
     for (int i = x; i < x + 8; i++) {
         for (int j = y; j < y + 12; j++) {

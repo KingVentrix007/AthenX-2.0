@@ -203,6 +203,11 @@ int clear_display()
     {
         console_clear(COLOR_BLACK1,COLOR_BLACK1);
     }
+    cls_screen(VBE_RGB(0,0,0));
+    set_screen_x(0);
+    set_screen_y(0);
+        // clear_screen();
+        // clear_display();
 }
 
 

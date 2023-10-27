@@ -1,5 +1,6 @@
 #ifndef __TERMIOS__H
 #define __TERMIOS__H
+#include "../../include/syscall.h"
 typedef unsigned int tcflag_t;
 typedef unsigned char cc_t;
 #define NCCS 20
@@ -30,4 +31,5 @@ struct termios {
     cc_t c_cc[NCCS];    // Control characters
 };
 int tcgetattr(int fd, struct termios *termios_p);
+int set_term_attr(AthenXTerminal term);
 #endif

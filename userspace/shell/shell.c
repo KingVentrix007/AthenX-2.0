@@ -1,9 +1,11 @@
+#define ATHENX_LIBC
 #include "stdio.h"
 #include "maths.h"
 #include "string.h"
 #include "stdlib.h"
 #include "terminal.h"
 #include "shell.h" 
+#include "termios.h"
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
 void Sappend(char *buf, char c) {
@@ -108,12 +110,42 @@ int shell(char buf[1001]) {
     } 
     else if (strcmp(arguments[0],"cat") == 0)
     {
-        FILE *file;
-        file = fopen(arguments[1],"r");
-        char data[1024];
-        fread(data,file,sizeof(data));
-        printf("%s\n",data);
+        AthenXTerminal term;
+        term.auto_scroll = false;
+        set_term_attr(term);
+        
+        FILE *file = fopen(arguments[1], "r");
+        if (file == NULL) {
+          printf("Error opening file %s\n",arguments[1]); 
+          return -1;
+        }
+
+    int allocv = get_file_size_from_pointer(file);
+    printf("\nAlocating %d bytes of memory for file\n",allocv);
+    char *data = malloc(allocv);
+    if(data == NULL)
+    { 
+        printf("Error creating data\n");
+        return -1;
+    }
+    size_t bytes_read = fread(data, sizeof(char),9000, file);
+    printf("file size: %d\n", bytes_read);
+    if (bytes_read > 0) {
+        data[bytes_read] = '\0'; // Null-terminate  the data.
+
+        // Print the data to the console. 
+        printf("data ->%s\n", data);
+
         fclose(file);
+        term.auto_scroll = true; //
+        set_term_attr(term); //
+        free(data);
+        return 0; // Success
+    }
+     term.auto_scroll = true; //
+        set_term_attr(term); //
+    fclose(file);
+    return -1;
     }
     else if (strcmp(arguments[0],"cls") == 0)
     {
@@ -122,8 +154,13 @@ int shell(char buf[1001]) {
     }
     else if (strcmp(arguments[0],"ls") == 0)
     {
-        ls(cwd);
+        ls(cwd); 
     }
+    else if (strcmp(arguments[0],"test") == 0)
+    {
+        fwrite("test",sizeof("test"),4,stdio);
+    }
+    
     else if (strcmp(arguments[0],"rm") == 0)
     {
         char tmp[1001];
@@ -153,7 +190,7 @@ int shell(char buf[1001]) {
             if (last_slash != NULL) {
                 //printf("Here\n");
                 // Remove the last directory from the current path
-                *last_slash = '\0';
+                *last_slash = '\0'; 
                 char* last_slash = strrchr(cwd, '/');
             
                 if (last_slash != NULL) {
@@ -170,7 +207,7 @@ int shell(char buf[1001]) {
         if(cwd[strlen(cwd)-1] == '/' && cwd[strlen(cwd)-2] == '/')
         {
             cwd[strlen(cwd)-1] = '\0';
-        }
+        } 
         if(cwd[strlen(cwd)-1] != '/')
         {
             strcat(cwd,"/");
@@ -205,6 +242,10 @@ int shell(char buf[1001]) {
     {
         printf("%s\n",cwd);
     }
+    else if(strcmp(arguments[0],"man") == 0)
+    {
+        syscall(37,arguments[1],0);
+    }
     else if (strcmp(arguments[0],"touch") == 0)
     {
         char *tmp = cwd;
@@ -218,14 +259,14 @@ int shell(char buf[1001]) {
         
         set_terminal_state(100,100,255,0,0);
     }
-    else if (strcmp("write",arguments[0]) == 0)
+    else if (strcmp("write",arguments[0]) == 0) 
     {
         FILE *f = fopen("/var/fake.txt", "w");
         fprintf(f,"%s\n",arguments[1]);
         fclose(f);
         FILE *q = fopen("/var/fake.txt", "r");
         char buf[1024] = {0};
-        fread(buf,q,sizeof(buf));
+        fread(buf,1024,sizeof(buf),q);
         printf("read %s from %s\n",buf,"/var/fake.txt");
         fclose(q);
     }

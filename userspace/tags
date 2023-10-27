@@ -1,0 +1,449 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ABUF_INIT	kilo/kilo.c	866;"	d	file:
+ARROW_DOWN	kilo/kilo.c	/^        ARROW_DOWN,$/;"	e	enum:KEY_ACTION	file:
+ARROW_LEFT	kilo/kilo.c	/^        ARROW_LEFT = 1000,$/;"	e	enum:KEY_ACTION	file:
+ARROW_RIGHT	kilo/kilo.c	/^        ARROW_RIGHT,$/;"	e	enum:KEY_ACTION	file:
+ARROW_UP	kilo/kilo.c	/^        ARROW_UP,$/;"	e	enum:KEY_ACTION	file:
+ATHENX_LIBC	libc/file_io.c	5;"	d	file:
+ATHENX_LIBC	shell/shell.c	1;"	d	file:
+ATHENX_OS	libc/athenX.c	1;"	d	file:
+BACKSPACE	kilo/kilo.c	/^        BACKSPACE =  127,   \/* Backspace *\/$/;"	e	enum:KEY_ACTION	file:
+BRKINT	libc/termios.h	8;"	d
+BUILD_DIR	libc/makefile	/^BUILD_DIR = obj$/;"	m
+CC	libc/makefile	/^CC = i686-elf-gcc$/;"	m
+CC	makefile	/^CC = i686-elf-gcc$/;"	m
+CFLAGS	libc/makefile	/^CFLAGS = -m32 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding -Iinclude$/;"	m
+CFLAGS	makefile	/^CFLAGS = -m32 -std=gnu99 -ffreestanding -DATHENX_LIBC -O2 -O0 -nostdlib -Ilibc\/$/;"	m
+CS8	libc/termios.h	14;"	d
+CTRL_C	kilo/kilo.c	/^        CTRL_C = 3,         \/* Ctrl-c *\/$/;"	e	enum:KEY_ACTION	file:
+CTRL_D	kilo/kilo.c	/^        CTRL_D = 4,         \/* Ctrl-d *\/$/;"	e	enum:KEY_ACTION	file:
+CTRL_F	kilo/kilo.c	/^        CTRL_F = 6,         \/* Ctrl-f *\/$/;"	e	enum:KEY_ACTION	file:
+CTRL_H	kilo/kilo.c	/^        CTRL_H = 8,         \/* Ctrl-h *\/$/;"	e	enum:KEY_ACTION	file:
+CTRL_L	kilo/kilo.c	/^        CTRL_L = 12,        \/* Ctrl+l *\/$/;"	e	enum:KEY_ACTION	file:
+CTRL_Q	kilo/kilo.c	/^        CTRL_Q = 17,        \/* Ctrl-q *\/$/;"	e	enum:KEY_ACTION	file:
+CTRL_S	kilo/kilo.c	/^        CTRL_S = 19,        \/* Ctrl-s *\/$/;"	e	enum:KEY_ACTION	file:
+CTRL_U	kilo/kilo.c	/^        CTRL_U = 21,        \/* Ctrl-u *\/$/;"	e	enum:KEY_ACTION	file:
+C_HL_extensions	kilo/kilo.c	/^char *C_HL_extensions[] = {".c",".h",".cpp",".hpp",".cc",NULL};$/;"	v
+C_HL_keywords	kilo/kilo.c	/^char *C_HL_keywords[] = {$/;"	v
+ClusterIdx	libc/fileio.h	/^    uint32 ClusterIdx;$/;"	m	struct:cluster_lookup
+CurrentCluster	libc/fileio.h	/^    uint32 CurrentCluster;$/;"	m	struct:cluster_lookup
+DEL_KEY	kilo/kilo.c	/^        DEL_KEY,$/;"	e	enum:KEY_ACTION	file:
+E	kilo/kilo.c	/^static struct editorConfig E;$/;"	v	typeref:struct:editorConfig	file:
+ECHO	libc/termios.h	15;"	d
+END_KEY	kilo/kilo.c	/^        END_KEY,$/;"	e	enum:KEY_ACTION	file:
+ENOENT	libc/errno.h	5;"	d
+ENOTTY	libc/errno.h	4;"	d
+ENTER	kilo/kilo.c	/^        ENTER = 13,         \/* Enter *\/$/;"	e	enum:KEY_ACTION	file:
+EOF	libc/fileio.h	24;"	d
+EPS	libc/maths.h	14;"	d
+EPS	libc/string.c	9;"	d	file:
+ESC	kilo/kilo.c	/^        ESC = 27,           \/* Escape *\/$/;"	e	enum:KEY_ACTION	file:
+EULER	libc/maths.h	13;"	d
+EXCLUDE_DIRS	makefile	/^EXCLUDE_DIRS := libc\/ kilo\/ editor\/ test\/$/;"	m
+FILE	libc/fileio.h	/^} FILE;$/;"	t	typeref:struct:FL_FILE
+FILE_APPEND	libc/fileio.h	59;"	d
+FILE_BINARY	libc/fileio.h	60;"	d
+FILE_CREATE	libc/fileio.h	62;"	d
+FILE_ERASE	libc/fileio.h	61;"	d
+FILE_READ	libc/fileio.h	57;"	d
+FILE_WRITE	libc/fileio.h	58;"	d
+FIND_RESTORE_HL	kilo/kilo.c	1023;"	d	file:
+FLAGS_ADAPT_EXP	libc/printf.c	112;"	d	file:
+FLAGS_CHAR	libc/printf.c	107;"	d	file:
+FLAGS_HASH	libc/printf.c	105;"	d	file:
+FLAGS_LEFT	libc/printf.c	102;"	d	file:
+FLAGS_LONG	libc/printf.c	109;"	d	file:
+FLAGS_LONG_LONG	libc/printf.c	110;"	d	file:
+FLAGS_PLUS	libc/printf.c	103;"	d	file:
+FLAGS_PRECISION	libc/printf.c	111;"	d	file:
+FLAGS_SHORT	libc/printf.c	108;"	d	file:
+FLAGS_SPACE	libc/printf.c	104;"	d	file:
+FLAGS_UPPERCASE	libc/printf.c	106;"	d	file:
+FLAGS_ZEROPAD	libc/printf.c	101;"	d	file:
+FL_FILE	libc/fileio.h	/^typedef struct FL_FILE$/;"	s
+HLDB	kilo/kilo.c	/^struct editorSyntax HLDB[] = {$/;"	v	typeref:struct:editorSyntax
+HLDB_ENTRIES	kilo/kilo.c	199;"	d	file:
+HL_COMMENT	kilo/kilo.c	61;"	d	file:
+HL_HIGHLIGHT_NUMBERS	kilo/kilo.c	70;"	d	file:
+HL_HIGHLIGHT_STRINGS	kilo/kilo.c	69;"	d	file:
+HL_KEYWORD1	kilo/kilo.c	63;"	d	file:
+HL_KEYWORD2	kilo/kilo.c	64;"	d	file:
+HL_MATCH	kilo/kilo.c	67;"	d	file:
+HL_MLCOMMENT	kilo/kilo.c	62;"	d	file:
+HL_NONPRINT	kilo/kilo.c	60;"	d	file:
+HL_NORMAL	kilo/kilo.c	59;"	d	file:
+HL_NUMBER	kilo/kilo.c	66;"	d	file:
+HL_STRING	kilo/kilo.c	65;"	d	file:
+HOME_KEY	kilo/kilo.c	/^        HOME_KEY,$/;"	e	enum:KEY_ACTION	file:
+ICANON	libc/termios.h	16;"	d
+ICRNL	libc/termios.h	9;"	d
+IEXTEN	libc/termios.h	17;"	d
+INPCK	libc/termios.h	10;"	d
+INT_MAX	libc/stdlib.c	5;"	d	file:
+INT_MIN	libc/stdlib.c	6;"	d	file:
+ISIG	libc/termios.h	18;"	d
+ISTRIP	libc/termios.h	11;"	d
+IXON	libc/termios.h	12;"	d
+KEY_ACTION	kilo/kilo.c	/^enum KEY_ACTION{$/;"	g	file:
+KEY_NULL	kilo/kilo.c	/^        KEY_NULL = 0,       \/* NULL *\/$/;"	e	enum:KEY_ACTION	file:
+KILO_QUERY_LEN	kilo/kilo.c	1013;"	d	file:
+KILO_QUIT_TIMES	kilo/kilo.c	1188;"	d	file:
+KILO_VERSION	kilo/kilo.c	35;"	d	file:
+LDFLAGS	makefile	/^LDFLAGS = -T linker.ld -nostdlib$/;"	m
+LIB	libc/makefile	/^LIB = libc.a$/;"	m
+LIBS	makefile	/^LIBS = ..\/obj\/arch\/syscall.o libc\/libc.a$/;"	m
+LIB_STDIO_H	libc/stdio.h	2;"	d
+MAN_DIR	makefile	/^MAN_DIR = ..\/man$/;"	m
+MAN_FILES	makefile	/^MAN_FILES := $(addsuffix .1, $(OUT_FILES))$/;"	m
+MAN_PAGES	makefile	/^MAN_PAGES := $(addprefix $(MAN_DIR)\/, $(MAN_FILES))$/;"	m
+MAX_ARGUMENTS	shell/shell.c	10;"	d	file:
+MAX_COMMAND_LENGTH	shell/shell.c	9;"	d	file:
+MAX_TOKENS	shell/shell.h	3;"	d
+MAX_TOKEN_LENGTH	shell/shell.h	4;"	d
+NCCS	libc/termios.h	6;"	d
+NORM	libc/maths.h	8;"	d
+OBJ_FILES	libc/makefile	/^OBJ_FILES = $(patsubst $(SRC_DIR)\/%.c,$(BUILD_DIR)\/%.o,$(SRC_FILES))$/;"	m
+OPOST	libc/termios.h	13;"	d
+OUTPUT_DIR	makefile	/^OUTPUT_DIR = ..\/programs$/;"	m
+OUTPUT_PATHS	makefile	/^OUTPUT_PATHS := $(addprefix $(OUTPUT_DIR)\/, $(OUT_FILES))$/;"	m
+OUT_FILES	makefile	/^OUT_FILES := $(patsubst %\/,%,$(SUBDIRS))$/;"	m
+O_CREAT	libc/fcntl.h	5;"	d
+O_RDWR	libc/fcntl.h	4;"	d
+PAGE_DOWN	kilo/kilo.c	/^        PAGE_DOWN$/;"	e	enum:KEY_ACTION	file:
+PAGE_UP	kilo/kilo.c	/^        PAGE_UP,$/;"	e	enum:KEY_ACTION	file:
+PI	libc/maths.h	12;"	d
+PRINTF_DEFAULT_FLOAT_PRECISION	libc/printf.c	75;"	d	file:
+PRINTF_DISABLE_SUPPORT_LONG_LONG	libc/printf.c	86;"	d	file:
+PRINTF_FTOA_BUFFER_SIZE	libc/printf.c	57;"	d	file:
+PRINTF_MAX_FLOAT	libc/printf.c	81;"	d	file:
+PRINTF_NTOA_BUFFER_SIZE	libc/printf.c	50;"	d	file:
+PRINTF_SUPPORT_EXPONENTIAL	libc/printf.c	69;"	d	file:
+PRINTF_SUPPORT_FLOAT	libc/printf.c	63;"	d	file:
+PRINTF_SUPPORT_LONG_LONG	libc/printf.c	88;"	d	file:
+PRINTF_SUPPORT_PTRDIFF_T	libc/printf.c	95;"	d	file:
+RAND_MAX	libc/maths.h	7;"	d
+SCAN_CODE_KEY_DOWN	libc/stdio.h	13;"	d
+SCAN_CODE_KEY_ESC	libc/stdio.h	14;"	d
+SCAN_CODE_KEY_UP	libc/stdio.h	12;"	d
+SEEK_CUR	libc/fileio.h	12;"	d
+SEEK_END	libc/fileio.h	16;"	d
+SEEK_SET	libc/fileio.h	20;"	d
+SRC_DIR	libc/makefile	/^SRC_DIR = ..\/libc$/;"	m
+SRC_FILES	libc/makefile	/^SRC_FILES = $(wildcard $(SRC_DIR)\/*.c)$/;"	m
+SRC_FILES	makefile	/^SRC_FILES := $(wildcard $(addsuffix *.c, $(SUBDIRS)))$/;"	m
+STDIN_FILENO	libc/termios.h	21;"	d
+STDOUT_FILENO	libc/termios.h	22;"	d
+STRING_H	libc/string.h	2;"	d
+SUBDIRS	makefile	/^SUBDIRS := $(filter-out $(EXCLUDE_DIRS),$(SUBDIRS))$/;"	m
+SUBDIRS	makefile	/^SUBDIRS := $(wildcard *\/)$/;"	m
+Sappend	shell/shell.c	/^void Sappend(char *buf, char c) {$/;"	f
+TAB	kilo/kilo.c	/^        TAB = 9,            \/* Tab *\/$/;"	e	enum:KEY_ACTION	file:
+TCSAFLUSH	libc/termios.h	7;"	d
+TIOCGWINSZ	libc/ioctl.h	3;"	d
+VMIN	libc/termios.h	19;"	d
+VTIME	libc/termios.h	20;"	d
+_MATH_H	libc/maths.h	2;"	d
+_POSIX_C_SOURCE	kilo/kilo.c	38;"	d	file:
+_PRINTF_H_	libc/printf.h	33;"	d
+__ATHENX__H	libc/athneX.h	3;"	d
+__CTYPE__H	libc/ctype.h	2;"	d
+__EDITOR__H	editor/editor.h	2;"	d
+__ERROR__NO__H	libc/errno.h	2;"	d
+__FCNTL__H	libc/fcntl.h	2;"	d
+__FILE__H	editor/file.h	2;"	d
+__FILE__IO__H	libc/fileio.h	2;"	d
+__IOCTL__H	libc/ioctl.h	2;"	d
+__MEMORY__H	libc/memory.h	2;"	d
+__SCANF__H	libc/scanf.h	2;"	d
+__SHELL__H	shell/shell.h	2;"	d
+__SIGNAL__H	libc/signal.h	2;"	d
+__STDLIB__H	libc/stdlib.h	2;"	d
+__SYS__TYPES__H	libc/sys/types.h	2;"	d
+__TERMINAL__H	libc/terminal.h	2;"	d
+__TERMIOS__H	libc/termios.h	2;"	d
+__TIME__H	libc/time.h	2;"	d
+__UNISTD__H	libc/unistd.h	2;"	d
+_atoi	libc/printf.c	/^static unsigned int _atoi(const char** str)$/;"	f	file:
+_etoa	libc/printf.c	/^static size_t _etoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, double value, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_ftoa	libc/printf.c	/^static size_t _ftoa(out_fct_type out, char* buffer, size_t idx, size_t maxlen, double value, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_is_digit	libc/printf.c	/^static inline bool _is_digit(char ch)$/;"	f	file:
+_ntoa_format	libc/printf.c	/^static size_t _ntoa_format(out_fct_type out, char* buffer, size_t idx, size_t maxlen, char* buf, size_t len, bool negative, unsigned int base, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_ntoa_long	libc/printf.c	/^static size_t _ntoa_long(out_fct_type out, char* buffer, size_t idx, size_t maxlen, unsigned long value, bool negative, unsigned long base, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_ntoa_long_long	libc/printf.c	/^static size_t _ntoa_long_long(out_fct_type out, char* buffer, size_t idx, size_t maxlen, unsigned long long value, bool negative, unsigned long long base, unsigned int prec, unsigned int width, unsigned int flags)$/;"	f	file:
+_out_buffer	libc/printf.c	/^static inline void _out_buffer(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_out_char	libc/printf.c	/^static inline void _out_char(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_out_fct	libc/printf.c	/^static inline void _out_fct(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_out_null	libc/printf.c	/^static inline void _out_null(char character, void* buffer, size_t idx, size_t maxlen)$/;"	f	file:
+_out_rev	libc/printf.c	/^static size_t _out_rev(out_fct_type out, char* buffer, size_t idx, size_t maxlen, const char* buf, size_t len, unsigned int width, unsigned int flags)$/;"	f	file:
+_putchar	libc/printf.c	/^void _putchar(char chr)$/;"	f
+_start	init.c	/^int _start(int argc, char argv[20][100])$/;"	f
+_strnlen_s	libc/printf.c	/^static inline unsigned int _strnlen_s(const char* str, size_t maxsize)$/;"	f	file:
+_vsnprintf	libc/printf.c	/^static int _vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, const char* format, va_list va)$/;"	f	file:
+abAppend	kilo/kilo.c	/^void abAppend(struct abuf *ab, const char *s, int len) {$/;"	f
+abFree	kilo/kilo.c	/^void abFree(struct abuf *ab) {$/;"	f
+abs	libc/maths.c	/^int abs(int n)$/;"	f
+abuf	kilo/kilo.c	/^struct abuf {$/;"	s	file:
+acos	libc/maths.c	/^double acos(double x)$/;"	f
+acosh	libc/maths.c	/^double acosh(double x)$/;"	f
+addToBuffer	libc/stdio.c	/^int addToBuffer(char* buffer, const char* format, ...) {$/;"	f
+append	libc/string.c	/^void append(char s[], char n) {$/;"	f
+arg	libc/printf.c	/^  void* arg;$/;"	m	struct:__anon1	file:
+asin	libc/maths.c	/^double asin(double x)$/;"	f
+asinh	libc/maths.c	/^double asinh(double x)$/;"	f
+atan	libc/maths.c	/^double atan(double x)$/;"	f
+atanh	libc/maths.c	/^double atanh(double x)$/;"	f
+athenx_fread	libc/file_io.c	/^int athenx_fread(char *buffer,FILE *fp,size_t size)$/;"	f
+athenx_fwrite	libc/file_io.c	/^int athenx_fwrite(FILE *fp,char* buffer)$/;"	f
+athenx_memalign	libc/athenX.c	/^void athenx_memalign(size_t size, size_t alignment)$/;"	f
+atoi	libc/stdlib.c	/^uint32_t atoi(const char *str)$/;"	f
+b	kilo/kilo.c	/^    char *b;$/;"	m	struct:abuf	file:
+b	kilo/kilo.c	/^    int r,g,b;$/;"	m	struct:hlcolor	file:
+backspace	libc/string.c	/^bool backspace(char *buffer) {$/;"	f
+bytenum	libc/fileio.h	/^    uint32                  bytenum;$/;"	m	struct:FL_FILE
+c_cc	libc/termios.h	/^    cc_t c_cc[NCCS];    \/\/ Control characters$/;"	m	struct:termios
+c_cflag	libc/termios.h	/^    tcflag_t c_cflag;   \/\/ Control modes$/;"	m	struct:termios
+c_iflag	libc/termios.h	/^    tcflag_t c_iflag;   \/\/ Input modes$/;"	m	struct:termios
+c_lflag	libc/termios.h	/^    tcflag_t c_lflag;   \/\/ Local modes$/;"	m	struct:termios
+c_oflag	libc/termios.h	/^    tcflag_t c_oflag;   \/\/ Output modes$/;"	m	struct:termios
+calloc	libc/stdlib.c	/^void* calloc(size_t num, size_t size) {$/;"	f
+cc_t	libc/termios.h	/^typedef unsigned char cc_t;$/;"	t
+chars	kilo/kilo.c	/^    char *chars;        \/* Row content. *\/$/;"	m	struct:erow	file:
+clear_screen	libc/stdio.c	/^int clear_screen()$/;"	f
+cluster_cache_data	libc/fileio.h	/^    uint32                  cluster_cache_data[FAT_CLUSTER_CACHE_ENTRIES];$/;"	m	struct:FL_FILE
+cluster_cache_idx	libc/fileio.h	/^    uint32                  cluster_cache_idx[FAT_CLUSTER_CACHE_ENTRIES];$/;"	m	struct:FL_FILE
+cluster_lookup	libc/fileio.h	/^struct cluster_lookup$/;"	s
+coloff	kilo/kilo.c	/^    int coloff;     \/* Offset of column displayed. *\/$/;"	m	struct:editorConfig	file:
+cos	libc/maths.c	/^double cos(double x)$/;"	f
+cosh	libc/maths.c	/^double cosh(double x)$/;"	f
+create_file	libc/file_io.c	/^int create_file(const char * path)$/;"	f
+ctos	libc/string.c	/^char *ctos(char s[2], const char c)$/;"	f
+cwd	shell/shell.c	/^char *cwd = "\/";  $/;"	v
+cx	kilo/kilo.c	/^    int cx,cy;  \/* Cursor x and y position in characters *\/$/;"	m	struct:editorConfig	file:
+cy	kilo/kilo.c	/^    int cx,cy;  \/* Cursor x and y position in characters *\/$/;"	m	struct:editorConfig	file:
+d64	libc/maths.c	/^    double d64;$/;"	m	union:__anon2	file:
+dbl_64	libc/maths.c	/^} dbl_64;$/;"	t	typeref:union:__anon2	file:
+dirty	kilo/kilo.c	/^    int dirty;      \/* File modified but not saved. *\/$/;"	m	struct:editorConfig	file:
+disableRawMode	kilo/kilo.c	/^void disableRawMode(int fd) {$/;"	f
+display_text	editor/main.c	/^void display_text(struct terminal_state* state, char* buffer, int buffer_length) {$/;"	f
+editor	editor/main.c	/^int editor(char filename[100]){$/;"	f
+editorAtExit	kilo/kilo.c	/^void editorAtExit(void) {$/;"	f
+editorConfig	kilo/kilo.c	/^struct editorConfig {$/;"	s	file:
+editorDelChar	kilo/kilo.c	/^void editorDelChar() {$/;"	f
+editorDelRow	kilo/kilo.c	/^void editorDelRow(int at) {$/;"	f
+editorFileWasModified	kilo/kilo.c	/^int editorFileWasModified(void) {$/;"	f
+editorFind	kilo/kilo.c	/^void editorFind(int fd) {$/;"	f
+editorFreeRow	kilo/kilo.c	/^void editorFreeRow(erow *row) {$/;"	f
+editorInsertChar	kilo/kilo.c	/^void editorInsertChar(int c) {$/;"	f
+editorInsertNewline	kilo/kilo.c	/^void editorInsertNewline(void) {$/;"	f
+editorInsertRow	kilo/kilo.c	/^void editorInsertRow(int at, char *s, size_t len) {$/;"	f
+editorMoveCursor	kilo/kilo.c	/^void editorMoveCursor(int key) {$/;"	f
+editorOpen	kilo/kilo.c	/^int editorOpen(char *filename) {$/;"	f
+editorProcessKeypress	kilo/kilo.c	/^void editorProcessKeypress(int fd) {$/;"	f
+editorReadKey	kilo/kilo.c	/^int editorReadKey(int fd) {$/;"	f
+editorRefreshScreen	kilo/kilo.c	/^void editorRefreshScreen(void) {$/;"	f
+editorRowAppendString	kilo/kilo.c	/^void editorRowAppendString(erow *row, char *s, size_t len) {$/;"	f
+editorRowDelChar	kilo/kilo.c	/^void editorRowDelChar(erow *row, int at) {$/;"	f
+editorRowHasOpenComment	kilo/kilo.c	/^int editorRowHasOpenComment(erow *row) {$/;"	f
+editorRowInsertChar	kilo/kilo.c	/^void editorRowInsertChar(erow *row, int at, int c) {$/;"	f
+editorRowsToString	kilo/kilo.c	/^char *editorRowsToString(int *buflen) {$/;"	f
+editorSave	kilo/kilo.c	/^int editorSave(void) {$/;"	f
+editorSelectSyntaxHighlight	kilo/kilo.c	/^void editorSelectSyntaxHighlight(char *filename) {$/;"	f
+editorSetStatusMessage	kilo/kilo.c	/^void editorSetStatusMessage(const char *fmt, ...) {$/;"	f
+editorSyntax	kilo/kilo.c	/^struct editorSyntax {$/;"	s	file:
+editorSyntaxToColor	kilo/kilo.c	/^int editorSyntaxToColor(int hl) {$/;"	f
+editorUpdateRow	kilo/kilo.c	/^void editorUpdateRow(erow *row) {$/;"	f
+editorUpdateSyntax	kilo/kilo.c	/^void editorUpdateSyntax(erow *row) {$/;"	f
+enableRawMode	kilo/kilo.c	/^int enableRawMode(int fd) {$/;"	f
+erow	kilo/kilo.c	/^typedef struct erow {$/;"	s	file:
+erow	kilo/kilo.c	/^} erow;$/;"	t	typeref:struct:erow	file:
+errno	libc/errno.h	/^int errno;$/;"	v
+exit	libc/stdlib.c	/^int exit(int code)$/;"	f
+exp	libc/maths.c	/^double exp(double x) \/\/ quartic spline approximation$/;"	f
+fabs	libc/maths.c	/^double fabs(double x) {$/;"	f
+fac	libc/maths.c	/^int fac(unsigned int x)$/;"	f
+fact	libc/maths.c	/^uint32_t fact(uint32_t n)$/;"	f
+fat_node	libc/fileio.h	/^struct fat_node$/;"	s
+fclose	libc/file_io.c	/^void fclose(FILE *fp)$/;"	f
+fct	libc/printf.c	/^  void  (*fct)(char character, void* arg);$/;"	m	struct:__anon1	file:
+fctprintf	libc/printf.c	/^int fctprintf(void (*out)(char character, void* arg), void* arg, const char* format, ...)$/;"	f
+file_data_address	libc/fileio.h	/^    uint32                  file_data_address;$/;"	m	struct:FL_FILE
+file_data_dirty	libc/fileio.h	/^    int                     file_data_dirty;$/;"	m	struct:FL_FILE
+file_data_sector	libc/fileio.h	/^    uint8                   file_data_sector[50];$/;"	m	struct:FL_FILE
+filelength	libc/fileio.h	/^    uint32                  filelength;$/;"	m	struct:FL_FILE
+filelength_changed	libc/fileio.h	/^    int                     filelength_changed;$/;"	m	struct:FL_FILE
+filematch	kilo/kilo.c	/^    char **filematch;$/;"	m	struct:editorSyntax	file:
+filename	kilo/kilo.c	/^    char *filename; \/* Currently open filename *\/$/;"	m	struct:editorConfig	file:
+filename	libc/fileio.h	/^    char                    filename[260];$/;"	m	struct:FL_FILE
+fl_is_dir	libc/stdio.c	/^int fl_is_dir(const char *path)$/;"	f
+flags	kilo/kilo.c	/^    int flags;$/;"	m	struct:editorSyntax	file:
+flags	libc/fileio.h	/^    uint8                   flags;$/;"	m	struct:FL_FILE
+fmax	libc/maths.c	/^double fmax(double x, double y) {$/;"	f
+font_height	editor/editor.h	/^    int font_height;$/;"	m	struct:terminal_state
+font_width	editor/editor.h	/^    int font_width;$/;"	m	struct:terminal_state
+fopen	libc/file_io.c	/^FILE* fopen(const char *filename,char* mode)$/;"	f
+fprintf	libc/file_io.c	/^int fprintf(FILE *fp, const char* format, ...) {$/;"	f
+fread	libc/file_io.c	/^size_t fread(void *ptr, size_t size, size_t count, FILE *stream) {$/;"	f
+free	libc/stdlib.c	/^void free(void* ptr) {$/;"	f
+fseek	libc/file_io.c	/^int fseek(FILE *f, long offset, int whence)$/;"	f
+ftell	libc/file_io.c	/^long ftell(FILE *fp)$/;"	f
+fwrite	libc/file_io.c	/^size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream) {$/;"	f
+g	kilo/kilo.c	/^    int r,g,b;$/;"	m	struct:hlcolor	file:
+getCursorPosition	kilo/kilo.c	/^int getCursorPosition(int ifd, int ofd, int *rows, int *cols) {$/;"	f
+getWindowSize	kilo/kilo.c	/^int getWindowSize(int ifd, int ofd, int *rows, int *cols) {$/;"	f
+get_char	libc/stdio.c	/^char *get_char()$/;"	f
+get_file_size_from_pointer	editor/file.c	/^long get_file_size_from_pointer(FILE *file) {$/;"	f
+get_file_size_from_pointer	libc/file_io.c	/^long get_file_size_from_pointer(FILE *file) {$/;"	f
+get_scan_code	libc/stdio.c	/^int get_scan_code() $/;"	f
+handleSigWinCh	kilo/kilo.c	/^void handleSigWinCh(int unused __attribute__((unused))) {$/;"	f
+handle_user_input	editor/main.c	/^int handle_user_input(struct terminal_state* state) {$/;"	f
+hex_string_to_uint16	libc/string.c	/^bool hex_string_to_uint16(const char* hexString, uint16_t* result) {$/;"	f
+hl	kilo/kilo.c	/^    unsigned char *hl;  \/* Syntax highlight type for each character in render.*\/$/;"	m	struct:erow	file:
+hl_oc	kilo/kilo.c	/^    int hl_oc;          \/* Row had open comment at end in last syntax highlight$/;"	m	struct:erow	file:
+hlcolor	kilo/kilo.c	/^typedef struct hlcolor {$/;"	s	file:
+hlcolor	kilo/kilo.c	/^} hlcolor;$/;"	t	typeref:struct:hlcolor	file:
+i64	libc/maths.c	/^    long long i64;$/;"	m	union:__anon2	file:
+idx	kilo/kilo.c	/^    int idx;            \/* Row index in the file, zero-based. *\/$/;"	m	struct:erow	file:
+initEditor	kilo/kilo.c	/^void initEditor(void) {$/;"	f
+init_stderr	libc/stdio.c	/^int init_stderr()$/;"	f
+init_stdio	libc/stdio.c	/^int init_stdio()$/;"	f
+init_terminal	editor/main.c	/^void init_terminal(struct terminal_state* state, int screen_width, int screen_height, int font_width, int font_height) {$/;"	f
+inv_sqrt	libc/maths.c	/^double inv_sqrt(double x)$/;"	f
+ipow	libc/maths.c	/^double ipow(double x, uint32_t n)$/;"	f
+is_separator	kilo/kilo.c	/^int is_separator(int c) {$/;"	f
+isalnum	libc/string.c	/^bool isalnum(int c) {$/;"	f
+isalpha	libc/string.c	/^int isalpha(char c) {$/;"	f
+isdigit	libc/string.c	/^int isdigit(int c) {$/;"	f
+isspace	libc/string.c	/^int isspace(char c) {$/;"	f
+isxdigit	libc/string.c	/^int isxdigit(int c) {$/;"	f
+itoa	libc/string.c	/^void itoa(char *buf, int base, int d) {$/;"	f
+keywords	kilo/kilo.c	/^    char **keywords;$/;"	m	struct:editorSyntax	file:
+last_fat_lookup	libc/fileio.h	/^    struct cluster_lookup   last_fat_lookup;$/;"	m	struct:FL_FILE	typeref:struct:FL_FILE::cluster_lookup
+len	kilo/kilo.c	/^    int len;$/;"	m	struct:abuf	file:
+lines_per_screen	editor/editor.h	/^    int lines_per_screen;$/;"	m	struct:terminal_state
+list_node	libc/fileio.h	/^    struct fat_node         list_node;$/;"	m	struct:FL_FILE	typeref:struct:FL_FILE::fat_node
+ln	libc/maths.c	/^double ln(double y)$/;"	f
+log	libc/maths.c	/^double log(double x, double y)$/;"	f
+log10	libc/maths.c	/^double log10(double x)$/;"	f
+log2	libc/maths.c	/^uint32_t log2(uint32_t x)$/;"	f
+lower	libc/string.c	/^char lower(char c) {$/;"	f
+ls	libc/stdio.c	/^int ls(char *path)$/;"	f
+machine_eps	libc/maths.c	/^double machine_eps(double x)$/;"	f
+main	editor/main.c	/^int main(int argc, char argv[20][100])$/;"	f
+main	kilo/kilo.c	/^int main(int argc, char **argv) {$/;"	f
+main	shell/shell.c	/^int main(int argc, char argv[20][100])$/;"	f
+main	test/test.c	/^int main() {$/;"	f
+malloc	libc/stdlib.c	/^void* malloc(size_t size) {$/;"	f
+max	libc/maths.c	/^double max(double a, double b)$/;"	f
+memcmp	libc/string.c	/^int memcmp(uint8 *s1, uint8 *s2, uint32 n) {$/;"	f
+memcmp_string	libc/string.c	/^int memcmp_string(const void *aptr, const void *bptr, size_t size)$/;"	f
+memcpy	libc/string.c	/^void *memcpy(void *dst, const void *src, uint32 n) {$/;"	f
+memmove	libc/string.c	/^void* memmove(void* dest, const void* src, size_t size) {$/;"	f
+memset	libc/string.c	/^void *memset(void *dst, char c, uint32 n) {$/;"	f
+min	libc/maths.c	/^double min(double a, double b)$/;"	f
+msb	libc/maths.c	/^uint32_t msb(uint32_t v)$/;"	f
+multiline_comment_end	kilo/kilo.c	/^    char multiline_comment_end[3];$/;"	m	struct:editorSyntax	file:
+multiline_comment_start	kilo/kilo.c	/^    char multiline_comment_start[3];$/;"	m	struct:editorSyntax	file:
+next	libc/fileio.h	/^    struct fat_node    *next;$/;"	m	struct:fat_node	typeref:struct:fat_node::fat_node
+numrows	kilo/kilo.c	/^    int numrows;    \/* Number of rows *\/$/;"	m	struct:editorConfig	file:
+orig_termios	kilo/kilo.c	/^static struct termios orig_termios; \/* In order to restore at exit.*\/$/;"	v	typeref:struct:termios	file:
+out_fct_type	libc/printf.c	/^typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t maxlen);$/;"	t	file:
+out_fct_wrap_type	libc/printf.c	/^} out_fct_wrap_type;$/;"	t	typeref:struct:__anon1	file:
+parentcluster	libc/fileio.h	/^    uint32                  parentcluster;$/;"	m	struct:FL_FILE
+parse_string	libc/string.c	/^void parse_string(char *parser, char *string, char c)$/;"	f
+path	libc/fileio.h	/^    char                    path[260];$/;"	m	struct:FL_FILE
+pop_value	libc/stdio.c	/^int pop_value() {$/;"	f
+pow	libc/maths.c	/^double pow(double x, double y)$/;"	f
+prepare_args	libc/stdio.c	/^void prepare_args(uint32_t* args, const char* format, ...) {$/;"	f
+previous	libc/fileio.h	/^    struct fat_node    *previous;$/;"	m	struct:fat_node	typeref:struct:fat_node::fat_node
+printf	libc/printf.c	/^int printf(const char* format, ...)$/;"	f
+puts	libc/stdio.c	/^int puts(char *string)$/;"	f
+r	kilo/kilo.c	/^    int r,g,b;$/;"	m	struct:hlcolor	file:
+rand	libc/maths.c	/^int rand()$/;"	f
+rawmode	kilo/kilo.c	/^    int rawmode;    \/* Is terminal raw mode enabled? *\/$/;"	m	struct:editorConfig	file:
+realloc	libc/stdlib.c	/^void* realloc(void* ptr, size_t size) {$/;"	f
+render	kilo/kilo.c	/^    char *render;       \/* Row content "rendered" for screen (for TABs). *\/$/;"	m	struct:erow	file:
+reverse_int	libc/stdio.c	/^int reverse_int(int value) {$/;"	f
+reverse_uint32_user	libc/stdio.c	/^uint32_t reverse_uint32_user(uint32_t value) {$/;"	f
+rm_file	libc/file_io.c	/^int rm_file(const char * path)$/;"	f
+row	kilo/kilo.c	/^    erow *row;      \/* Rows *\/$/;"	m	struct:editorConfig	file:
+rowoff	kilo/kilo.c	/^    int rowoff;     \/* Offset of row displayed. *\/$/;"	m	struct:editorConfig	file:
+rsize	kilo/kilo.c	/^    int rsize;          \/* Size of the rendered row. *\/$/;"	m	struct:erow	file:
+scanf	libc/scanf.c	/^int scanf(const char* format, ...) {$/;"	f
+screen_height	editor/editor.h	/^    int screen_height;$/;"	m	struct:terminal_state
+screen_width	editor/editor.h	/^    int screen_width;$/;"	m	struct:terminal_state
+screencols	kilo/kilo.c	/^    int screencols; \/* Number of cols that we can show *\/$/;"	m	struct:editorConfig	file:
+screenrows	kilo/kilo.c	/^    int screenrows; \/* Number of rows that we can show *\/$/;"	m	struct:editorConfig	file:
+seed	libc/maths.h	/^static uint32_t seed = 0;$/;"	v
+set_pos	libc/terminal.c	/^int set_pos(int x,int y)$/;"	f
+set_term_attr	libc/termios.c	/^int set_term_attr(AthenXTerminal term)$/;"	f
+set_terminal_state	libc/terminal.c	/^int set_terminal_state(int x, int y, int r, int g, int b)$/;"	f
+shell	shell/shell.c	/^int shell(char buf[1001]) {$/;"	f
+shortfilename	libc/fileio.h	/^    uint8                   shortfilename[11];$/;"	m	struct:FL_FILE
+sin	libc/maths.c	/^double sin(double x)$/;"	f
+sin_1st_quadrant	libc/maths.c	/^double sin_1st_quadrant(double x)$/;"	f
+singleline_comment_start	kilo/kilo.c	/^    char singleline_comment_start[2];$/;"	m	struct:editorSyntax	file:
+sinh	libc/maths.c	/^double sinh(double x)$/;"	f
+size	kilo/kilo.c	/^    int size;           \/* Size of the row, excluding the null term. *\/$/;"	m	struct:erow	file:
+small_rand	libc/maths.c	/^int small_rand()$/;"	f
+snprintf	libc/printf.h	86;"	d
+snprintf_	libc/printf.c	/^int snprintf_(char* buffer, size_t count, const char* format, ...)$/;"	f
+sprintf	libc/printf.h	72;"	d
+sprintf_	libc/printf.c	/^int sprintf_(char* buffer, const char* format, ...)$/;"	f
+sqrt	libc/maths.c	/^double sqrt(double x)$/;"	f
+srand	libc/maths.c	/^void srand()$/;"	f
+ssize_t	libc/sys/types.h	/^typedef long ssize_t;$/;"	t
+startcluster	libc/fileio.h	/^    uint32                  startcluster;$/;"	m	struct:FL_FILE
+statusmsg	kilo/kilo.c	/^    char statusmsg[80];$/;"	m	struct:editorConfig	file:
+statusmsg_time	kilo/kilo.c	/^    time_t statusmsg_time;$/;"	m	struct:editorConfig	file:
+stderr	libc/stdio.h	/^FILE *stderr;$/;"	v
+stdio	libc/stdio.h	/^FILE *stdio;$/;"	v
+strcat	libc/string.c	/^void strcat(char *dest, const char *src) {$/;"	f
+strchr	libc/string.c	/^char* strchr(const char* str, int character) {$/;"	f
+strcmp	libc/string.c	/^int strcmp(const char *s1, char *s2) {$/;"	f
+strcpy	libc/string.c	/^int strcpy(char *dst, const char *src) {$/;"	f
+strcspn	libc/string.c	/^size_t strcspn(const char* str, const char* reject) {$/;"	f
+string_length	libc/string.c	/^int string_length(char s[]) {$/;"	f
+strlen	libc/string.c	/^int strlen(const char *s) {$/;"	f
+strncmp	libc/string.c	/^int strncmp(const char *s1, const char *s2, size_t n)$/;"	f
+strncpy	libc/string.c	/^char *strncpy(char *dst, const char *src, size_t n)$/;"	f
+strrchr	libc/string.c	/^char* strrchr(const char* str, int ch) {$/;"	f
+strstr	libc/string.c	/^char *strstr(char *s1, const char *s2)$/;"	f
+strtok	libc/string.c	/^char* strtok(char* str, const char* delimiters) {$/;"	f
+strtok_r	libc/string.c	/^char* strtok_r(char* str, const char* delim, char** saveptr) {$/;"	f
+strtol	libc/string.c	/^long strtol(const char* str, char** endptr, int base) {$/;"	f
+strtoul	libc/string.c	/^unsigned long strtoul(const char* str, char** endptr, int base) {$/;"	f
+strtoull	libc/string.c	/^unsigned long long strtoull(const char *str, char **endptr, int base) {$/;"	f
+swap	libc/string.h	6;"	d
+syntax	kilo/kilo.c	/^    struct editorSyntax *syntax;    \/* Current syntax highlight, or NULL. *\/$/;"	m	struct:editorConfig	typeref:struct:editorConfig::editorSyntax	file:
+tab32	libc/maths.c	/^const int tab32[32] = {$/;"	v
+tan	libc/maths.c	/^double tan(double x)$/;"	f
+tanh	libc/maths.c	/^double tanh(double x)$/;"	f
+tcflag_t	libc/termios.h	/^typedef unsigned int tcflag_t;$/;"	t
+tcgetattr	libc/termios.c	/^int tcgetattr(int fd, struct termios *termios_p) {$/;"	f
+terminal_state	editor/editor.h	/^struct terminal_state {$/;"	s
+termios	libc/termios.h	/^struct termios {$/;"	s
+test_ret	libc/stdio.c	/^int  test_ret(int in)$/;"	f
+time_t	libc/time.h	/^typedef long time_t;$/;"	t
+tokenizeCommand	shell/shell.c	/^int tokenizeCommand(const char* buffer, char tokens[][MAX_TOKEN_LENGTH]) {$/;"	f
+tolower	libc/string.c	/^int tolower(int c) {$/;"	f
+top_line_num	editor/editor.h	/^    int top_line_num;$/;"	m	struct:terminal_state
+total_lines	editor/editor.h	/^    int total_lines; \/\/ Add total_lines$/;"	m	struct:terminal_state
+typename	libc/maths.h	15;"	d
+updateWindowSize	kilo/kilo.c	/^void updateWindowSize(void) {$/;"	f
+upper	libc/string.c	/^char upper(char c) {$/;"	f
+vbe_rgb	libc/terminal.c	/^uint32 vbe_rgb(uint8 red, uint8 green, uint8 blue) {$/;"	f
+vprintf	libc/printf.h	98;"	d
+vprintf_	libc/printf.c	/^int vprintf_(const char* format, va_list va)$/;"	f
+vscanf	libc/scanf.c	/^int vscanf(const char* format, va_list args) {$/;"	f
+vsnprintf	libc/stdio.c	/^int vsnprintf(char* buffer, size_t size, const char* format, va_list ap) {$/;"	f
+vsnprintf_	libc/printf.c	/^int vsnprintf_(char* buffer, size_t count, const char* format, va_list va)$/;"	f
+winsize	libc/ioctl.h	/^struct winsize {$/;"	s
+ws_col	libc/ioctl.h	/^    unsigned short ws_col;$/;"	m	struct:winsize
+ws_row	libc/ioctl.h	/^    unsigned short ws_row;$/;"	m	struct:winsize
+ws_xpixel	libc/ioctl.h	/^    unsigned short ws_xpixel;$/;"	m	struct:winsize
+ws_ypixel	libc/ioctl.h	/^    unsigned short ws_ypixel;$/;"	m	struct:winsize

@@ -56,15 +56,26 @@ int ls(char *path)
 {
     syscall(SYS_LIST_DIR,path,0);
 }
-int fl_is_dir(char *path)
+int fl_is_dir(const char *path)
 {
     int r = syscall(SYS_IS_DIR,0,path);
    
-    printf("%s->%d\n",path,r);
+     printf("%s->%d\n",path,r);
      return r;
     
 }
-
+int init_stdio()
+{
+    // stdio.filelength = "stdio";
+    char *path = "/dev/stdio";
+    strcpy(stdio->filename, "stdio");
+    strcpy(stdio->path, path);
+}
+int init_stderr()
+{
+    char *path = "/dev/stderr";
+    
+}
 // int printf(const char* format, ...) {
 //     char buffer[1000];
 //     memset(buffer, 0, sizeof(buffer));

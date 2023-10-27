@@ -10,6 +10,7 @@
         "stdbool.h": "c",
         "string.h": "c",
         "bool.h": "c",
-        "scanf.h": "c"
+        "scanf.h": "c",
+        "termios.h": "c"
     }
 }

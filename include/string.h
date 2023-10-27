@@ -21,7 +21,7 @@ char *ctos(char s[2], const char c);
 void strcat(char *dest, const char *src);
 // char *strncpy(char *dst, const char *src, size_t n);
 int isspace(char c);
-
+void strncat(char* dest, const char* src, size_t destSize);
 int isalpha(char c);
 char upper(char c);
 char lower(char c);

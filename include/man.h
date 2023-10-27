@@ -1,6 +1,8 @@
 #ifndef __MAN__H
 #define __MAN__H
 
+#define MAX_CHUNKS 10
+#define MAX_CHUNK_SIZE ((1280 / 16) * (600 / 16) - (600 / 16)*2)
 void man_inspect();
 
 // For the 'pci' command
@@ -66,4 +68,9 @@ void man_edit();
 void man_main(const char* functionName);
 
 int man_list();
+
+
+void display_large_man_page(char* buffer, int screenHeight);
+
+int split_man_page_into_chunks(const char* buffer, char chunkArray[MAX_CHUNKS][MAX_CHUNK_SIZE]);
 #endif

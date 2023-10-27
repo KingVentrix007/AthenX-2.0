@@ -2,7 +2,8 @@
 #include "printf.h"
 #include "../../include/syscall.h"
 // fileio.c
-int fread(char *buffer,FILE *fp,size_t size)
+#define ATHENX_LIBC
+int athenx_fread(char *buffer,FILE *fp,size_t size)
 {
    
     parameters *parms;
@@ -33,9 +34,36 @@ FILE* fopen(const char *filename,char* mode)
     return fp;
 
 }
-int fwrite(FILE *fp,char* buffer)
+int athenx_fwrite(FILE *fp,char* buffer)
 {
     syscall(SYS_WRITE, fp, buffer);
+}
+
+size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream) {
+
+    struct file_io file;
+    file.ptr = ptr;
+    file.size = size;
+    file.count = count;
+    return syscall(SYS_FWRITE,stream,&file);
+    
+}
+size_t fread(void *ptr, size_t size, size_t count, FILE *stream) {
+    struct file_io file;
+    file.ptr = ptr;
+    file.size = size;
+    file.count = count;
+
+    size_t items_read = syscall(SYS_FREAD, stream, &file);
+
+    // Check if items were read successfully and handle errors if necessary
+    if (items_read < 0) {
+        // Handle the error here, return an error code, or perform error handling as needed.
+        printf("zero bytes read\n");
+        return items_read;
+    }
+
+    return items_read; // Return the number of items read.
 }
 void fclose(FILE *fp)
 {
@@ -53,16 +81,20 @@ int rm_file(const char * path)
 int fprintf(FILE *fp, const char* format, ...) {
     char buffer[4096]; // You can adjust the buffer size as needed.
     memset(buffer, 0, sizeof(buffer));
+    
     va_list args;
     va_start(args, format);
     
-    // Format the string using _vsnprintf_
+    // Format the string using vsnprintf
     int result = vsnprintf_(buffer, sizeof(buffer), format, args);
     va_end(args);
 
     if (result >= 0) {
         // Write the formatted string to the file using fwrite
-        if (fwrite(fp, buffer) == 0) {
+        size_t len = strlen(buffer);
+        size_t bytes_written = fwrite(buffer, sizeof(char), len, fp);
+        
+        if (bytes_written == len) {
             return 0; // Success
         }
     }
@@ -107,3 +139,17 @@ int fseek(FILE *f, long offset, int whence)
     parms->param2 = whence;
     syscall(SYS_FSEEK, f, parms);
 }
+#ifdef ATHENX_LIBC
+long get_file_size_from_pointer(FILE *file) {
+    if (file == NULL) {
+        return -1; // Return -1 to indicate that the file pointer is invalid
+    }
+
+    long current_position = ftell(file); // Get the current position
+    fseek(file, 0, SEEK_END); // Move the file pointer to the end of the file
+    long size = ftell(file); // Get the current position, which is the size
+    fseek(file, current_position, SEEK_SET); // Return the file pointer to its original position
+
+    return size;
+}
+#endif

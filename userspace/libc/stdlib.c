@@ -55,6 +55,7 @@ uint32_t atoi(const char *str)
  *   void* - A pointer to the allocated memory, or NULL if allocation fails.
  */
 void* malloc(size_t size) {
+    printf("\nrequested %d bytes of memory\n", size);
     void* memory = syscall(SYS_MMAP,size,0);
     if (memory == NULL) {
         // Allocation failed

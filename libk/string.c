@@ -646,7 +646,7 @@ char* strdup(const char* str) {
     size_t length = strlen(str) + 1;
 
     // Allocate memory for the duplicated string
-    char* duplicate = (char*)malloc(length);
+    char* duplicate = (char*)kmalloc(length);
 
     if (duplicate == NULL) {
         // Memory allocation failed
@@ -658,3 +658,23 @@ char* strdup(const char* str) {
      return duplicate;
 }
    
+
+void strncat(char* dest, const char* src, size_t destSize) {
+    size_t destLen = strlen(dest);
+    size_t srcLen = strlen(src);
+
+    // Calculate available space in the destination buffer
+    size_t availableSpace = destSize - destLen;
+
+    // Check if there's enough space to concatenate the source string
+    if (srcLen >= availableSpace) {
+        // Truncate the source string if it's too long
+        srcLen = availableSpace - 1;
+    }
+
+    // Copy the source string into the destination
+    strncpy(dest + destLen, src, srcLen);
+
+    // Null-terminate the resulting string
+    dest[destLen + srcLen] = '\0';
+}

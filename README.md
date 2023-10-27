@@ -154,6 +154,14 @@ Simply add any changes you want then and save them, then type 'make run' and wat
 ## User programs
 
 Creating userspace programs for AthenX is always incouraged, please read this [documentation for more information](/docs/Manuals+roadmaps/Creating+running%20user%20programs.md)
+
+## Ports
+Currently I am attempting to port some software to AthenX-2.0
+This is one area where **ANY** contribution will be almost certainly implemented into AthenX-2.0
+Software currently being ported:
+
+- [ ] [Kilo](https://github.com/antirez/kilo) text editor - [TODO](/userspace/kilo/contribute.md#these-are-the-missing-functions-that-i-need-to-create-in-order-to-successfully-port-kilo-any-contribution-to-this-list-will-be-greatly-appreciated)
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated** even if i don't add it to the main project.
