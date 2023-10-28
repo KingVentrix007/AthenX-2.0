@@ -16,3 +16,4 @@ main
 load
 *.fat
 inspect/
+!obj/arch/syscall.o
