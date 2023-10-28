@@ -818,7 +818,12 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
         {
              printf("Usage: load [command]\n");
         }
-    } else if (strcmp(arguments[0], "cls") == 0) {
+    }else if (strcmp(arguments[0],"man") == 0)
+    {
+        man(arguments[1]);
+    }
+     
+    else if (strcmp(arguments[0], "cls") == 0) {
         // Implement the cls command to clear the screen
         set_screen_x(0);
         set_screen_y(0);
@@ -888,7 +893,7 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
             printf("Usage: cat [file]\n");
         }
     } else {
-                int index = search_program(programs,2,arguments[0]);
+                int index = search_program(programs,20,arguments[0]);
         
         if (index != -1)
         {

@@ -41,6 +41,11 @@
 #define SYS_LAZY_MAN 37
 #define SYS_FWRITE 38
 #define SYS_FREAD 39
+#define SYS_IS_PATH 40
+#define SYS_FGETC 41
+#define SYS_FGETS 42
+#define SYS_FPUTS 43
+#define SYS_FPUTC 44
 typedef struct param_struct
 {
     char* param1;
@@ -63,6 +68,16 @@ struct file_io {
     size_t size;
     size_t count;
 };
+struct syscall
+{
+    int num_paraters; // the total number of parameters
+    int all_one_type; // all the parameters are one type
+    uint32 parameter1; // the first parameter
+    uint32 parameter2; // the second parameter
+    uint32 parameter3; // the third parameter
+    uint32 pointer; // Pointer to anther structure
+};
+
 typedef struct {
     uint32_t font_color;  // Font color (RGB value)
     uint32_t bg_color;    // Background color (RGB value)

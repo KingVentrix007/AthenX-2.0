@@ -1,0 +1,65 @@
+AMIX(1)                User Commands                AMIX(1)
+
+NAME
+       amix - A command-line utility for various tasks.
+
+SYNOPSIS
+       amix [OPTION]... [SUBCOMMAND]...
+
+DESCRIPTION
+       The amix command is a versatile command-line utility that provides various subcommands for performing different tasks. This man page describes the "fsearch" and "search" subcommands.
+
+SUBCOMMANDS
+       - fsearch       Search for a word or phrase in a file and display the first match.
+
+       - search        Search for a word or phrase in a file and count the matches.
+
+OPTIONS
+       None currently supported.
+
+USAGE
+       To use amix subcommands, type the desired subcommand followed by its arguments.
+
+amix-fsearch SUBCOMMAND OPTIONS
+       The amix-fsearch command is used to search for a specific word or phrase in a text file and display the first match. It supports the following options:
+
+       - file_path: The path to the file in which you want to search.
+
+       - search_text: The word or phrase you want to search for.
+
+       - case_sensitive: An optional flag (1 for case-sensitive, 0 for case-insensitive, default is case-insensitive).
+
+EXAMPLES
+       - To search for the word "example" in a file: amix fsearch file.txt example
+
+       - To perform a case-sensitive search: amix fsearch file.txt example 1
+
+amix-search SUBCOMMAND OPTIONS
+       The amix-search command is used to search for a specific word or phrase in a text file and count the matches. It supports the following options:
+
+       - file_path: The path to the file in which you want to search.
+
+       - search_text: The word or phrase you want to search for.
+
+       - case_sensitive: An optional flag (1 for case-sensitive, 0 for case-insensitive, default is case-insensitive).
+
+AUTHOR
+       The amix command was created by [Your Name].
+
+COPYRIGHT
+       This is free software; you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation; either version 3 of the License, or
+       (at your option) any later version.
+
+       This program is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+       GNU General Public License for more details.
+
+       You should have received a copy of the GNU General Public License
+       along with this program; if not, write to the Free Software Foundation,
+       Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+SEE ALSO
+       More information on the amix command and its subcommands may be available in the system documentation.

@@ -67,14 +67,29 @@ int fl_is_dir(const char *path)
 int init_stdio()
 {
     // stdio.filelength = "stdio";
-    char *path = "/dev/stdio";
+    char path[20] = "/dev/stdio";
     strcpy(stdio->filename, "stdio");
     strcpy(stdio->path, path);
+    
 }
 int init_stderr()
 {
-    char *path = "/dev/stderr";
+    char path[20] = "/dev/stderr";
+    strcpy(stderr->filename, "stderr");
+    strcpy(stderr->path, path);
     
+}
+int init_stdlog()
+{
+    char path[20] = "/dev/stdlog";
+    strcpy(stderr->filename, "stdlog");
+    strcpy(stderr->path, path);
+}
+int init_libc()
+{
+    init_stdio();
+    init_stdlog();
+    init_stderr();
 }
 // int printf(const char* format, ...) {
 //     char buffer[1000];
@@ -247,4 +262,8 @@ int get_scan_code()
 
 {
     return syscall(SYS_GET_SCAN,0,0);
+}
+void perror(const char *s)
+{
+    printf("%s\n",s);
 }

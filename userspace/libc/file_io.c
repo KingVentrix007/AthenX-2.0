@@ -1,6 +1,7 @@
 #include "fileio.h"
 #include "printf.h"
 #include "../../include/syscall.h"
+#include "stdio.h"
 // fileio.c
 #define ATHENX_LIBC
 int athenx_fread(char *buffer,FILE *fp,size_t size)
@@ -139,6 +140,81 @@ int fseek(FILE *f, long offset, int whence)
     parms->param2 = whence;
     syscall(SYS_FSEEK, f, parms);
 }
+
+
+
+
+
+
+
+/**
+ * Function Name: fgetc
+ * Description: Reads the next character from the specified file.
+ *
+ * Parameters:
+ *   stream (FILE*) - A pointer to the file stream from which to read.
+ *
+ * Return:
+ *   On success, the character read is returned as an unsigned char cast to an int. If the end of the file is reached or an error occurs, it returns EOF.
+ */
+int fgetc(FILE* stream)
+{
+    return syscall(SYS_FGETC, stream,0);
+}
+
+/**
+ * Function Name: fputc
+ * Description: Writes a character to the specified file.
+ *
+ * Parameters:
+ *   c (int) - The character to be written.
+ *   stream (FILE*) - A pointer to the file stream where the character will be written.
+ *
+ * Return:
+ *   On success, the character written is returned. If an error occurs, it returns EOF.
+ */
+int fputc(int c, FILE* stream)
+{
+    return syscall(SYS_FPUTC,stream,c);
+}
+
+/**
+ * Function Name: fputs
+ * Description: Writes a string to the specified file.
+ *
+ * Parameters:
+ *   str (const char*) - The string to be written.
+ *   stream (FILE*) - A pointer to the file stream where the string will be written.
+ *
+ * Return:
+ *   On success, a non-negative value is returned. If an error occurs, it returns EOF.
+ */
+int fputs(const char* str, FILE* stream)
+{
+   return syscall(SYS_FPUTS,str,stream);
+}
+
+/**
+ * Function Name: fgets
+ * Description: Reads a line of text from the specified file and stores it in the provided buffer.
+ *
+ * Parameters:
+ *   str (char*) - A pointer to the buffer where the read line is stored.
+ *   size (int) - The maximum number of characters to be read, including the null-terminating character.
+ *   stream (FILE*) - A pointer to the file stream from which to read.
+ *
+ * Return:
+ *   On success, it returns the same `str` pointer. If an error occurs or the end of the file is reached, it returns NULL.
+ */
+char* fgets(char* str, int size, FILE* stream)
+{
+    struct syscall p;
+    p.parameter1 = str;
+    p.parameter2 = size;
+    return syscall(SYS_FGETS, &p, stream);
+}
+
+
 #ifdef ATHENX_LIBC
 long get_file_size_from_pointer(FILE *file) {
     if (file == NULL) {
@@ -151,5 +227,10 @@ long get_file_size_from_pointer(FILE *file) {
     fseek(file, current_position, SEEK_SET); // Return the file pointer to its original position
 
     return size;
+}
+
+int is_dir(char *path)
+{
+    return syscall(SYS_IS_PATH, path,0);
 }
 #endif

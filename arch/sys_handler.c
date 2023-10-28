@@ -101,6 +101,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
     int result = 0;
      FILE *fp;
      parameters *parmss;
+     struct syscall *s;
      Entry dirs[MAX];
     Entry files[MAX];
      int dir_count = 0;
@@ -255,6 +256,9 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             printf("PATH: %s == %d\n", param2,result);
             // result = -909;
             break;
+        case SYS_IS_PATH:
+            result = fl_is_dir(param1);
+            break;
         case SYS_CREATE:
             fp = fopen(param1, "a");
             fclose(fp);
@@ -292,7 +296,11 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             return kcalloc(param1, param2);
             break;
         case SYS_REALLOC:
-            return krealloc(param1, param2);
+            result = krealloc((void *)param1, (size_t)param2);
+            if(result == NULL)
+            {
+                printf("realloc failed\n");
+            }
             break;
         case SYS_LAZY_MAN:
             man_main((char *)param1);
@@ -331,6 +339,20 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             
             // printf("syscall output: \n%s",io_read->ptr);
             break;
+        case SYS_FGETC:
+            result =  fl_fgetc((FL_FILE *)param1);
+            break;
+        case SYS_FPUTC:
+            result = fl_fputc((FL_FILE *)param1,param2);
+            break;
+        case SYS_FPUTS:
+            result = fl_fputc(param1,(FL_FILE * )param2);
+            break;
+        case SYS_FGETS:
+            s = (struct syscall *)param1;
+            result = fl_fgets(s->parameter1,s->parameter2,(FL_FILE * )param2);
+            break;
+
         default:
             printf("Unknown syscall number\n");
             break;

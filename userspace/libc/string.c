@@ -606,3 +606,22 @@ size_t strcspn(const char* str, const char* reject) {
     }
     return length;
 }
+char *strdup(const char *src) {
+    // Check if the source string is NULL
+    if (src == NULL) {
+        return NULL;
+    }
+
+    // Allocate memory for the new string
+    char *dst = (char *)malloc(strlen(src) + 1);
+
+    // Check if memory allocation was successful
+    if (dst == NULL) {
+        return NULL;
+    }
+
+    // Copy the source string to the newly allocated memory
+    strcpy(dst, src);
+
+    return dst;
+}

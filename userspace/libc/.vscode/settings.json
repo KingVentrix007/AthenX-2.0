@@ -11,6 +11,8 @@
         "string.h": "c",
         "bool.h": "c",
         "scanf.h": "c",
-        "termios.h": "c"
+        "termios.h": "c",
+        "cstdio": "c",
+        "fileio.h": "c"
     }
 }

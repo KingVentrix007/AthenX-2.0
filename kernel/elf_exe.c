@@ -249,7 +249,8 @@ void load_elf_executable(uint8_t* elf_data,int myArgc,char* myArgv[]) {
     if (stack_size > 0) {
         printf("Stack size: %zu bytes\n", stack_size);
     } else {
-        printf("No stack size information found in the ELF header\n");
+        printf("\n");
+        // printf("No stack size information found in the ELF header\n");
     }
     run_elf(my_elf,myArgc,myArgv);
 
