@@ -1,10 +1,10 @@
-*.o
 
-obj/*.o
+
+*.o
 obj/*.bin
 *.iso
 *.log
-obj/
+obj/**/*.o
 FAT32_IMG/
 *.img
 serial.log
@@ -17,3 +17,5 @@ load
 *.fat
 inspect/
 !obj/arch/syscall.o
+
+
