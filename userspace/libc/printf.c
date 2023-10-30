@@ -917,8 +917,5 @@ int fctprintf(void (*out)(char character, void* arg), void* arg, const char* for
 void _putchar(char chr)
 {
   int c = syscall(SYS_PUTCHAR,chr,0);
-  // if(c != chr) 
-  // { 
-  //   for(;;);
-  // }
+
 }

@@ -57,11 +57,11 @@ int update_status(const char *file, size_t matchs)
     int x = get_x();    
     int y = get_y(); 
     // printf("\nHELLO -> x=%d y=%d \n",x,y);
-    set_x(100*16); 
-    set_y(16); 
+    set_x(768); 
+    set_y(100); 
     printf("%d matches found in %s\n", matchs,file); 
-    set_x(x);  
-    set_y(y); 
+    set_x(y);   
+    set_y(x); 
     // for(;;);  
 } 
 
@@ -147,9 +147,10 @@ int csearch_file(const char *file_path, const char *search_text, int case_sensit
     char* copy = strdup(buffer);
     char *token = strtok(copy, " "); // Split the text at spaces.
      while (token != NULL) {
+        update_status(file_path,m);
         if(strcmp(token, search_text) == 0)
         {
-            update_status(file_path,m);
+            
             m++;
             set_font_c(255, 255, 0);
             set_bg_c(0,0,255);
@@ -158,6 +159,7 @@ int csearch_file(const char *file_path, const char *search_text, int case_sensit
         token = strtok(NULL, " "); // Get the next token.
         set_font_c(0,255,0);
         set_bg_c(0,0,0);
+        update_status(file_path,m);
         
     }
     free(buffer);

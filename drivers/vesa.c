@@ -169,6 +169,54 @@ void scroll_lines(int lines) {
         destination[bytesToCopy / sizeof(uint32_t) + i] = VBE_RGB(0, 0, 0);
     }
 }
+void scroll_line(int lines) {
+    int n = lines;
+
+    // Define the dimensions of the square to ignore in the top right corner
+    int squareWidth = 200;
+    int squareHeight = 200;
+
+    // Calculate the number of bytes to copy and the destination address for the main scrolling area
+    size_t bytesToCopy = (g_width - squareWidth) * (g_height - n) * sizeof(uint32_t);
+    uint32_t* destination = g_vbe_buffer;
+
+    // Calculate the number of bytes to clear
+    size_t bytesToClear = (g_width * n) * sizeof(uint32_t);
+
+    // Perform the copy operation for the main scrolling area
+    for (int y = n; y < g_height; y++) {
+        for (int x = squareWidth; x < g_width; x++) {
+            int srcIndex = y * g_width + x;
+            int destIndex = (y - n) * g_width + (x - squareWidth);
+            destination[destIndex] = g_vbe_buffer[srcIndex];
+        }
+    }
+
+    // Leave the top right corner unaffected
+    for (int y = 0; y < squareHeight; y++) {
+        for (int x = 0; x < squareWidth; x++) {
+            int cornerIndex = (y * squareWidth + x);
+            destination[cornerIndex] = g_vbe_buffer[cornerIndex];
+        }
+    }
+
+    // Fill the cleared lines with red pixels (you can change the color as needed)
+    for (size_t i = 0; i < bytesToClear / sizeof(uint32_t); i++) {
+        destination[bytesToCopy / sizeof(uint32_t) + i] = VBE_RGB(0, 0, 0);
+    }
+}
+// In this updated code, we subtract the squareWidth from the width when calculating bytesToCopy. This way, it ignores the 200x200 square in the top right corner when scrolling. The rest of the code remains similar to the original implementation.
+
+// Please note that this code assumes that the g_vbe_buffer, g_width, and g_height variables are correctly defined in your program. You may need to adapt the code to your specific implementation.
+
+
+
+
+// Is this conversation helpful so far?
+
+
+
+
 void shift_text_lines_up() {
     int totalLines = g_height / 16; // Assuming each text line is 16 pixels high
 

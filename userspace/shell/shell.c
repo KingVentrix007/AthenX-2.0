@@ -29,7 +29,8 @@ int main(int argc, char **argv)
     char *buf = (char*)malloc(1001);
     memset(buf, 0, sizeof(buf));
     buf[0] = '\0';
-    while(1==1)
+    
+    while(1)
     {
         // printf("HERE>");
         char c = get_char();
@@ -40,7 +41,7 @@ int main(int argc, char **argv)
                 free(buf);
                 return 0;
             }
-            memset(buf, 0, sizeof(buf));
+            buf[0] = '\0';
             printf("\nshell>");
         }
         else if (c == '\0')
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
             printf("%c",c);
             Sappend(buf, c);
         }
-        
+        // printf("hello\n");
     }
 }
 
@@ -279,7 +280,10 @@ int shell(char buf[1001]) {
     {
         
         int x = get_x();
-        printf("\nx=%d\n",x);
+        // set_x(x+900);
+        printf("food"); 
+        // int y = get_y();
+        // printf("\ny=%d\n",y); 
         // return 0;
     }
     else if (strcmp("write",arguments[0]) == 0) 

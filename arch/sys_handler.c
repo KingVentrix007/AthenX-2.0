@@ -314,7 +314,7 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
         case SYS_PUTCHAR:
 
             printf("%c",param1);
-            result = param1;
+            // result = param1;
             break;
         case SYS_RM:
             remove(param1);
@@ -445,12 +445,12 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             set_bg_color32(term->color);
             break;
         case SYS_SET_X:
-            printf("set-x =%d\n",param1);
-            set_screen_x(param1);
+            // printf("set-x =%d\n",param1);
+            set_vesa_colum(param1);
             break;
         case SYS_SET_Y:
-            set_screen_y(param1);
-            printf("set-t =%d\n",param1);
+            set_vesa_row(param1);
+            // printf("set-t =%d\n",param1);
             break;
         case SYS_GET_X:
            
