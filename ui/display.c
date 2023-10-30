@@ -63,6 +63,14 @@ int set_font_c(int r,int g,int b)
     // beep();
     // printf_("set_font_c(%d,%d,%d)",r,g,b);
 }
+int set_font_c32(uint32_t c)
+{
+    font_color = c;
+}
+int set_bg_color32(uint32_t c)
+{
+    background_color = c;
+}
 uint32 get_font_color()
 {
     return font_color;
@@ -142,7 +150,7 @@ void set_screen_y(int y)
 }
 int get_screen_x()
 {
-    size_t x;
+    int x;
     if(display_mode_screen == 0)
     {
        x = get_vesa_row();

@@ -5,17 +5,14 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/libc",
-                "../include/**",
+                "../include/",
                 "/home/king/OsDev/basekernel/cross/lib/gcc/i686-elf/8.2.0/include/"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/home/king/OsDev/basekernel/cross/bin/i686-elf-gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64",
-            "forcedInclude": [
-                "<path_to_your_header.h>"
-            ],
             "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],

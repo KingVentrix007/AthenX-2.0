@@ -23,11 +23,18 @@ uint32 * BackBuffer = NULL;
 uint32 vbe_get_width() {
     return g_width;
 }
-
+int get_pitch()
+{
+    return Pitch;
+}
 uint32 vbe_get_height() {
     return g_height;
 }
 
+uint32 *get_g_vbe_buffer()
+{
+    return g_vbe_buffer;
+}
 // get vbe info
 int get_vbe_info() {
     REGISTERS16 in = {0}, out = {0};
@@ -223,7 +230,7 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp) {
         /* The pitch is the amount of bytes between the start of each row. This isn't always bytes * width. */
         /* This should work for the basic 16 and 32 bpp modes (but not 24) */
         Pitch = g_width * PixelStride;
-        BackBuffer = ((uint32 *) (kmalloc(g_height * Pitch)));
+        // BackBuffer = ((uint32 *) (kmalloc(g_height * Pitch)));
 
     #endif
     printf_("END\n");

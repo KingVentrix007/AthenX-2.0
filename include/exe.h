@@ -21,7 +21,7 @@ typedef struct {
     char name[256]; // Adjust the size as needed
 } ProgramEntry;
 #define MAX_PROGRAMS 100
-void load_elf_file(const char* filename, int argc, const char** argv);
+void load_elf_file(const char* filename, int argc, char **argv);
 void load_exe_file(const char* filename, uint8_t* stack);
 int find_programs(const char *path);
 int get_program_list(char *list[MAX_PROGRAMS]);

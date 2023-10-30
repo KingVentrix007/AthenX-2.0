@@ -10,6 +10,7 @@
 #include "../include/isr.h"
 #include "../include/x86_reg.h"
 #include "printf.h"
+#include "../include/sys_handler.h"
 #define PT_GNU_STACK	(PT_LOOS + 0x474e551)
 addr original_esp;
 addr original_ebp;
@@ -85,6 +86,7 @@ void run_elf(struct elf_exe elf, int myArgc,char* myArgv[]) {
         :
         : "r"(&stack)
     );
+    deallocate_untracked_memory();
 }    
 
 
@@ -191,7 +193,8 @@ void switch_to_user_mode(UserProcessContext *user_context, KernelContext *kernel
     );
 }
 // Function to load and execute an ELF executable
-void load_elf_executable(uint8_t* elf_data,int myArgc,char* myArgv[]) {
+void load_elf_executable(uint8_t* elf_data,int myArgc,char **myArgv) {
+    printf("ARR = %s\n",myArgv[1]);
     FUNC_ADDR_NAME(&load_elf_executable,1,"u");
     // Verify ELF magic number.
     size_t stack_size = 0;
@@ -266,7 +269,8 @@ void exit_elf(KernelContext* location)
     );
     terminal_main();
 }
-void load_elf_file(const char* filename, int argc, const char** argv) {
+void load_elf_file(const char* filename, int argc, char **argv) {
+    printf("AR = %s\n",argv[1]);
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
         // Handle file opening error.

@@ -31,9 +31,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <stdbool.h>
-#include <stdint.h>
+#include "stdint.h"
 #include "printf.h"
-#include "../../include/syscall.h"
+ #include "syscall.h"
 
 // define this globally (e.g. gcc -DPRINTF_INCLUDE_CONFIG_H ...) to include the
 // printf_config.h header file
@@ -916,5 +916,9 @@ int fctprintf(void (*out)(char character, void* arg), void* arg, const char* for
 
 void _putchar(char chr)
 {
-  syscall(SYS_PUTCHAR,chr,0);
+  int c = syscall(SYS_PUTCHAR,chr,0);
+  // if(c != chr) 
+  // { 
+  //   for(;;);
+  // }
 }

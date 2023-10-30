@@ -1,0 +1,4 @@
+int time(void)
+{
+    return;
+}

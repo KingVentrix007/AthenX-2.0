@@ -40,28 +40,11 @@
         "array": "c",
         "string_view": "c",
         "initializer_list": "c",
-        "utility": "c"
-    },
-    "configurations": [
-        {
-            "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/libc", // Include your custom libc directory
-                "${workspaceFolder}/include/syscall.h" // Include the syscall.h file
-            ],
-            "defines": [],
-            "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64",
-            "forcedInclude": ["<path_to_your_header.h>"]
-        }
-    ],
-    "version": 4,
-    // "C_Cpp.default.includePath": [
-    //     "${workspaceFolder}/libc", // Include your custom libc directory
-    //     "/home/king/OsDev/basekernel/cross/lib/gcc/i686-elf/8.2.0/include" // Include the cross-compiler's include directory
-    // ]
+        "utility": "c",
+        "system_error": "c",
+        "fcntl.h": "c",
+        "termios.h": "c",
+        "terminal.h": "c"
+    }
     
 }

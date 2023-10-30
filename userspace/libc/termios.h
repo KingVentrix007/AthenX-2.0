@@ -1,6 +1,6 @@
 #ifndef __TERMIOS__H
 #define __TERMIOS__H
-#include "../../include/syscall.h"
+#include "syscall.h"
 typedef unsigned int tcflag_t;
 typedef unsigned char cc_t;
 #define NCCS 20

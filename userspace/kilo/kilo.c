@@ -205,14 +205,14 @@ static struct termios orig_termios; /* In order to restore at exit.*/
 void disableRawMode(int fd) {
     /* Don't even check the return value as it's too late. */
     if (E.rawmode) {
-        tcsetattr(fd,TCSAFLUSH,&orig_termios);
+        // tcsetattr(fd,TCSAFLUSH,&orig_termios);
         E.rawmode = 0;
     }
 }
 
 /* Called at exit to avoid remaining in raw mode. */
 void editorAtExit(void) {
-    disableRawMode(STDIN_FILENO);
+    // disableRawMode(STDIN_FILENO);
 }
 
 /* Raw mode: 1960 magic shit. */
@@ -220,9 +220,9 @@ int enableRawMode(int fd) {
     struct termios raw;
 
     if (E.rawmode) return 0; /* Already enabled. */
-    if (!isatty(STDIN_FILENO)) goto fatal;
-    atexit(editorAtExit);
-    if (tcgetattr(fd,&orig_termios) == -1) goto fatal;
+    // if (!isatty(STDIN_FILENO)) goto fatal;
+    // atexit(editorAtExit);
+    // if (tcgetattr(fd,&orig_termios) == -1) goto fatal;
 
     raw = orig_termios;  /* modify the original mode */
     /* input modes: no break, no CR to NL, no parity check, no strip char,
@@ -251,56 +251,45 @@ fatal:
 
 /* Read a key from the terminal put in raw mode, trying to handle
  * escape sequences. */
-int editorReadKey(int fd) {
-    int nread;
-    char c, seq[3];
-    while ((nread = read(fd,&c,1)) == 0);
-    if (nread == -1) exit(1);
+int editorReadKey() {
+    char c = get_char(); // Use your get_char() function to get input character.
 
-    while(1) {
-        switch(c) {
-        case ESC:    /* escape sequence */
-            /* If this is just an ESC, we'll timeout here. */
-            if (read(fd,seq,1) == 0) return ESC;
-            if (read(fd,seq+1,1) == 0) return ESC;
-
-            /* ESC [ sequences. */
-            if (seq[0] == '[') {
-                if (seq[1] >= '0' && seq[1] <= '9') {
-                    /* Extended escape, read additional byte. */
-                    if (read(fd,seq+2,1) == 0) return ESC;
-                    if (seq[2] == '~') {
-                        switch(seq[1]) {
+    // Check for ESC sequences and map them to Kilo key codes.
+    if (c == ESC) {
+        char seq1 = get_char();
+        char seq2 = get_char();
+        if (seq1 == '[') {
+            if (seq2 >= '0' && seq2 <= '9') {
+                char seq3 = get_char();
+                if (seq3 == '~') {
+                    switch (seq2) {
                         case '3': return DEL_KEY;
                         case '5': return PAGE_UP;
                         case '6': return PAGE_DOWN;
-                        }
                     }
-                } else {
-                    switch(seq[1]) {
+                }
+            } else {
+                switch (seq2) {
                     case 'A': return ARROW_UP;
                     case 'B': return ARROW_DOWN;
                     case 'C': return ARROW_RIGHT;
                     case 'D': return ARROW_LEFT;
                     case 'H': return HOME_KEY;
                     case 'F': return END_KEY;
-                    }
                 }
             }
-
-            /* ESC O sequences. */
-            else if (seq[0] == 'O') {
-                switch(seq[1]) {
+        } else if (seq1 == 'O') {
+            switch (seq2) {
                 case 'H': return HOME_KEY;
                 case 'F': return END_KEY;
-                }
             }
-            break;
-        default:
-            return c;
         }
     }
+
+    // If it's not an ESC sequence, return the character itself.
+    return c;
 }
+
 
 /* Use the ESC [6n escape sequence to query the horizontal cursor position
  * and return it. On error -1 is returned, on success the position of the
@@ -310,7 +299,7 @@ int getCursorPosition(int ifd, int ofd, int *rows, int *cols) {
     unsigned int i = 0;
 
     /* Report cursor location */
-    if (write(ofd, "\x1b[6n", 4) != 4) return -1;
+    if (kilo_write(ofd, "\x1b[6n", 4) != 4) return -1;
 
     /* Read the response: ESC [ rows ; cols R */
     while (i < sizeof(buf)-1) {
@@ -341,14 +330,14 @@ int getWindowSize(int ifd, int ofd, int *rows, int *cols) {
         if (retval == -1) goto failed;
 
         /* Go to right/bottom margin and get position. */
-        if (write(ofd,"\x1b[999C\x1b[999B",12) != 12) goto failed;
+        if (kilo_write(ofd,"\x1b[999C\x1b[999B",12) != 12) goto failed;
         retval = getCursorPosition(ifd,ofd,rows,cols);
         if (retval == -1) goto failed;
 
         /* Restore position. */
         char seq[32];
         snprintf(seq,32,"\x1b[%d;%dH",orig_row,orig_col);
-        if (write(ofd,seq,strlen(seq)) == -1) {
+        if (kilo_write(ofd,seq,strlen(seq)) == -1) {
             /* Can't recover... */
         }
         return 0;
@@ -834,10 +823,10 @@ int editorSave(void) {
     int fd = open(E.filename,O_RDWR|O_CREAT,0644);
     if (fd == -1) goto writeerr;
 
-    /* Use truncate + a single write(2) call in order to make saving
+    /* Use truncate + a single kilo_write(2) call in order to make saving
      * a bit safer, under the limits of what we can do in a small editor. */
     if (ftruncate(fd,len) == -1) goto writeerr;
-    if (write(fd,buf,len) != len) goto writeerr;
+    if (kilo_write(fd,buf,len) != len) goto writeerr;
 
     close(fd);
     free(buf);
@@ -848,7 +837,7 @@ int editorSave(void) {
 writeerr:
     free(buf);
     if (fd != -1) close(fd);
-    editorSetStatusMessage("Can't save! I/O error: %s",strerror(errno));
+    editorSetStatusMessage("Can't save! I/O error: %s","Woops i made a mistaken");
     return 1;
 }
 
@@ -994,7 +983,7 @@ void editorRefreshScreen(void) {
     snprintf(buf,sizeof(buf),"\x1b[%d;%dH",E.cy+1,cx);
     abAppend(&ab,buf,strlen(buf));
     abAppend(&ab,"\x1b[?25h",6); /* Show cursor. */
-    write(STDOUT_FILENO,ab.b,ab.len);
+    kilo_write(STDOUT_FILENO,ab.b,ab.len);
     abFree(&ab);
 }
 

@@ -45,6 +45,8 @@ system_call_handler:
     pop ebx
     ;pop eax
     add esp, 4 ; skip pushed eax - return result for system_call_handle_c
+    ; cmp eax, 500
+    ; je $
 
-    
-    iretd
+    sti
+    iret

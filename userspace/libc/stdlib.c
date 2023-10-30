@@ -1,5 +1,5 @@
 
-#include "../../include/syscall.h"
+ #include "syscall.h"
 #include "stddef.h"
 #include "stdlib.h"
 #define INT_MAX 2147483647

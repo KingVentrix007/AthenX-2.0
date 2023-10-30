@@ -875,31 +875,20 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
         }
           }
    }
-    } else if (strcmp(arguments[0], "cat") == 0) {
-        // Implement the cat command to display file contents
-        if (arg_count >= 2) {
-            char path[FATFS_MAX_LONG_FILENAME] = "";
-        strcat(path,cwd);
-        strcat(path,"/");
-        strcat(path,arguments[1]);
-        printf("\n");
-        printf("Reading file at: %s\n",path);
-        clear_display();
-        clear_screen();
-        set_screen_x(0);
-        set_screen_y(0);
-        displayFileContents(path);
-        } else {
-            printf("Usage: cat [file]\n");
-        }
-    } else {
+    }  else {
                 int index = search_program(programs,20,arguments[0]);
         
         if (index != -1)
         {
             set_scroll_mode(1);
+             set_scroll_mode(0);
             char tmp[20] = "/sys/";
+            if(strcmp(arguments[0],"cat") == 0)
+            {
+                set_scroll_mode(2);
+            }
             strcat(tmp,programs[index]);
+            printf("A= %s\n",arguments[1]);
             load_elf_file(tmp,arg_count,arguments);
             set_scroll_mode(0);
 

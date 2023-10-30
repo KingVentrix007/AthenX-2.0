@@ -2,7 +2,7 @@
 #ifdef ATHENX_OS
 #include "athneX.h"
 #include "stddef.h"
-#include "../../include/syscall.h"
+ #include "syscall.h"
 
 
 

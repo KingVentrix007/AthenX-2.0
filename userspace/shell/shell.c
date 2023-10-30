@@ -17,29 +17,32 @@ void Sappend(char *buf, char c) {
         buf[len + 1] = '\0';  
     }
 }
-char *cwd = "/";  
-int main(int argc, char argv[20][100])
+char cwd[100] = "/";  
+int main(int argc, char **argv)
 {
     strcpy(cwd, argv[1]);
     printf("Welcome to the shell!\n");
     printf("\nShell>");
     // set_pos(100,100);
-    printf("Press any key to continue\n");
+    // printf("Press any key to continue\n"); 
     // char buf[1001];
     char *buf = (char*)malloc(1001);
+    memset(buf, 0, sizeof(buf));
+    buf[0] = '\0';
     while(1==1)
     {
+        // printf("HERE>");
         char c = get_char();
         if (c == '\n') {
             // printf("\nBUFFER %s\n", buf);
             printf("\n");
             if (shell(buf) == -567) {
-                
-                return -1;
+                free(buf);
+                return 0;
             }
             memset(buf, 0, sizeof(buf));
-            printf("\nShell>");
-}
+            printf("\nshell>");
+        }
         else if (c == '\0')
         {
             /* code */
@@ -77,7 +80,7 @@ int main(int argc, char argv[20][100])
 int shell(char buf[1001]) {
 
 
-    char command_copy[MAX_COMMAND_LENGTH];
+    char command_copy[1001];
     strcpy(command_copy, buf);
 
     // Tokenize the command by spaces
@@ -158,7 +161,25 @@ int shell(char buf[1001]) {
     }
     else if (strcmp(arguments[0],"test") == 0)
     {
-        fwrite("test",sizeof("test"),4,stdio);
+        char *fake = malloc(100);
+        // FILE *file = fopen("/root/cmd.c", "r");
+        // if (file == NULL) {
+        //     printf("File not found.\n");
+        //     return 1;
+        // }
+
+        // int intValue;
+        // char strValue[256];
+
+        // int itemsRead = fscanf(file, "Test %d String %s", &intValue, strValue);
+
+        // if (itemsRead == 2) {
+        //     printf("Read values: %d, %s\n", intValue, strValue);
+        // } else {
+        //     printf("Failed to read values.\n");
+        // }
+
+        // fclose(file);
     }
     
     else if (strcmp(arguments[0],"rm") == 0)
@@ -243,11 +264,11 @@ int shell(char buf[1001]) {
         printf("%s\n",cwd);
     }
     else if(strcmp(arguments[0],"man") == 0)
-    {
+    { 
         syscall(37,arguments[1],0);
     }
     else if (strcmp(arguments[0],"touch") == 0)
-    {
+    { 
         char *tmp = cwd;
         strcat(tmp,"/");
         strcat(tmp,arguments[1]);
@@ -257,14 +278,16 @@ int shell(char buf[1001]) {
     else if (strcmp(arguments[0],"term" ) == 0)
     {
         
-        set_terminal_state(100,100,255,0,0);
+        int x = get_x();
+        printf("\nx=%d\n",x);
+        // return 0;
     }
     else if (strcmp("write",arguments[0]) == 0) 
     {
-        FILE *f = fopen("/var/fake.txt", "w");
+        FILE *f = fopen("/var/fake.txt", "w"); 
         fprintf(f,"%s\n",arguments[1]);
         fclose(f);
-        FILE *q = fopen("/var/fake.txt", "r");
+        FILE *q = fopen("/var/fake.txt", "r"); 
         char buf[1024] = {0};
         fread(buf,1024,sizeof(buf),q);
         printf("read %s from %s\n",buf,"/var/fake.txt");
@@ -273,7 +296,7 @@ int shell(char buf[1001]) {
     
     
     
-
+ 
 
 
 
@@ -293,8 +316,12 @@ int shell(char buf[1001]) {
 
     else
     {
-        printf("Invalid command %s\n", arguments[0]);
+        
+        printf("Invalid command %s pls try again\n", arguments[0]);
+        // printf("ending command ");
     }
+    // printf("end\n");
+    // return -1;
     
     // char tokens[MAX_TOKENS][MAX_TOKEN_LENGTH];
     // memset(tokens, 0, sizeof(tokens));

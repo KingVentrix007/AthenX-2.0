@@ -105,4 +105,6 @@ int * find_biggest_mode();
 #define VBE_RGB(r, g, b) vbe_rgb(r, g, b)
 #define VBE_RGBA(r, g, b, a) vbe_rgba(r, g, b, a)
 void vesa_scroll(int direct);
+uint32 *get_g_vbe_buffer();
+int get_pitch();
 #endif

@@ -1,5 +1,5 @@
 #include "termios.h"
-#include "../../include/syscall.h"
+ #include "syscall.h"
 int tcgetattr(int fd, struct termios *termios_p) {
     // Your custom implementation of tcgetattr
     // Implement the functionality you need here.

@@ -46,6 +46,12 @@
 #define SYS_FGETS 42
 #define SYS_FPUTS 43
 #define SYS_FPUTC 44
+#define SYS_SET_FONT_C 45
+#define SYS_SET_BG_COLOR 46
+#define SYS_SET_X 47
+#define SYS_SET_Y 48
+#define SYS_GET_X 49
+#define SYS_GET_Y 50
 typedef struct param_struct
 {
     char* param1;

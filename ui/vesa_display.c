@@ -96,7 +96,7 @@ void vesa_putchar(char c)
             
             //printf("HERE");
         }
-        if(scroll_auto == 0)
+        else if(scroll_auto == 0)
         {
             vesa_column = 0;
             vesa_row = vesa_row +16;

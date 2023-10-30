@@ -1,6 +1,6 @@
 #include "fileio.h"
 #include "printf.h"
-#include "../../include/syscall.h"
+ #include "syscall.h"
 #include "stdio.h"
 // fileio.c
 #define ATHENX_LIBC
@@ -212,6 +212,90 @@ char* fgets(char* str, int size, FILE* stream)
     p.parameter1 = str;
     p.parameter2 = size;
     return syscall(SYS_FGETS, &p, stream);
+}
+/**
+ * Function Name:fscanf
+ * Description: Custom implementation of fscanf function using provided functions.
+ *
+ * Parameters:
+ *   stream (FILE*) - The file pointer from which to read data.
+ *   format (const char*) - The format string specifying the data to be read.
+ *   ... - Variable number of pointers to variables where the read data will be stored.
+ *
+ * Return:
+ *   Returns the number of input items successfully matched and assigned.
+ */
+int fscanf(FILE *stream, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    int numItemsRead = 0;
+    int c;
+    char *buffer = malloc(get_file_size_from_pointer(stream));  // Temporary buffer for reading characters
+
+    while (*format) {
+        if (*format == '%') {
+            format++;  // Move past '%'
+            if (*format == 'd') {
+                // Read an integer
+                int *intPtr = va_arg(args, int*);
+                int value = 0;
+                int sign = 1;
+
+                // Read characters until a non-digit character is encountered
+                c = fgetc(stream);
+                while (c != EOF && (c == ' ' || c == '\t' || c == '\n'))
+                    c = fgetc(stream);
+                if (c == '-') {
+                    sign = -1;
+                    c = fgetc(stream);
+                }
+                while (c != EOF && (c >= '0' && c <= '9')) {
+                    value = value * 10 + (c - '0');
+                    c = fgetc(stream);
+                }
+                *intPtr = value * sign;
+                numItemsRead++;
+            }
+            else if (*format == 's') {
+                // Read a string
+                char *strPtr = va_arg(args, char*);
+                int maxLen = 255;  // Maximum length of string
+                int len = 0;
+                c = fgetc(stream);
+                while (c != EOF && (c == ' ' || c == '\t' || c == '\n'))
+                    c = fgetc(stream);
+                while (c != EOF && c != ' ' && c != '\t' && c != '\n') {
+                    if (len < maxLen - 1) {
+                        strPtr[len] = c;
+                        len++;
+                    }
+                    c = fgetc(stream);
+                }
+                strPtr[len] = '\0';
+                numItemsRead++;
+            }
+            else {
+                // Unsupported format specifier
+                break;
+            }
+        }
+        else {
+            // Read and compare a character from the file
+            c = fgetc(stream);
+            if (c == *format) {
+                numItemsRead++;
+            }
+            else if (c == EOF) {
+                break;
+            }
+        }
+        format++;
+    }
+
+    va_end(args);
+    free(buffer);
+    return numItemsRead;
 }
 
 

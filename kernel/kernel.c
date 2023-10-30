@@ -44,10 +44,12 @@
 #include "../include/write.h"
 #include "../include/tui.h"
 #include "../include/env.h"
-#include "../include/syscall.h"
+// #include "../include/syscall.h"
 #include "virt.h"
 #include "../include/exe.h"
 #include "../include/elf_exe.h"
+// #include "flanterm.h"
+// #include "fb.h"
 // #define STB_IMAGE_IMPLEMENTATION
 // #include "../include/stb_image.h"
 KERNEL_MEMORY_MAP g_kmap;
@@ -612,7 +614,15 @@ void toggle_cursor_visibility() {
 
 void terminal_main()
 {
-    //beep();
+    // //beep();
+    // uint32 *vesa_buffer;
+    // vesa_buffer = get_g_vbe_buffer();
+//     struct flanterm_context *ft_ctx = flanterm_fb_simple_init(
+//     vesa_buffer, vbe_get_width(), vbe_get_height(), get_pitch()
+// );
+    const char msg[] = "Hello world\nThis text is a message\nFOr u";
+
+    // flanterm_write(ft_ctx, msg, sizeof(msg));
     //DEBUG("terminal_main");
     FUNC_ADDR_NAME(&terminal_main,0,"");
     //printf("HERE\n");
@@ -751,6 +761,7 @@ void terminal_main()
                 // printf_(s);
                 undraw_square(get_screen_y(),get_screen_x());
                 printf(s);
+                
                 //printf_("X{}");
                 //undraw_square(get_screen_x()-10,get_screen_y());
                 //printf_(s);

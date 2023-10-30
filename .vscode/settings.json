@@ -43,6 +43,16 @@
         "bitmap.h": "c",
         "font.h": "c",
         "display.h": "c",
-        "stdlib.h": "c"
-    }
+        "stdlib.h": "c",
+        "elf_exe.h": "c",
+        "man.h": "c",
+        "vesa.h": "c"
+    },
+    "code-runner.executorMap": {
+        "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here
+    },
+    "vscord.enabled": true
+    
+   
+    
 }

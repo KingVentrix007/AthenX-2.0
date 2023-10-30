@@ -2,6 +2,7 @@
 #include "string.h"
 #include "search.h"
 #include "stdlib.h"
+#include "terminal.h"
 int search_file(const char *file_path, const char *search_text, int case_sensitive) {
     int match_count = 0;
     int line_number = 1;  // Initialize line number
@@ -50,13 +51,25 @@ int search_file(const char *file_path, const char *search_text, int case_sensiti
     return match_count;
 }
 
-
+int update_status(const char *file, size_t matchs)
+{ 
+     
+    int x = get_x();    
+    int y = get_y(); 
+    // printf("\nHELLO -> x=%d y=%d \n",x,y);
+    set_x(100*16); 
+    set_y(16); 
+    printf("%d matches found in %s\n", matchs,file); 
+    set_x(x);  
+    set_y(y); 
+    // for(;;);  
+} 
 
 void search_first_match(const char *file_path, const char *search_text, int case_sensitive) {
     FILE *file = fopen(file_path, "r");
 
-    if (file == NULL) {
-        perror("Error opening file");
+    if (file == NULL) { 
+        perror("Error opening file"); 
         return;
     }
 
@@ -66,7 +79,7 @@ void search_first_match(const char *file_path, const char *search_text, int case
         printf("Failed to allocate memory for file %s\n", file_path);
         return;
     }
-    size_t search_text_length = strlen(search_text);
+    size_t search_text_length = strlen(search_text); 
 
     char *search_text_copy = NULL;
     if (!case_sensitive) {
@@ -109,5 +122,45 @@ void search_first_match(const char *file_path, const char *search_text, int case
 
     free(search_text_copy);  // Free the dynamically allocated memory
     free(buffer);
+    fclose(file);
+}
+
+
+int csearch_file(const char *file_path, const char *search_text, int case_sensitive) {
+    int m = 0;
+   FILE *file = fopen(file_path, "r");
+
+    if (file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    char *buffer = malloc(get_file_size_from_pointer(file));
+    if(buffer == NULL)
+    {
+        printf("Failed to allocate memory for file %s\n", file_path);
+        fclose(file);
+        return;
+    }
+    // printf("\n%d ",strlen(buffer));
+    fread(buffer,sizeof(char),get_file_size_from_pointer(file),file);
+    char* copy = strdup(buffer);
+    char *token = strtok(copy, " "); // Split the text at spaces.
+     while (token != NULL) {
+        if(strcmp(token, search_text) == 0)
+        {
+            update_status(file_path,m);
+            m++;
+            set_font_c(255, 255, 0);
+            set_bg_c(0,0,255);
+        }
+        printf("%s ", token);
+        token = strtok(NULL, " "); // Get the next token.
+        set_font_c(0,255,0);
+        set_bg_c(0,0,0);
+        
+    }
+    free(buffer);
+    free(copy); // Free the memory allocated for the copy.
     fclose(file);
 }

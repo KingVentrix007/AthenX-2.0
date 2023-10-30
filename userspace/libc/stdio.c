@@ -1,5 +1,5 @@
 
-#include "../../include/syscall.h" // Include your kernel headers
+ #include "syscall.h" // Include your kernel headers
 #include "stdio.h"
 #include "printf.h"
 
@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include "string.h"
+#include "stdint.h"
 // stdio.c
 extern volatile uint32_t *syscall_ret;
 
@@ -252,7 +253,7 @@ char *get_char()
 {
     char c = (char*)syscall(SYS_GETCHAR,90,0);
     return c;
-}
+} 
 int clear_screen()
 {
     syscall(SYS_SCREEN_CTRL,0,0);

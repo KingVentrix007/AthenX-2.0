@@ -625,3 +625,9 @@ char *strdup(const char *src) {
 
     return dst;
 }
+void strlwr(char *str) {
+    while (*str) {
+        *str = tolower((unsigned char)*str);
+        str++;
+    }
+}

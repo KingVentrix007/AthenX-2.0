@@ -1,7 +1,7 @@
 // hello.c
 #include "stdio.h"
 #include "string.h"
-// #include "../../include/syscall.h"
+//  #include "syscall.h"
 
 int main() {
     printf("BASIC KEYBOARD\n");

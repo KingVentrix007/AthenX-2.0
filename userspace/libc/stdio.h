@@ -60,7 +60,7 @@ int fputc(int c, FILE *stream);
 int fputs(const char *str, FILE *stream);
 char* fgets(char *str, int size, FILE *stream);
 int fprintf(FILE *stream, const char *format, ...);
-
+int fscanf(FILE *stream, const char *format, ...);
 
 void perror(const char *s);
 
@@ -76,7 +76,7 @@ void perror(const char *s);
 
 
 
-
+#define ATHENX_LIBC
 #ifdef ATHENX_LIBC //these are fuction native to the ATHENX library 
 long get_file_size_from_pointer(FILE *file);
 int is_dir(char *path);
