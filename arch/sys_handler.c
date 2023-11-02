@@ -2,7 +2,7 @@
 #include "../include/isr.h"
 #include "../include/printf.h"
 #include "../include/keyboard.h"
-#include "../userspace/libc/syscall.h"
+#include "../userspace/libc/include/syscall.h"
 #include "../include/fat_filelib.h"
 #include "../include/kheap.h"
 #include "../include/exe.h"

@@ -161,6 +161,7 @@ This is one area where **ANY** contribution will be almost certainly implemented
 Software currently being ported:
 
 - [ ] [Kilo](https://github.com/antirez/kilo) text editor - [TODO](/userspace/kilo/contribute.md#these-are-the-missing-functions-that-i-need-to-create-in-order-to-successfully-port-kilo-any-contribution-to-this-list-will-be-greatly-appreciated)
+- [ ] [tcc](https://github.com/LuaDist/tcc) Tiny C complier
 
 ## Contributing
 

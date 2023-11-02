@@ -277,10 +277,10 @@ int shell(char buf[1001]) {
         create_file(tmp);
     }
     else if (strcmp(arguments[0],"term" ) == 0)
-    {
+    { 
         
         int x = get_x();
-        // set_x(x+900);
+        // set_x(x+900); 
         printf("food"); 
         // int y = get_y();
         // printf("\ny=%d\n",y); 

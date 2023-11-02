@@ -61,9 +61,11 @@ int fputs(const char *str, FILE *stream);
 char* fgets(char *str, int size, FILE *stream);
 int fprintf(FILE *stream, const char *format, ...);
 int fscanf(FILE *stream, const char *format, ...);
-
+int fflush(FILE* stream);
 void perror(const char *s);
-
+void setbuf(FILE* stream, char* buffer);
+int vfprintf(FILE* stream, const char* format, va_list arg);
+int sprintf(char* str, const char* format, ...);
 #endif
 
 

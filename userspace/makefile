@@ -1,14 +1,14 @@
 # Define the compiler and flags
 CC = i686-elf-gcc
-CFLAGS = -m32 -std=gnu99 -ffreestanding -DATHENX_LIBC -O2 -O0 -nostdlib -Ilibc/
-LDFLAGS = -T linker.ld -nostdlib
-LIBS = ../obj/arch/syscall.o libc/libc.a
+CFLAGS = -m32 -std=gnu99 -ffreestanding -DATHENX_LIBC -O2 -O0 -nostdlib -Ilibc/include -g
+LDFLAGS = -T linker.ld -Ilibc/include
+LIBS = libc/libc.a
 
 # Find all subdirectories in the current directory
 SUBDIRS := $(wildcard */)
 
 # Filter out any directories you want to exclude (if necessary)
-EXCLUDE_DIRS := libc/  editor/ test/ kilo/
+EXCLUDE_DIRS := libc/  editor/ test/ kilo/ edit/ tcc/
 SUBDIRS := $(filter-out $(EXCLUDE_DIRS),$(SUBDIRS))
 
 # List of source files to compile in each subdirectory

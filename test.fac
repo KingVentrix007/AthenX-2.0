@@ -1,0 +1,3 @@
+.START
+print "hello world"
+.END

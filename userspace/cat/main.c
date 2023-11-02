@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
     }
     else
     {
-        printf("Unknown extension highlighting disabled"); 
+        printf("Unknown extension highlighting disabled\n\n"); 
         printf("%s\n",code);
 
     }

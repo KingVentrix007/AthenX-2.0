@@ -14,7 +14,7 @@
 #include "../include/kernel.h"
 #include "../include/sys_handler.h"
 #include "../include/x86_reg.h"
-#include "../userspace/libc/syscall.h"
+#include "../userspace/libc/include/syscall.h"
 // For both exceptions and irq interrupt
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
 int isr_count = 0;
