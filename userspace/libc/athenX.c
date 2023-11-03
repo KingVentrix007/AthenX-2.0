@@ -13,7 +13,7 @@
 
 void athenx_memalign(size_t size, size_t alignment)
 {
-    return syscall(SYS_ALLIGEND_MEM,size,alignment);
+    return syscall(SYS_ALLIGEND_MEM,size,alignment); 
 }
 
 

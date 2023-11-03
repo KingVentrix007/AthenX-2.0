@@ -1,5 +1,4 @@
 
-
 #include "../include/fat_filelib.h"
 #include "../include/fat32.h"
 #include "../include/installer.h"
@@ -270,6 +269,7 @@ unsigned int getSizeInSectors(const char* buffer) {
     return sectors;
 }
 void kmain(unsigned long magic, unsigned long addr) {
+    //  enable_paging_c();
     FUNC_ADDR_NAME(&kmain,2,"ui");
     MULTIBOOT_INFO *mboot_info;
      
@@ -314,7 +314,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         clear_screen();
         set_screen_x(0);
         set_screen_y(0);
-        init_virt();
+        // init_virt();enable_paging()
+       
         printf("kernel memory start address = %p\n",mboot_info->addr);
          fl_init();
           if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)

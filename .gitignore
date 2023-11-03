@@ -17,5 +17,5 @@ load
 *.fat
 inspect/
 !obj/arch/syscall.o
-
+sync.sh
 
