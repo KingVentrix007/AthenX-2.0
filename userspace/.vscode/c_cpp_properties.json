@@ -4,8 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/libc",
-                "../include/",
+                "${workspaceFolder}/libc/**",
+                "${workspaceFolder}/libc/include",
+                "libc/include/",
                 "/home/king/OsDev/basekernel/cross/lib/gcc/i686-elf/8.2.0/include/"
             ],
             "defines": [],

@@ -55,7 +55,7 @@ uint32_t atoi(const char *str)
  *   void* - A pointer to the allocated memory, or NULL if allocation fails.
  */
 void* malloc(size_t size) {
-    printf("\nrequested %d bytes of memory\n", size);
+    // printf("\nrequested %d bytes of memory\n", size);
     void* memory = syscall(SYS_MMAP,size,0);
     if (memory == NULL) {
         // Allocation failed
@@ -79,22 +79,22 @@ void free(void* ptr) {
         syscall(SYS_MUNMAP,ptr,0);
     }
 }
-/**
- * Function Name: realloc
- * Description: Memory reallocation function.
- * This function changes the size of the memory block pointed to by ptr to the new size,
- * preserving the existing data. If necessary, it may move the data to a new location.
- *
- * Parameters:
- *   ptr (void*) - A pointer to the previously allocated memory block.
- *   size (size_t) - The new size, in bytes, for the memory block.
- *
- * Return:
- *   void* - A pointer to the reallocated memory block, or NULL if the reallocation fails.
- */
-void* realloc(void* ptr, size_t size) {
-    return syscall(SYS_REALLOC,ptr, size);
-}
+// /**
+//  * Function Name: realloc
+//  * Description: Memory reallocation function.
+//  * This function changes the size of the memory block pointed to by ptr to the new size,
+//  * preserving the existing data. If necessary, it may move the data to a new location.
+//  *
+//  * Parameters:
+//  *   ptr (void*) - A pointer to the previously allocated memory block.
+//  *   size (size_t) - The new size, in bytes, for the memory block.
+//  *
+//  * Return:
+//  *   void* - A pointer to the reallocated memory block, or NULL if the reallocation fails.
+//  */
+// void* realloc(void* ptr, size_t size) {
+//     return syscall(SYS_REALLOC,ptr, size);
+// }
 /**
  * Function Name: calloc
  * Description: Memory allocation function for initialized memory.
@@ -111,6 +111,44 @@ void* realloc(void* ptr, size_t size) {
 void* calloc(size_t num, size_t size) {
     return syscall(SYS_CALLOC, num, size);
 }
+
+
+/**
+ * Function Name: my_realloc
+ * Description: Reallocates memory for a previously allocated block of memory.
+ *
+ * Parameters:
+ *   ptr (void*) - A pointer to the previously allocated memory.
+ *   new_size (size_t) - The new size of the memory block in bytes.
+ *
+ * Return:
+ *   (void*) - A pointer to the newly allocated memory. Returns NULL if memory allocation fails.
+ */
+void* realloc(void* ptr, size_t new_size) {
+    if (new_size == 0) {
+        free(ptr);  // If the new size is zero, it's equivalent to freeing the memory.
+        return NULL;
+    }
+
+    void* new_ptr = malloc(new_size);  // Allocate memory for the new block.
+
+    if (new_ptr == NULL) {
+        return NULL;  // Memory allocation failed.
+    }
+
+    if (ptr != NULL) {
+        size_t copy_size = new_size;
+        if (new_size > sizeof(ptr)) {
+            copy_size = sizeof(ptr);
+        }
+        memcpy(new_ptr, ptr, copy_size);  // Copy data from the old block to the new block.
+
+        free(ptr);  // Free the old memory block.
+    }
+
+    return new_ptr;  // Return the pointer to the new memory block.
+}
+
 int exit(int code)
 {
     return code;

@@ -11,7 +11,7 @@
     <img src="images/athenx-low-resolution-color-logo.png" alt="Logo" width="100" height="">
   </a>
 
-  <h1 align="center">AthenX</h1>
+  <h1 align="center">AthenX-2.0</h1>
 
   <p align="center">
     A super simple 32 bit operating system
@@ -181,7 +181,7 @@ Don't forget to give the project a star! Thanks again!
 ## License
 
 1. This `README.md` is distributed under the MIT License. See `OtherLicenses/MIT.txt` for more information.
-2. This operating system is protected by the `GNU General Public License v3.0`, if you use, redistribute, re-upload or share this code you have to comply with `GNU General Public License v3.0` and any other Licenses specified within the source code files.
+2. This operating system is protected by the `GNU General Public License v3.0`, if you use, redistribute, re-upload or share this code you have to comply with `GNU General Public License v3.0` and any other Licenses specified within the source code files. I would also appreciate it if credit would be given to me if you use this project.
 3. Licenses specific to files will be stored in the `OtherLicenses` folder
 4. If i have missed any copyright licenses, **Please tell me** and i will try to fix it as soon as possible
 
@@ -237,25 +237,25 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
     <img src="images/cool background.png" alt="Logo" width="" height="">
   </a>
   <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/KingVentrix007/AthenX-2.0">
     <img src="images/Log in screen.png" alt="Logo" width="" height="">
   </a>
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href=https://github.com/KingVentrix007/AthenX-2.0">
     <img src="images/File handling.png" alt="Logo" width="" height="">
   </a>
 
 # VERSION 2.0
 
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/KingVentrix007/AthenX-2.0">
     <img src="images/Stack trace on error.png" alt="Logo" width="" height="">
   </a>
   <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/KingVentrix007/AthenX-2.0">
     <img src="images/Main terminal.png" alt="Logo" width="" height="">
   </a>
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/KingVentrix007/AthenX-2.0">
     <img src="images/list of registerd PCI devices.png" alt="Logo" width="" height="">
   </a>

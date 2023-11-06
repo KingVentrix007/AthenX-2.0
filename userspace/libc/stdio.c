@@ -59,9 +59,9 @@ int ls(char *path)
 }
 int fl_is_dir(const char *path)
 {
-    int r = syscall(SYS_IS_DIR,0,path);
+    int r = syscall(SYS_IS_DIR,90,path);
    
-     printf("%s->%d\n",path,r);
+    //  printf("%s->%d\n",path,r);
      return r;
     
 }

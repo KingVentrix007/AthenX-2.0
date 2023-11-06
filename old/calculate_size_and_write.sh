@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the name of your binary file (AthenX.bin)
-binaryFileName="HackOS.bin"
+binaryFileName="AthenX.bin"
 
 # Define the percentage to add (30%)
 percentageToAdd=1

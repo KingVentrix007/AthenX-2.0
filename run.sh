@@ -6,8 +6,8 @@ image_file="AthenX.img"
 # Set the path to the rootfs folder within the mount point
 rootfs_mount_point="/mnt/AthenX/rootfs"
 
-# Set the path to HackOS.bin
-hackos_bin="HackOS.bin"
+# Set the path to AthenX.bin
+hackos_bin="AthenX.bin"
 
 if [ -f "$image_file" ]; then
   # If the .img file exists, mount it
@@ -15,8 +15,8 @@ if [ -f "$image_file" ]; then
   sudo mount -o loop,rw "AthenX.img" /mnt/AthenX
   # sudo umount /mnt/AthenX
 
-  # Copy HackOS.bin into the rootfs folder
-  sudo cp "HackOS.bin" "/mnt/AthenX/boot"
+  # Copy AthenX.bin into the rootfs folder
+  sudo cp "AthenX.bin" "/mnt/AthenX/boot"
   # Define the source directory
   SRC_DIR="programs" # Change this to the actual source directory
 
@@ -91,7 +91,7 @@ else
 
   # Copy your OS files and GRUB configuration
 
-  sudo cp HackOS.bin /mnt/AthenX/boot
+  sudo cp AthenX.bin /mnt/AthenX/boot
 
   # Install GRUB to the MBR (Master Boot Record)
   sudo grub-install --target=i386-pc --boot-directory=/mnt/AthenX --force --no-floppy --modules="part_msdos fat" /dev/loop0

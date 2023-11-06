@@ -14,6 +14,7 @@
         "termios.h": "c",
         "cstdio": "c",
         "fileio.h": "c",
-        "system_error": "c"
+        "system_error": "c",
+        "unistd.h": "c"
     }
 }

@@ -18,4 +18,4 @@ load
 inspect/
 !obj/arch/syscall.o
 sync.sh
-
+.bin

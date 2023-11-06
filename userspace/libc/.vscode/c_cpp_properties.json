@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/include",  // Add local include directory
+                "/usr/include",  // Add system-wide include directory
+                "/usr/local/include"  // Add additional system-wide include directories
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",  // Path to your C/C++ compiler
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "/usr/include",
+                    "/usr/local/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 4
+}

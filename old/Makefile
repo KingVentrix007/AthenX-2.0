@@ -33,13 +33,13 @@ $(OBJ_ASM)/%.o: $(START_ASM)/%.asm
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.asm
 	nasm -f elf32 -o $@ $<
 
-all: HackOS.bin
+all: AthenX.bin
 
-HackOS.bin: $(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
+AthenX.bin: $(OBJ_FILES1) $(OBJ_FILES2) $(OBJ_FILES3)
 	ld $(LDPARAMS) -o $@ $(OBJ_DIR)/*.o
 
-iso: HackOS.bin
-	cp HackOS.bin iso/boot/HackOS.bin
+iso: AthenX.bin
+	cp AthenX.bin iso/boot/AthenX.bin
 	cp LDout.map iso/boot/grub/
 	./calculate_size_and_write.sh
 #sudo grub-mkrescue --output=HackOS.iso iso
@@ -69,7 +69,7 @@ MAIN:
 	qemu-img create MAIN.img 1G
 
 clean:
-	rm -f *.o HackOS HackOS.iso HackOS.bin $(OBJ_DIR)/*.o
+	rm -f *.o HackOS HackOS.iso AthenX.bin $(OBJ_DIR)/*.o
 	rm -f AthenX.img
 
 version+:

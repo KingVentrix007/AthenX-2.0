@@ -38,23 +38,23 @@ $(OBJ_DIR)/%.o: %.asm
 	$(ASM) -f elf32 -o $@ $<
 
 # Define the all target and dependencies
-all: libc-f HackOS.bin user
+all: libc-f AthenX.bin user
 libc:
 	 (cd porg/libc && make)
 
 
-HackOS.bin: $(OBJ_FILES_C) $(OBJ_FILES_S) $(OBJ_FILES_ASM)
+AthenX.bin: $(OBJ_FILES_C) $(OBJ_FILES_S) $(OBJ_FILES_ASM)
 	ld $(LDPARAMS) -o $@ $^
 
 # Output directory
 OUT_DIR = build
 
 # Copy the output binary to the build directory
-COPY_OUTPUT = cp HackOS.bin $(OUT_DIR)/
+COPY_OUTPUT = cp AthenX.bin $(OUT_DIR)/
 
 run-script:
 	sudo (cd script && bash run.sh)
-run: HackOS.bin
+run: AthenX.bin
 	bash ./run.sh
 	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
 

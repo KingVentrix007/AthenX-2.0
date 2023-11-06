@@ -1,11 +1,12 @@
 #define ATHENX_LIBC
 #include "stdio.h"
 #include "maths.h"
-#include "string.h"
+#include "string.h" 
 #include "stdlib.h"
 #include "terminal.h"
 #include "shell.h" 
 #include "termios.h"
+#include "file.h"
 #define MAX_COMMAND_LENGTH 50
 #define MAX_ARGUMENTS 10
 void Sappend(char *buf, char c) {
@@ -26,7 +27,8 @@ int main(int argc, char **argv)
     // set_pos(100,100);
     // printf("Press any key to continue\n"); 
     // char buf[1001];
-    char *buf = (char*)malloc(1001);
+    size_t malloc_size = 20;
+    char *buf = (char*)malloc(malloc_size);
     memset(buf, 0, sizeof(buf));
     buf[0] = '\0';
     
@@ -42,7 +44,7 @@ int main(int argc, char **argv)
                 return 0;
             }
             buf[0] = '\0';
-            printf("\nshell>");
+            printf("\n%s@shell>",cwd);
         }
         else if (c == '\0')
         {
@@ -69,6 +71,10 @@ int main(int argc, char **argv)
         else
         {
             printf("%c",c);
+            if((strlen(buf)+1) >= malloc_size)
+            {
+                buf = (char *)realloc(buf,malloc_size+(int)(malloc_size));
+            }
             Sappend(buf, c);
         }
         // printf("hello\n");
@@ -199,67 +205,7 @@ int shell(char buf[1001]) {
      
     else if(strcmp(arguments[0],"cd") == 0)
     {
-        if (arg_count >= 2) {
-    if (strcmp(arguments[1], "..") == 0) {
-        // Check if the current directory is the rootfs directory
-        if (strcmp(cwd, "root") == 0 || strcmp(cwd, "/root/") == 0) {
-            // Allow going one level above rootfs
-            strcpy(cwd, "/");
-        } else if (strstr(cwd, "/") != 0) {
-            // Find the last '/' character in the current directory path
-            char* last_slash = strrchr(cwd, '/');
-            
-            if (last_slash != NULL) {
-                //printf("Here\n");
-                // Remove the last directory from the current path
-                *last_slash = '\0'; 
-                char* last_slash = strrchr(cwd, '/');
-            
-                if (last_slash != NULL) {
-                    //printf("Here23\n");
-                    // Remove the last directory from the current path
-                    *last_slash = '\0';
-                    
-                    }
-            } else {
-                // If there is no '/', set the current directory to rootfs
-                strcpy(cwd, "root");
-            }
-        }
-        if(cwd[strlen(cwd)-1] == '/' && cwd[strlen(cwd)-2] == '/')
-        {
-            cwd[strlen(cwd)-1] = '\0';
-        } 
-        if(cwd[strlen(cwd)-1] != '/')
-        {
-            strcat(cwd,"/");
-        }
-    } else { 
-        char tmp[260];
-        strcpy(tmp,cwd);
-        if(tmp[strlen(tmp)-1] != '/')
-        {
-             strcat(tmp, "/");
-        }
-       
-        strcat(tmp, arguments[1]);
-        
-        if (fl_is_dir(tmp) == 1) {
-            strcpy(cwd, tmp);
-        } else {
-            printf("\n%s is not a valid path\n", tmp);
-        }
-        if(cwd[strlen(cwd)-1] == '/' && cwd[strlen(cwd)-2] == '/')
-        {
-            // DEBUG("");
-            cwd[strlen(cwd)-1] = '\0';
-        }
-        if(cwd[strlen(cwd)-1] != '/')
-        {
-            strcat(cwd,"/");
-        }
-    }
-}
+       change_directory(arguments,arg_count,cwd);
     }else if (strcmp(arguments[0],"pwd") == 0)
     {
         printf("%s\n",cwd);
@@ -274,29 +220,29 @@ int shell(char buf[1001]) {
         strcat(tmp,"/");
         strcat(tmp,arguments[1]);
         
-        create_file(tmp);
+        create_file(tmp); 
     }
     else if (strcmp(arguments[0],"term" ) == 0)
     { 
         
         int x = get_x();
-        // set_x(x+900); 
-        printf("food"); 
+        // set_x(x+900);  
+        printf("food");  
         // int y = get_y();
         // printf("\ny=%d\n",y); 
         // return 0;
     }
-    else if (strcmp("write",arguments[0]) == 0) 
-    {
-        FILE *f = fopen("/var/fake.txt", "w"); 
-        fprintf(f,"%s\n",arguments[1]);
-        fclose(f);
-        FILE *q = fopen("/var/fake.txt", "r"); 
-        char buf[1024] = {0};
-        fread(buf,1024,sizeof(buf),q);
-        printf("read %s from %s\n",buf,"/var/fake.txt");
-        fclose(q);
-    }
+    // else if (strcmp("write",arguments[0]) == 0) 
+    // {
+    //     FILE *f = fopen("/var/fake.txt", "w"); 
+    //     fprintf(f,"%s\n",arguments[1]);
+    //     fclose(f);
+    //     FILE *q = fopen("/var/fake.txt", "r"); 
+    //     char buf[1024] = {0};
+    //     fread(buf,1024,sizeof(buf),q);
+    //     printf("read %s from %s\n",buf,"/var/fake.txt");
+    //     fclose(q);
+    // }
     
     
     

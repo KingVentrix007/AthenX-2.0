@@ -335,11 +335,11 @@ int system_call_handler_c(int syscall_number, int param1, int param2) {
             fl_listdirectory(param1, dirs, files, &dir_count, &file_count);
             break;
         case SYS_IS_DIR:
-            result = fl_is_dir(param1);
-            printf("PATH: %s == %d\n", param2,result);
+            result = fl_is_dir((char *)param2);
+            // printf("PATH: %s == %d\n", param2,result);
             // result = -909;
             break;
-        case SYS_IS_PATH:
+        case SYS_IS_PATH: 
             result = fl_is_dir(param1);
             break;
         case SYS_CREATE:
