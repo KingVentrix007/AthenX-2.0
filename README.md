@@ -94,6 +94,10 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
    ```
 
 2. open freshly installed repository with wsl or any other UNIX system and run:
+    ```bash
+      bash ./build-cross-compiler.sh
+    ```
+    then add /cross/bin
 
     ```sh
     make run
