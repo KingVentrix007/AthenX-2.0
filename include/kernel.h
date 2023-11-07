@@ -59,6 +59,8 @@ void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap);
 void get_map(KERNEL_MEMORY_MAP *out);
 MULTIBOOT_INFO *get_mb_info();
 int is_all_one_type(const char* str);
+int pre_terminal(int argc, char **argv);
+void set_init_path(char * path);
 #endif
 
 

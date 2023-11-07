@@ -1,7 +1,7 @@
 #ifndef _ACPI_
 #define _ACPI_
 #include "../include/types.h"
-
+#include "stdbool.h"
 //! RSDP
 #define RSDP_SIGNATURE "RSD PTR "
 struct XSDP_t {
@@ -30,7 +30,7 @@ struct ACPISDTHeader {
   uint32_t CreatorID;
   uint32_t CreatorRevision;
 };
-
+bool doChecksum(struct ACPISDTHeader *tableHeader);
 //!XsdtPointer
 // struct XSDT {
 //   struct ACPISDTHeader h;

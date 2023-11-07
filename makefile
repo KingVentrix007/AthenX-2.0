@@ -2,7 +2,7 @@ CC = i686-elf-gcc
 AS = as
 ASM = nasm
 CONFIG = ./config
-GCCPARAMS = -m32 -O0 -I/include -fno-omit-frame-pointer -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
+GCCPARAMS =  -O0 -I/include -fno-omit-frame-pointer -nostdlib -fno-pic -fno-builtin -fno-exceptions -ffreestanding -fno-leading-underscore -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
             -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
             -Wredundant-decls -Wnested-externs -Winline -Wno-long-long
 
@@ -12,7 +12,7 @@ SCRIPTS_DIR = script
 HDR_DIR = include
 # Define source and object directory for each subdirectory
 OBJ_DIR = obj
-SRC_DIRS = arch kernel drivers fs libk ui utils install
+SRC_DIRS = arch kernel drivers fs libk ui utils install security
 OBJ_DIRS = $(addprefix $(OBJ_DIR)/,$(SRC_DIRS))
 
 # Create object directories if they don't exist
@@ -56,7 +56,7 @@ run-script:
 	sudo (cd script && bash run.sh)
 run: AthenX.bin
 	bash ./run.sh
-	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56
+	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56 -no-reboot -no-shutdown -serial stdio
 
 clean:
 	rm -rf $(OUT_DIR)/*.bin $(OUT_DIR)/*.map $(OUT_DIR)/*.img $(OBJ_DIR)/*

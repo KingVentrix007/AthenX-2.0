@@ -12,6 +12,19 @@ struct XSDP_t* find_rsdp(unsigned char* start, unsigned int length) {
     return NULL;
 }
 
+bool doChecksum(struct ACPISDTHeader *tableHeader)
+{
+    unsigned char sum = 0;
+ 
+    for (int i = 0; i < tableHeader->Length; i++)
+    {
+        sum += ((char *) tableHeader)[i];
+    }
+ 
+    return sum == 0;
+}
+
+
 // void *findFACP(void *RootSDT)
 // {
 //     struct RSDT *rsdt = (struct RSDT *) RootSDT;

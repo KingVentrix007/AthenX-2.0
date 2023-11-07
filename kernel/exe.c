@@ -91,9 +91,9 @@ int find_programs(const char *path)
             
         }
     }
-    for (int i = 0; i < num_programs; i++) {
-        printf("Filename %d: %s\n", i + 1, programs[i]);
-    }
+    // for (int i = 0; i < num_programs; i++) {
+    //     printf("Filename %d: %s\n", i + 1, programs[i]);
+    // }
 
 }
 

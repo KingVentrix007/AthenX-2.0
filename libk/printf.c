@@ -34,7 +34,8 @@
 #include <stdint.h>
 #include "../include/vesa_display.h"
 #include "../include/printf.h"
-
+#include "stdio.h"
+#include "ansi.h"
 
 // define this globally (e.g. gcc -DPRINTF_INCLUDE_CONFIG_H ...) to include the
 // printf_config.h header file
@@ -155,7 +156,8 @@ static inline void _out_char(char character, void* buffer, size_t idx, size_t ma
   }
 }
 
-
+static void handle_ansi_escape(out_fct_type out, char* buffer, size_t* idx, size_t maxlen, const char* format);
+static void apply_ansi_escape(out_fct_type out, char* buffer, size_t* idx, size_t maxlen, const char* escape_sequence, size_t escape_sequence_length);
 // internal output function wrapper
 static inline void _out_fct(char character, void* buffer, size_t idx, size_t maxlen)
 {
@@ -587,6 +589,15 @@ static int _vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, const
 
   while (*format)
   {
+     if (*format == '\033') {
+           int plus = parse_ansi(format);
+           for (size_t i = 0; i < plus+1; i++)
+           {
+             format++;
+           }
+           
+          
+        } else
     // format specifier?  %[flags][width][.precision][length]
     if (*format != '%') {
       // no
@@ -859,6 +870,72 @@ static int _vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, const
 
 
 ///////////////////////////////////////////////////////////////////////////////
+
+//internal escape sequence parser
+static void handle_ansi_escape(out_fct_type out, char* buffer, size_t* idx, size_t maxlen, const char* format) {
+    format++; // Skip the '%'
+    if (*format == '[') {
+        format++; // Skip the '['
+        while (*format) {
+            if (*format >= '0' && *format <= '9') {
+                // Parse and handle ANSI escape sequences
+                const char* end = format;
+                while (*end >= '0' && *end <= '9') {
+                    end++;
+                }
+                if (*end == 'm') {
+                    // Handle ANSI escape sequence
+                    while (format < end) {
+                        // out(*format, buffer, (*idx)++, maxlen);
+                        format++;
+                    }
+                }
+                format = end + 1; // Skip the 'm'
+            } else {
+                // out(*format, buffer, (*idx)++, maxlen);
+                format++;
+            }
+        }
+    }
+}
+
+
+static void apply_ansi_escape(out_fct_type out, char* buffer, size_t* idx, size_t maxlen, const char* escape_sequence, size_t escape_sequence_length) {
+    printf("escape-> %s\n",escape_sequence);
+    if (strncmp(escape_sequence, "\033[0m", escape_sequence_length) == 0) {
+        // Handle code for resetting text attributes
+    } else if (strncmp(escape_sequence, "\033[1m", escape_sequence_length) == 0) {
+        // Handle code for making text bold
+    } else if (strncmp(escape_sequence, "\033[31m", escape_sequence_length) == 0) {
+        // Handle code for setting text color to red
+    } else if (strncmp(escape_sequence, "\033[32m", escape_sequence_length) == 0) {
+        // Handle code for setting text color to green
+    } else if (strncmp(escape_sequence, "\033[33m", escape_sequence_length) == 0) {
+        // Handle code for setting text color to yellow
+    } else if (strstr(escape_sequence, "\033[100;") != NULL) {
+    // Handle code for setting the cursor position
+    // Extract the x and y coordinates from the escape_sequence
+    printf("HELLO %s\n", escape_sequence);
+    int x = 0;
+    int y = 0;
+    int out = sscanf(escape_sequence, "\033[100;%d;%d", &y, &x);
+    printf("%d\n", x);
+    printf("%d\n", y);
+    printf("out -> %d\n", out);
+    if (out == 2) {
+        // Calculate the pixel positions (assuming 16x16 pixels per character)
+        int pixel_x = x * 16;
+        int pixel_y = y * 16;
+
+        // Call set_screen_x and set_screen_y with the calculated pixel positions
+        set_screen_x(pixel_x);
+        set_screen_y(pixel_y);
+    }
+}
+}
+
+
+
 
 int printf(const char* format, ...)
 {

@@ -47,6 +47,7 @@
 #include "virt.h"
 #include "../include/exe.h"
 #include "../include/elf_exe.h"
+#include "user.h"
 // #include "flanterm.h"
 // #include "fb.h"
 // #define STB_IMAGE_IMPLEMENTATION
@@ -54,6 +55,7 @@
 KERNEL_MEMORY_MAP g_kmap;
 MULTIBOOT_INFO *multi_boot_info;
 char programs[MAX_PROGRAMS][20];
+char init_path[100];
 int program_count = 0;
 // void find_initramfs_location(MULTIBOOT_INFO *mb_info) {
 //     if (mb_info->flags & (1 << 3)) {
@@ -268,13 +270,16 @@ unsigned int getSizeInSectors(const char* buffer) {
 
     return sectors;
 }
+// This should go outside any function..
+
 void kmain(unsigned long magic, unsigned long addr) {
     //  enable_paging_c();
     FUNC_ADDR_NAME(&kmain,2,"ui");
     MULTIBOOT_INFO *mboot_info;
-     
+   
     gdt_init();
     idt_init();
+     init_serial(DEFAULT_COM_DEBUG_PORT);
     //
     //ata_get_drive_by_model
     set_scroll_mode(1);
@@ -358,7 +363,9 @@ void kmain(unsigned long magic, unsigned long addr) {
             const char* env_vars[] = {
             "HOME=/root/",
             "BOOT=42",
-            "JUNK=FILES"
+            "JUNK=FILES",
+            "INIT=/sys/shell",
+            "PATH=/sys/,/sys/bin/,/sysroot/"
             // Add more environmental variables as needed.
         };
 
@@ -370,29 +377,47 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("Error saving environmental variables.\n");
         }
         }
-         if (loadAndDrawImage("/gui/sunset.tga", 0, 0) == 0) {
-        printf("succsess\n");
-        set_screen_x(0);
-        set_screen_y(0);
-        } else {
-            // Error occurred
+        //  if (loadAndDrawImage("/gui/sunset.tga", 0, 0) == 0) {
+        // printf("succsess\n");
+        // set_screen_x(0);
+        // set_screen_y(0);
+        // } else {
+        //     // Error occurred
+        // }
+         char output[71629] = {0};
+        if(mboot_info->mods_count >= 1)
+        {
+             printf("Mod count: %d\n", mboot_info->mods_count);
+            uint32_t initrd_size = 0;
+            uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
+            uint8_t* initrd_end_location = initrd_location + initrd_size;
+            printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
+           
+            memcpy(output, initrd_location, initrd_size);
         }
-       
-         printf("Mod count: %d\n", mboot_info->mods_count);
-        uint32_t initrd_size = 0;
-        uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
-        uint8_t* initrd_end_location = initrd_location + initrd_size;
-        printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
-        char output[71629] = {0};
-        memcpy(output, initrd_location, initrd_size);
-        unsigned char* bios_start = (unsigned char*)0xE0000;
+        else
+        {
+            printf("No modules found\n");
+
+        }
+            unsigned char* bios_start = (unsigned char*)0xE0000;
             unsigned int bios_length = 0x20000;  // 128 KB
 
             struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
 
             if (rsdp) {
                 printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
-                //printf("Version: %d\n",rsdp->Revision);
+                struct ACPISDTHeader* RSDT = (struct ACPISDTHeader*)rsdp->RsdtAddress;
+                // bool valid = doChecksum(RSDT);
+                // if(valid == TRUE)
+                // {
+                //     printf("Creator ID: %d\n",RSDT->CreatorID);
+                // }
+                // else
+                // {
+                //     printf("[ERROR]Invalid RSDT Table found\n");
+                // }
+                // //printf("Version: %d\n",rsdp->Revision);
             
                 // Access other information in the RSDP as needed
             } else {
@@ -401,26 +426,25 @@ void kmain(unsigned long magic, unsigned long addr) {
 
         timer_init();//!DO NOT PUT BEFORE INIT VESA
 
-        if(strstr(output,"Memory Configuration") != NULL)
-        {
-            //printf("\nFound initrid\n");
-            get_adder_map(output);
-        }
-        else if (strstr(output,"INSTALL") != NULL)
-        {
+        // if(strstr(output,"Memory Configuration") != NULL)
+        // {
+        //     //printf("\nFound initrid\n");
+        //     get_adder_map(output);
+        // }
+        // else if (strstr(output,"INSTALL") != NULL)
+        // {
            
 
-             clear_screen();
-            int size = getSizeInSectors(output);
-            printf("%d\n",2000);
-             clear_screen();
-            //(0,1,size);
-            printf("\n\nSHUT DOWN THE PC AND REMOVE THE INSTALL MEDIUM\n");
-            for(;;);
-        }
-         
+        //      clear_screen();
+        //     int size = getSizeInSectors(output);
+        //     printf("%d\n",2000);
+        //      clear_screen();
+        //     //(0,1,size);
+        //     printf("\n\nSHUT DOWN THE PC AND REMOVE THE INSTALL MEDIUM\n");
+        //     for(;;);
+        // }
+        
         init_pci_device();
-       
         const char *directory = "/sys/"; //Path to program directory
         program_count = find_programs(directory);
         printf("%d programs found\n",program_count);
@@ -432,12 +456,23 @@ void kmain(unsigned long magic, unsigned long addr) {
 
     // Print the contents of the list
     for (int i = 0; i < program_count; i++) {
-        printf("List element %d: %s\n", i, list[i]);
+        printf("Program %d: %s\n", i, list[i]);
     }
     // for (int i = 0; i < program_count; i++) {
     //     printf("%d: %s\n",i+1, programs[i]);
     // }
         // load_elf_file("/sys/shell");
+        // clear_screen();
+        // set_screen_x(0);
+        // set_screen_y(0);
+        // char **argv = (char**)kmalloc(2 * sizeof(char*));
+        // argv[1] = (char*)kmalloc(strlen(get_cwd()) + 1);
+        // strcpy(argv[1], get_cwd());
+        // argv[0] = (char*)kmalloc(strlen("user") + 1);
+        // strcpy(argv[0], "user");
+        // printf("%s\n",argv[0]);
+        // printf("%s\n",argv[1]);
+        // pre_terminal(2,argv);
         if (ret < 0) {
             ERROR("failed to init vesa graphics\n");
             sleep(4);
@@ -450,8 +485,12 @@ void kmain(unsigned long magic, unsigned long addr) {
         } else {
  
             //printf("Terminal initialization (%d)",ret);
+            //  init_paging();
             fpu_enable();
+            // printf("\033[100;500m");
+
             printf("Initialization complete\nAthenX %s:%d.%d.%d started successfully with %d errors\n",VERSION_MAIN,VERSION_SUB_MAIN,VERSION_SUB_MINOR,VERSION_SUB_PATCH,get_num_errors());
+            printf("Welcome to AthenX-2.0. This is the default terminal, please run load <name> to execute your terminal or <name> to run a script\n");
             
             
             //char *dumbb = "DUMB";
@@ -476,115 +515,206 @@ done:
 
 int login(int skip)
 {
-    struct login_info
+    set_scroll_mode(0);
+    FILE *fp = fopen("/etc/passwd","r");
+    if(get_file_size(fp) <= 1)
+    {   
+        fclose(fp);
+        printf("NO USERS\n");
+         const char *new_home = "/home/tristan";
+        addUser("tristan","123",1,NULL,new_home);
+    }
+    else
     {
-        char checksum[32];
-        char username_stored[32];
-        char password_stored[32];
-    };
-    const int DRIVE = 0;
-    const uint32 LBA = KERNEL_SECTOR_BASE+3;
-    const uint8 NO_OF_SECTORS = 1;
-    char buf[ATA_SECTOR_SIZE] = {0};
-    
-
-    struct login_info login_i;
-    memset(buf, 0, sizeof(buf));
-    ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
-    memcpy(&login_i, buf, sizeof(login_i));
-    if(strcmp(login_i.checksum,"True") == 0)
+        fclose(fp);
+    }
+    char username[100] = {0};
+    char password[100] = {0};
+    memset(username,0,sizeof(username));
+    username[0] = '\0';
+    memset(password,0,sizeof(password));
+    password[0] = '\0';
+    printf("Enter username: ");
+    while (1)
     {
-        char *username[512];
-        username[0] = '\0';
-        char *password[512];
-        password[0] = '\0';
-        if(skip == 0)
-        {
-            printf_("Username>");
-                while (1==1)
+         char *c = kb_getchar_w();
+         if(c == '\b')
+            {
+                //crude_song();
+                if(backspace(username))
                 {
-                    //printf_(">");
-                    char c = kb_getchar();
-                    char* s;
-                    if (c == '\n')
-                    {
-                            printf_("\n");
-                            
-                            
-                            break;
-                            //crude_song();
-                    }
-                    else
-                    {
-                        
-                        
-                        
-                        s = ctos(s, c);
-                        //printf_(s);
-                        printf_(s);
-                        //printf_(".");
-                        //printf_(s);
-                        
-                        append(username,c);
-                    }
+                    printf_("\b");
                     
-                }
-                printf_("Password>");
-                while (1==1)
-                {
-                    char c = kb_getchar();
-                    if (c == '\n')
-                    {
-                            printf_("\n");
-                            
-                            
-                            break;
-                            //crude_song();
-                    }
-                    else
-                    {
-                        
-                        
-                        char* s;
-                        s = ctos(s, c);
-                        //printf_(s);
-                        //printf_(s);
-                        printf_("#");
-                        
-                        append(password,c);
-                    }
-                    
-                }
-                int login_username_true = 0;
-                int login_password_true = 0;
-                if(strcmp(username,login_i.username_stored) == 0)
-                {
-                    login_username_true = 1;
+                    //set_cursor_x(get_cursor_x()-2);
+                    //printf_(" ");
+                    //console_ungetchar();
                 }
                 else
                 {
-                    return -1;
+                    ///beep();
                 }
-                if (strcmp(password,login_i.password_stored) == 0)
-                {
-                    login_password_true = 1;
-                }
-                else
-                {
-                    return -1;
-                }
-                if(login_username_true == 1 && login_password_true == 1)
-                {
-                    return 1;
-                }
-                else{return -1;}
-        }
-        else{return 89;}
-   
-    
+                
+                //printf_("\b");
+            }
+            
+            else if (c == '\n')
+            {
+                // printf("\n");
+                break;
+                //printf_("\n");
+                // undraw_square(get_screen_y(),get_screen_x());
+                // cmd_handler(username,programs);
+                // memset(buffer, 0,sizeof(buffer));
+                
+                //next_line();
+                //printf("code");
+                //set_screen_x(0);
+                //set_terminal_colum(get_terminal_col()+16);
+                //set_terminal_row(0);
+                //  strcpy(cwd_at,get_cwd());
+                // printf("\n%s>",cwd_at);
+                //printf("looped\n");
+                
+                //crude_song();
+            }
+            // else if(c == '\n')
+            // {
+            //     undraw_square(get_screen_y(),get_screen_x());
+            //     printf("\n");
+            //     memset(buffer,0,sizeof(buffer));
+            // }
+            else if (c == '\0')
+            {
+                //DEBUG("NULL");
+                
+                //beep();
+            }
+            else if((int)c != 0x48 && (int)c != 0x50 && (int)c != 0x4D && (int)c != 0x4B )
+            {
+                
+                char* s;
+                s = ctos(s, c);
+                //printf_(s);
+                //undraw_square(get_screen_x(),get_screen_y());
+                // printf_(s);
+                // undraw_square(get_screen_y(),get_screen_x());
+                printf(s);
+                
+                //printf_("X{}");
+                //undraw_square(get_screen_x()-10,get_screen_y());
+                //printf_(s);
+                 
+                 //printf_(s);
+                //printf_(s);
+                
+                append(username,c);
+               
+                
+            }
+            else
+            {
+                
+            }
 
     }
-    else{kernel_command_handler("login set");}
+    printf("\nEnter password: ");
+    while (1)
+    {
+         char *c = kb_getchar_w();
+         if(c == '\b')
+            {
+                //crude_song();
+                if(backspace(password))
+                {
+                    printf_("\b");
+                    
+                    //set_cursor_x(get_cursor_x()-2);
+                    //printf_(" ");
+                    //console_ungetchar();
+                }
+                else
+                {
+                    ///beep();
+                }
+                
+                //printf_("\b");
+            }
+            
+            else if (c == '\n')
+            {
+                // printf("\n");
+                break;
+                //printf_("\n");
+                // undraw_square(get_screen_y(),get_screen_x());
+                // cmd_handler(username,programs);
+                // memset(buffer, 0,sizeof(buffer));
+                
+                //next_line();
+                //printf("code");
+                //set_screen_x(0);
+                //set_terminal_colum(get_terminal_col()+16);
+                //set_terminal_row(0);
+                //  strcpy(cwd_at,get_cwd());
+                // printf("\n%s>",cwd_at);
+                //printf("looped\n");
+                
+                //crude_song();
+            }
+            // else if(c == '\n')
+            // {
+            //     undraw_square(get_screen_y(),get_screen_x());
+            //     printf("\n");
+            //     memset(buffer,0,sizeof(buffer));
+            // }
+            else if (c == '\0')
+            {
+                //DEBUG("NULL");
+                
+                //beep();
+            }
+            else if(c != '\0')
+            {
+                
+                char* s;
+                s = ctos(s, c);
+                //printf_(s);
+                //undraw_square(get_screen_x(),get_screen_y());
+                // printf_(s);
+                // undraw_square(get_screen_y(),get_screen_x());
+                printf("*");
+                
+                //printf_("X{}");
+                //undraw_square(get_screen_x()-10,get_screen_y());
+                //printf_(s);
+                 
+                 //printf_(s);
+                //printf_(s);
+                
+                append(password,c);
+               
+                
+            }
+            else
+            {
+                
+            }
+
+    }
+    printf("\n");
+    if(validateUserCredentials(username,password) == true)
+    {
+        UserInfo user_info;
+        getUserInfo(username,&user_info);
+        // set_cwd(user_info.home_directory);
+        return 1;
+    }
+    else
+    {
+        printf("invalid\n");
+        return -1;
+    }
+
+    
     
 }
 void getstr_bound(char *buffer, uint8 bound) {
@@ -613,6 +743,24 @@ void toggle_cursor_visibility() {
     cursor_visible = !cursor_visible;
 }
 
+
+void set_init_path(char * path)
+{
+    strcpy(init_path,path);
+}
+
+int pre_terminal(int argc, char **argv)
+{
+    if(init_path != "\0")
+    {
+        load_elf_file(init_path,argc,argv);
+    }
+    else
+    {
+        return -1;
+    }
+    
+}
 void terminal_main()
 {
     // //beep();
@@ -622,7 +770,28 @@ void terminal_main()
 //     vesa_buffer, vbe_get_width(), vbe_get_height(), get_pitch()
 // );
     const char msg[] = "Hello world\nThis text is a message\nFOr u";
+    int valid_login = 0;
+    int attempts = 1;
+    login(1);
+    while (valid_login != 1)
+    {
+        valid_login = 1;
+        attempts++;
+        if(valid_login != 1)
+        {
+            printf("User credentials are not valid.\n");
+        }
+        
+        
+    }
+    if(attempts >= 9)
+    {
+        printf("INVALID LOGIN, MAX ATTEMPTS\n");
+        for(;;);
 
+    }
+    
+    
     // flanterm_write(ft_ctx, msg, sizeof(msg));
     //DEBUG("terminal_main");
     FUNC_ADDR_NAME(&terminal_main,0,"");

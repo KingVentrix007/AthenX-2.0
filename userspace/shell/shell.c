@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     // set_pos(100,100);
     // printf("Press any key to continue\n"); 
     // char buf[1001];
-    size_t malloc_size = 20;
+    size_t malloc_size = 1001;
     char *buf = (char*)malloc(malloc_size);
     memset(buf, 0, sizeof(buf));
     buf[0] = '\0';
@@ -71,10 +71,10 @@ int main(int argc, char **argv)
         else
         {
             printf("%c",c);
-            if((strlen(buf)+1) >= malloc_size)
-            {
-                buf = (char *)realloc(buf,malloc_size+(int)(malloc_size));
-            }
+            // if((strlen(buf)+1) >= malloc_size)
+            // {
+            //     buf = (char *)realloc(buf,malloc_size+(int)(malloc_size));
+            // }
             Sappend(buf, c);
         }
         // printf("hello\n");

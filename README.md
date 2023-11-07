@@ -94,7 +94,7 @@ AthenX is not and NEVER will be a replacement for a "real" os, it is simply here
    ```
 
 2. open freshly installed repository with wsl or any other UNIX system and run:
-    ```bash
+    ```sh
       bash ./build-cross-compiler.sh
     ```
     then add /cross/bin
@@ -160,7 +160,7 @@ Simply add any changes you want then and save them, then type 'make run' and wat
 Creating userspace programs for AthenX is always incouraged, please read this [documentation for more information](/docs/Manuals+roadmaps/Creating+running%20user%20programs.md)
 
 ## Ports
-Currently I am attempting to port some software to AthenX-2.0
+Currently I am attempting to port some software to AthenX-2.0.
 This is one area where **ANY** contribution will be almost certainly implemented into AthenX-2.0
 Software currently being ported:
 

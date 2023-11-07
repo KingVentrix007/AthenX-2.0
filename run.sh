@@ -56,8 +56,8 @@ if [ -f "$image_file" ]; then
 else
   # Create an empty image file
   dd if=/dev/zero of="$image_file" bs=1M count=1024
-  sudo parted "$image_file" mklabel msdos
-  sudo parted "$image_file" mkpart primary fat32 1MiB 100%
+  # sudo parted "$image_file" mklabel msdos
+  # sudo parted "$image_file" mkpart primary fat32 1MiB 100%
   # Partition the disk using fdisk
   echo -e "o\nn\np\n1\n\n\nw" | sudo fdisk "$image_file"
 
@@ -68,33 +68,33 @@ else
   sudo mkdir -p /mnt/AthenX
 
   sudo mount -o loop,rw "$image_file" /mnt/AthenX
-  sudo mkdir -p /mnt/AthenX/bin
-  sudo mkdir -p /mnt/AthenX/etc
-  sudo mkdir -p /mnt/AthenX/home
-  sudo mkdir -p /mnt/AthenX/mnt
-  sudo mkdir -p /mnt/AthenX/tmp
-  sudo mkdir -p /mnt/AthenX/usr
-  sudo mkdir -p /mnt/AthenX/var
-  sudo mkdir -p /mnt/AthenX/boot
-  sudo mkdir -p /mnt/AthenX/media
-  sudo mkdir -p /mnt/AthenX/sys
-  sudo mkdir -p /mnt/AthenX/dev
-  sudo mkdir -p /mnt/AthenX/proc
-  sudo mkdir -p /mnt/AthenX/lib
-  sudo mkdir -p /mnt/AthenX/sbin
-  sudo mkdir -p /mnt/AthenX/opt
-  sudo mkdir -p /mnt/AthenX/root
-  sudo mkdir -p /mnt/AthenX/gui
-  sudo mkdir -p /mnt/AthenX/user
-  sudo mkdir -p /mnt/AthenX/var/log
-  sudo mkdir -p /mnt/AthenX/man
-
+  # sudo mkdir -p /mnt/AthenX/bin
+  # sudo mkdir -p /mnt/AthenX/etc
+  # sudo mkdir -p /mnt/AthenX/home
+  # sudo mkdir -p /mnt/AthenX/mnt
+  # sudo mkdir -p /mnt/AthenX/tmp
+  # sudo mkdir -p /mnt/AthenX/usr
+  # sudo mkdir -p /mnt/AthenX/var
+  # sudo mkdir -p /mnt/AthenX/boot
+  # sudo mkdir -p /mnt/AthenX/media
+  # sudo mkdir -p /mnt/AthenX/sys
+  # sudo mkdir -p /mnt/AthenX/dev
+  # sudo mkdir -p /mnt/AthenX/proc
+  # sudo mkdir -p /mnt/AthenX/lib
+  # sudo mkdir -p /mnt/AthenX/sbin
+  # sudo mkdir -p /mnt/AthenX/opt
+  # sudo mkdir -p /mnt/AthenX/root
+  # sudo mkdir -p /mnt/AthenX/gui
+  # sudo mkdir -p /mnt/AthenX/user
+  # sudo mkdir -p /mnt/AthenX/var/log
+  # sudo mkdir -p /mnt/AthenX/man
+  sudo cp -r "sysroot"/* /mnt/AthenX/
   # Copy your OS files and GRUB configuration
 
   sudo cp AthenX.bin /mnt/AthenX/boot
 
   # Install GRUB to the MBR (Master Boot Record)
-  sudo grub-install --target=i386-pc --boot-directory=/mnt/AthenX --force --no-floppy --modules="part_msdos fat" /dev/loop0
+  sudo grub-install --target=i386-pc --root-directory=/mnt/AthenX --boot-directory=/mnt/AthenX --force --no-floppy --modules="part_msdos fat" /dev/loop0
   echo "saved_entry=grub.cfg" | sudo tee /mnt/AthenX/grub/grubenv
   sudo cat /mnt/AthenX/grub/grubenv
   # sudo cp "simple.cfg" /mnt/AthenX/grub/grub.cfg

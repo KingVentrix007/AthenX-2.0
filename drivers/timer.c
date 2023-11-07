@@ -75,7 +75,7 @@ void timer_init() {
 }
 
 void sleep(double sec) {
-    uint32 end = g_ticks + sec * g_freq_hz;
+    uint32 end = g_ticks + sec * g_freq_hz; 
     while (g_ticks < end);
 }
 

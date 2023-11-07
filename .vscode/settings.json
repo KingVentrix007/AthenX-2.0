@@ -47,7 +47,16 @@
         "elf_exe.h": "c",
         "man.h": "c",
         "vesa.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "fat_access.h": "c",
+        "stdbool.h": "c",
+        "editor.h": "c",
+        "acpi.h": "c",
+        "ansi.h": "c",
+        "user.h": "c",
+        "compare": "c",
+        "inttypes.h": "c",
+        "sha256.h": "c"
     },
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here

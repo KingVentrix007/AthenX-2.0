@@ -47,6 +47,7 @@
         "terminal.h": "c",
         "setjmp.h": "c",
         "sim.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "enabled"
     
 }

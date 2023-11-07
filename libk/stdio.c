@@ -180,3 +180,69 @@ int perror(char *string)
 
 //     closedir(dir);
 // }
+
+int sscanf(const char* input, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    int num_matched = 0; // To track the number of matched items.
+    const char* input_ptr = input;
+
+    // Loop through the format string.
+    for (const char* fmt_ptr = format; *fmt_ptr != '\0'; fmt_ptr++) {
+        // Check for format specifiers.
+        if (*fmt_ptr == '%') {
+            fmt_ptr++; // Move to the specifier character.
+            
+            // Check for supported specifiers.
+            if (*fmt_ptr == 'd') {
+                int* int_ptr = va_arg(args, int*);
+                *int_ptr = 0; // Initialize integer variable.
+                int sign = 1;
+
+                // Handle optional '+' or '-' sign.
+                if (*input_ptr == '-') {
+                    sign = -1;
+                    input_ptr++;
+                } else if (*input_ptr == '+') {
+                    input_ptr++;
+                }
+
+                // Parse digits.
+                while (*input_ptr >= '0' && *input_ptr <= '9') {
+                    *int_ptr = (*int_ptr * 10) + (*input_ptr - '0');
+                    input_ptr++;
+                }
+
+                // Apply the sign.
+                *int_ptr *= sign;
+                num_matched++;
+            } else if (*fmt_ptr == 's') {
+                char* str_ptr = va_arg(args, char*);
+                int len = 0;
+
+                // Extract characters until a space or the end of the input.
+                while (*input_ptr != ' ' && *input_ptr != '\0') {
+                    *str_ptr = *input_ptr;
+                    str_ptr++;
+                    input_ptr++;
+                    len++;
+                }
+                *str_ptr = '\0'; // Null-terminate the string.
+                num_matched++;
+            }
+        } else {
+            // Check for a matching character in the input.
+            if (*fmt_ptr == *input_ptr) {
+                input_ptr++; // Move the input pointer.
+            } else {
+                // Failed to match format string to input.
+                break;
+            }
+        }
+    }
+
+    va_end(args);
+
+    return num_matched;
+}

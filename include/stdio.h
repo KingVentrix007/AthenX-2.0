@@ -6,6 +6,7 @@ char get_chr();
 char* get_char_block();
 void scanf(char* format, ...);
 int perror(char *string);
+int sscanf(const char* input, const char* format, ...);
 #define IO_BUFFER_SIZE 1000
 
 typedef struct

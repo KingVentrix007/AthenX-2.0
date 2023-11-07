@@ -109,6 +109,12 @@ int vprintf_(const char* format, va_list va);
  */
 int fctprintf(void (*out)(char character, void* arg), void* arg, const char* format, ...);
 
+// Define the escape sequence codes
+#define ESC_RESET   "\x1B[0m" // Reset to default
+#define ESC_RED     "\x1B[31m" // Set text color to red
+#define ESC_GREEN   "\x1B[32m" // Set text color to green
+#define ESC_YELLOW  "\x1B[33m" // Set text color to yellow
+#define ESC_BLUE    "\x1B[34m" // Set text color to blue
 
 #ifdef __cplusplus
 }

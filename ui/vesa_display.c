@@ -186,7 +186,7 @@ int putchar_vesa(int ic)
 {
     char c = (char)ic;
     vesa_write(&c, sizeof(c));
-    //write_serial(c,DEFAULT_COM_DEBUG_PORT);
+    write_serial(c,DEFAULT_COM_DEBUG_PORT);
     return ic;
 }
 void cls_screen(char *color)

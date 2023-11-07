@@ -69,7 +69,7 @@ void run_elf(struct elf_exe elf, int myArgc,char* myArgv[]) {
     );
 
     // Define the entry pointer as a function
-    void (*elf_entry)(int, char[20][100]) = (void (*)(int, char[20][100]))(elf.elf_start); // Assuming ELF entry point is at offset 0
+    void (*elf_entry)(int, char **) = (void (*)(int, char **))(elf.elf_start); // Assuming ELF entry point is at offset 0
 
     // Call the ELF entry point function with the arguments
     elf_entry(myArgc, myArgv);
