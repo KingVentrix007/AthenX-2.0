@@ -377,6 +377,8 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("Error saving environmental variables.\n");
         }
         }
+          char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
+          printf("args = %s\n",cmdline);
         //  if (loadAndDrawImage("/gui/sunset.tga", 0, 0) == 0) {
         // printf("succsess\n");
         // set_screen_x(0);

@@ -14,7 +14,18 @@ if [ -f "$image_file" ]; then
   sudo mkdir -p /mnt/AthenX
   sudo mount -o loop,rw "AthenX.img" /mnt/AthenX
   # sudo umount /mnt/AthenX
+  fsck.fat -n "$disk_image"
 
+  # Check the return code of fsck
+  if [ $? -eq 0 ]; then
+      echo "Disk image is valid."
+      # Add your commands to run if the image is valid
+  else
+      echo "Disk image is invalid or contains errors."
+      exit
+      # fsck.fat "$image_file"
+      # Add your commands to run if the image is invalid
+  fi
   # Copy AthenX.bin into the rootfs folder
   sudo cp "AthenX.bin" "/mnt/AthenX/boot"
   # Define the source directory
@@ -94,7 +105,7 @@ else
   sudo cp AthenX.bin /mnt/AthenX/boot
 
   # Install GRUB to the MBR (Master Boot Record)
-  sudo grub-install --target=i386-pc --root-directory=/mnt/AthenX --boot-directory=/mnt/AthenX --force --no-floppy --modules="part_msdos fat" /dev/loop0
+  sudo grub-install --target=i386-pc --boot-directory=/mnt/AthenX --force --no-floppy --modules="part_msdos fat" /dev/loop0
   echo "saved_entry=grub.cfg" | sudo tee /mnt/AthenX/grub/grubenv
   sudo cat /mnt/AthenX/grub/grubenv
   # sudo cp "simple.cfg" /mnt/AthenX/grub/grub.cfg
@@ -112,7 +123,7 @@ else
 
   echo "Root Directory LBA Address: $root_dir_lba"
   echo "TESTING $image_file intergraty"
-  fsck.fat $image_file
+  fsck.fat "$image_file"
   # Unmount the image
   sudo umount /mnt/AthenX
 fi
