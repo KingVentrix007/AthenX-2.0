@@ -108,7 +108,7 @@ int fatfs_init(struct fatfs *fs)
     //DEBUG("");
     // Read LBA Begin for the file system
     if (valid_partition)
-        fs->lba_begin = GET_32BIT_WORD(fs->currentsector.sector, PARTITION1_LBA_BEGIN_LOCATION);
+        fs->lba_begin = GET_32BIT_WORD(fs->currentsector.sector, PARTITION1_LBA_BEGIN_LOCATION); 
     // Else possibly MBR less disk
     else
         fs->lba_begin = 0;

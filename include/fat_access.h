@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 #define FAT_INIT_OK                         0
 #define FAT_INIT_MEDIA_ACCESS_ERROR         (-1)
-#define FAT_INIT_INVALID_SECTOR_SIZE        (-2)
+#define FAT_INIT_INVALID_SECTOR_SIZE        (-900)
 #define FAT_INIT_INVALID_SIGNATURE          (-3)
 #define FAT_INIT_ENDIAN_ERROR               (-4)
 #define FAT_INIT_WRONG_FILESYS_TYPE         (-5)

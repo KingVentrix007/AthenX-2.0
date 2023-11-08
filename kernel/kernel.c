@@ -315,6 +315,8 @@ void kmain(unsigned long magic, unsigned long addr) {
         //kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
         int ret = display_init(0,x,y,32);
         printf("\nTotal memory size = %d",end-start);
+        char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
+        
         ata_init();
         clear_screen();
         set_screen_x(0);
@@ -322,6 +324,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // init_virt();enable_paging()
        
         printf("kernel memory start address = %p\n",mboot_info->addr);
+        printf("args->%s\n",cmdline);
          fl_init();
           if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
         {
