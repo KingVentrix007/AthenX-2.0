@@ -323,7 +323,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         set_screen_y(0);
         // init_virt();enable_paging()
        
-        printf("kernel memory start address = %p\n",mboot_info->addr);
+        printf("kernel memory start address this postion = %p\n",mboot_info->addr);
         printf("args->%s\n",cmdline);
          fl_init();
           if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)

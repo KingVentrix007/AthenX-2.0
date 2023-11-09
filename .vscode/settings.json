@@ -56,7 +56,9 @@
         "user.h": "c",
         "compare": "c",
         "inttypes.h": "c",
-        "sha256.h": "c"
+        "sha256.h": "c",
+        "fat_write.h": "c",
+        "fat_cache.h": "c"
     },
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here

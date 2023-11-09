@@ -235,6 +235,14 @@ static int _create_directory(char *path)
     }
 
 #if FATFS_INC_LFN_SUPPORT
+    if (!fatfs_add_special_entries(&_fs, file->startcluster, file->parentcluster))
+    {
+        // Delete allocated space
+        fatfs_free_cluster_chain(&_fs, file->startcluster);
+
+        _free_file(file);
+        return 0;
+    }
 
     // Generate a short filename & tail
     tailNum = 0;
@@ -1623,4 +1631,44 @@ int ferror(FILE *stream) {
     // It always returns 0 (no error) to indicate that no error occurred.
     
     return 0;
+}
+
+
+
+
+
+
+int fatfs_add_special_entries(struct fatfs *fs, uint32 dirCluster, uint32 parentCluster) {
+    // Check if the cluster is valid
+    if (dirCluster < 2 || parentCluster < 2)
+        return 0;
+
+    // Create the . entry
+    // Create the . entry
+    struct fat_dir_entry dotEntry;
+    memset(&dotEntry, 0, sizeof(dotEntry));
+    strcpy((char*)dotEntry.Name, "."); // Use the Name field
+    dotEntry.Attr = FAT_ATTR_SUBDIRECTORY; // Set the attribute to indicate a subdirectory
+    dotEntry.FstClusLO = (uint16_t)(dirCluster & 0xFFFF);
+    dotEntry.FstClusHI = (uint16_t)((dirCluster >> 16) & 0xFFFF);
+    dotEntry.FileSize = 0;
+
+    // Write the . entry to the directory cluster
+    if (!fatfs_add_file_entry(fs, dirCluster, (char*)dotEntry.Name, NULL, 0, 1, &dotEntry)) {
+        return 0;
+    }
+
+    // Create the .. entry
+    struct fat_dir_entry dotDotEntry;
+    memset(&dotDotEntry, 0, sizeof(dotDotEntry));
+    strcpy((char*)dotDotEntry.Name, ".."); // Use the Name field
+    dotDotEntry.Attr = FAT_ATTR_SUBDIRECTORY; // Set the attribute to indicate a subdirectory
+    dotDotEntry.FstClusLO = (uint16_t)(parentCluster & 0xFFFF);
+    dotDotEntry.FstClusHI = (uint16_t)((parentCluster >> 16) & 0xFFFF);
+    dotDotEntry.FileSize = 0;
+
+    // Write the .. entry to the directory cluster
+    if (!fatfs_add_file_entry(fs, dirCluster, (char*)dotDotEntry.Name, NULL, 0, 1, &dotDotEntry)) {
+        return 0;
+    }
 }
