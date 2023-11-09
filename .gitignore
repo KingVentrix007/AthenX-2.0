@@ -18,9 +18,10 @@ load
 inspect/
 !obj/arch/syscall.o
 sync.sh
-.bin'
+.bin
 cross/
 /cross/
 /temp/
 temp/
 
+/.bin
