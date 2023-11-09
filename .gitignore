@@ -21,4 +21,6 @@ sync.sh
 .bin'
 cross/
 /cross/
+/temp/
+temp/
 

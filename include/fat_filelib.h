@@ -84,6 +84,7 @@ void                fl_attach_locks(void (*lock)(void), void (*unlock)(void));
 int                 fl_attach_media(fn_diskio_read rd, fn_diskio_write wr);
 void                fl_shutdown(void);
 
+int fatfs_add_special_entries(struct fatfs *fs, uint32 dirCluster, uint32 parentCluster);
 // Standard API
 void*               fl_fopen(const char *path, const char *modifiers);
 void                fl_fclose(void *file);

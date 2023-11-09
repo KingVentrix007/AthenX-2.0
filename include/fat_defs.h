@@ -106,7 +106,7 @@
 //-----------------------------------------------------------------------------
 #define FAT32_LAST_CLUSTER              0xFFFFFFFF
 #define FAT32_INVALID_CLUSTER           0xFFFFFFFF
-
+#define FAT_ATTR_SUBDIRECTORY 0x10
 STRUCT_PACK_BEGIN
 struct fat_dir_entry STRUCT_PACK
 {
