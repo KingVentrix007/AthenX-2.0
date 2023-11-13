@@ -25,3 +25,5 @@ cross/
 temp/
 
 /.bin
+inspect/
+/inspect/

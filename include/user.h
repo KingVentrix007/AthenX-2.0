@@ -12,7 +12,7 @@ typedef struct  {
 }UserInfo;
 
 
-long get_file_size(FILE *file);
+
 int valid_user(const char *username);
 bool compare_username(const char* input_string, const char* username);
 bool addUser(const char *username, const char *password, int access_level, const char *shell, const char *home);

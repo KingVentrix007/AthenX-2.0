@@ -1672,3 +1672,46 @@ int fatfs_add_special_entries(struct fatfs *fs, uint32 dirCluster, uint32 parent
         return 0;
     }
 }
+
+
+
+
+
+
+
+long get_file_size(FILE *file) {
+    // FILE* file = fopen(file_name, "rb");
+    if (file == NULL) {
+        // Error opening the file
+        return -1;
+    }
+
+    // Seek to the end of the file
+    if (fseek(file, 0, SEEK_END) != 0) {
+        // Error seeking to the end
+        fclose(file);
+        return -1;
+    }
+
+    // Get the current file position, which is the file size
+    long size = ftell(file);
+    
+    // Close the file
+    // fclose(file);
+
+    return size;
+}
+
+int is_file(const char *path)
+{
+    FILE *fp = fopen(path,"r");
+    if(fp == NULL)
+    {
+        return -1;
+    }
+    else{
+        return 0;
+    }
+    fclose(fp);
+}
+

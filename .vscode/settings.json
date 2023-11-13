@@ -60,7 +60,11 @@
         "fat_string.h": "c",
         "fat_misc.h": "c",
         "fat_defs.h": "c",
-        "random": "c"
+        "random": "c",
+        "password.h": "c",
+        "auth.h": "c",
+        "multiboot.h": "c",
+        "mod.h": "c"
     },
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here

@@ -432,10 +432,10 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
         strcat(path,arguments[1]);
         printf("\n");
         printf("Reading file at: %s\n",path);
-        clear_display();
-        clear_screen();
-        set_screen_x(0);
-        set_screen_y(0);
+        // clear_display();
+        // clear_screen();
+        // set_screen_x(0);
+        // set_screen_y(0);
         displayFileContents(path);
         // if(file == NULL)
         // {
@@ -482,6 +482,23 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
         // fl_listdirectory("/rootfs");
         // fl_listdirectory(cwd);
         
+    }
+    else if (strcmp(arguments[0],"update") == 0)
+    {
+        if(arg_count > 1)
+        {
+
+        }
+        else
+        {
+            char *path = "/tmp/AthenX.bin";
+            char *old_path = "/boot/AthenX.bin";
+            int ret = install_new_version(path,old_path);
+            if(ret != 0);
+            {
+                printf("Update failed with exit code (%d)",ret);
+            }
+        }
     }
     
     else if(strcmp(arguments[0],"cd") == 0)
@@ -592,7 +609,7 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
     else if (strcmp(arguments[0],"exit") == 0)
     {
         //fs_partition_table_main_update();
-        ssfs_update_table();
+        // ssfs_update_table();
     }
     else if (strcmp(arguments[0],"set-xy") == 0)
     {

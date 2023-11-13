@@ -48,6 +48,9 @@
 #include "../include/exe.h"
 #include "../include/elf_exe.h"
 #include "user.h"
+#include "mod.h"
+
+
 // #include "flanterm.h"
 // #include "fb.h"
 // #define STB_IMAGE_IMPLEMENTATION
@@ -316,7 +319,6 @@ void kmain(unsigned long magic, unsigned long addr) {
         int ret = display_init(0,x,y,32);
         printf("\nTotal memory size = %d",end-start);
         char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
-        
         ata_init();
         clear_screen();
         set_screen_x(0);
@@ -324,7 +326,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         // init_virt();enable_paging()
        
         printf("kernel memory start address this postion = %p\n",mboot_info->addr);
-        printf("args->%s\n",cmdline);
+        // printf("args->%s\n",cmdline);
          fl_init();
           if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
         {
@@ -380,8 +382,8 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("Error saving environmental variables.\n");
         }
         }
-          char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
-          printf("args = %s\n",cmdline);
+          char* cmdlines = (char*)(uintptr_t)mboot_info->cmdline;
+          printf("args = %s\n",cmdlines);
         //  if (loadAndDrawImage("/gui/sunset.tga", 0, 0) == 0) {
         // printf("succsess\n");
         // set_screen_x(0);
@@ -390,19 +392,29 @@ void kmain(unsigned long magic, unsigned long addr) {
         //     // Error occurred
         // }
          char output[71629] = {0};
-        if(mboot_info->mods_count >= 1)
+        if(mboot_info->mods_count >= -100)
         {
-             printf("Mod count: %d\n", mboot_info->mods_count);
-            uint32_t initrd_size = 0;
-            uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
-            uint8_t* initrd_end_location = initrd_location + initrd_size;
-            printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
+            int mod_count = 0;
+            LoadedModule * modules = get_loaded_modules(mboot_info,&mod_count);
+            void *buffer = get_module_value(modules[0]);
+            printf("%s\n",buffer);
+            free(buffer);
+            //  printf("Mod count: %d\n", mboot_info->mods_count);
+            // uint32_t initrd_size = 0;
+            // uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
+            // uint8_t* initrd_end_location = initrd_location + initrd_size;
+            // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
            
-            memcpy(output, initrd_location, initrd_size);
+            // memcpy(output, initrd_location, initrd_size);
         }
         else
         {
             printf("No modules found\n");
+             int mod_count = 0;
+            LoadedModule * modules = get_loaded_modules(mboot_info,&mod_count);
+            void *buffer = get_module_value(modules[0]);
+            printf("%s\n",buffer);
+            free(buffer);
 
         }
             unsigned char* bios_start = (unsigned char*)0xE0000;
@@ -458,7 +470,7 @@ void kmain(unsigned long magic, unsigned long addr) {
 
     // Call the populate_list_from_filenames function to populate the list
     populate_list_from_filenames(list, 100);
-
+    // printf("TEST UPDATE FUNCTION\n");
     // Print the contents of the list
     for (int i = 0; i < program_count; i++) {
         printf("Program %d: %s\n", i, list[i]);
@@ -478,6 +490,36 @@ void kmain(unsigned long magic, unsigned long addr) {
         // printf("%s\n",argv[0]);
         // printf("%s\n",argv[1]);
         // pre_terminal(2,argv);
+        // if(is_file("/tmp/AthenX.bin") == 0)
+        // {
+
+        //     FILE *install_file = fopen("/tmp/AthenX.bin", "r");
+        //     FILE *main_file = fopen("/tmp/AthenX.bin", "r");
+        //     size_t install_file_size = get_file_size(install_file);
+        //     size_t main_file_size = get_file_size(main_file);
+        //     char * install_file_buffer = (char *)kmalloc(install_file_size);
+        //      char * main_file_buffer = (char *)kmalloc(main_file_size);
+        //      if(install_file_buffer == NULL || main_file_buffer == NULL)
+        //      {
+        //         printf("malloc error");
+        //      }
+        //      else
+        //      {
+        //         fl_fread(install_file_buffer,sizeof(char),install_file_size,install_file);
+        //         fl_fread(main_file_buffer,sizeof(char),main_file_size,main_file);
+        //         if(install_file_buffer == main_file_buffer)
+        //         {
+
+        //         }
+        //         else
+        //         {
+        //              printf("There is an update available. Type update to install\n");
+        //         }
+        //      }
+        //     fclose(main_file);
+        //     fclose(install_file);
+           
+        // }
         if (ret < 0) {
             ERROR("failed to init vesa graphics\n");
             sleep(4);
@@ -526,8 +568,8 @@ int login(int skip)
     {   
         fclose(fp);
         printf("NO USERS\n");
-         const char *new_home = "/home/tristan";
-        addUser("tristan","123",1,NULL,new_home);
+        char *new_home = "/home/tristan";
+        addUser("tristan","123",1,"/sys/shell/",new_home);
     }
     else
     {
@@ -710,7 +752,13 @@ int login(int skip)
     {
         UserInfo user_info;
         getUserInfo(username,&user_info);
+        printf("\n::\n");
+        printf("Home %s\n",user_info.home_directory);
         // set_cwd(user_info.home_directory);
+        if(user_info.login_shell != NULL)
+        {
+
+        }
         return 1;
     }
     else
@@ -777,8 +825,8 @@ void terminal_main()
     const char msg[] = "Hello world\nThis text is a message\nFOr u";
     int valid_login = 0;
     int attempts = 1;
-    login(1);
-    while (valid_login != 1)
+    
+    while (login(1) != 1)
     {
         valid_login = 1;
         attempts++;

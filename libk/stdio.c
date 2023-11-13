@@ -181,68 +181,57 @@ int perror(char *string)
 //     closedir(dir);
 // }
 
-int sscanf(const char* input, const char* format, ...) {
+int sscanf(const char* format, const char* input, ...) {
     va_list args;
-    va_start(args, format);
+    va_start(args, input);
 
-    int num_matched = 0; // To track the number of matched items.
-    const char* input_ptr = input;
+    const char* formatPtr = format;
+    const char* inputPtr = input;
+    int count = 0;
 
-    // Loop through the format string.
-    for (const char* fmt_ptr = format; *fmt_ptr != '\0'; fmt_ptr++) {
-        // Check for format specifiers.
-        if (*fmt_ptr == '%') {
-            fmt_ptr++; // Move to the specifier character.
-            
-            // Check for supported specifiers.
-            if (*fmt_ptr == 'd') {
-                int* int_ptr = va_arg(args, int*);
-                *int_ptr = 0; // Initialize integer variable.
-                int sign = 1;
+    while (*formatPtr) {
+        if (*formatPtr == '%') {
+            formatPtr++;
 
-                // Handle optional '+' or '-' sign.
-                if (*input_ptr == '-') {
-                    sign = -1;
-                    input_ptr++;
-                } else if (*input_ptr == '+') {
-                    input_ptr++;
+            switch (*formatPtr) {
+                case 's': {
+                    char* strArg = va_arg(args, char*);
+                    while (*inputPtr && *inputPtr != ' ') {
+                        *strArg++ = *inputPtr++;
+                    }
+                    *strArg = '\0';
+                    count++;
+                    break;
                 }
-
-                // Parse digits.
-                while (*input_ptr >= '0' && *input_ptr <= '9') {
-                    *int_ptr = (*int_ptr * 10) + (*input_ptr - '0');
-                    input_ptr++;
+                case 'c': {
+                    char* charArg = va_arg(args, char*);
+                    *charArg = *inputPtr++;
+                    count++;
+                    break;
                 }
+                case 'd': {
+                    int* intArg = va_arg(args, int*);
+                    *intArg = 0;
 
-                // Apply the sign.
-                *int_ptr *= sign;
-                num_matched++;
-            } else if (*fmt_ptr == 's') {
-                char* str_ptr = va_arg(args, char*);
-                int len = 0;
+                    while (*inputPtr >= '0' && *inputPtr <= '9') {
+                        *intArg = (*intArg * 10) + (*inputPtr++ - '0');
+                    }
 
-                // Extract characters until a space or the end of the input.
-                while (*input_ptr != ' ' && *input_ptr != '\0') {
-                    *str_ptr = *input_ptr;
-                    str_ptr++;
-                    input_ptr++;
-                    len++;
+                    count++;
+                    break;
                 }
-                *str_ptr = '\0'; // Null-terminate the string.
-                num_matched++;
             }
+        } else if (*formatPtr != *inputPtr) {
+            // If the characters don't match, return the number of items parsed
+            break;
         } else {
-            // Check for a matching character in the input.
-            if (*fmt_ptr == *input_ptr) {
-                input_ptr++; // Move the input pointer.
-            } else {
-                // Failed to match format string to input.
-                break;
-            }
+            // Characters match, continue parsing
+            formatPtr++;
+            inputPtr++;
         }
     }
 
     va_end(args);
 
-    return num_matched;
+    return count;
 }

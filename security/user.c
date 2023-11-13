@@ -10,56 +10,35 @@
 //! username:password_hash:salt:additional_fields
 int valid_user(const char *username)
 {
-    char *data;
-    FILE *fp = fopen("/etc/passwd","r");
-    data = (char *)kmalloc(get_file_size(fp));
-    if(data == NULL)
-    {
-        printf("Malloc error\n");
-        fclose(fp);
-        return -1;
-    }
-    char line[256];
-    while (fgets(line, sizeof(line), fp) != NULL)
-    {
-        if(compare_username(line, username) == TRUE)
-        {
-            return 1;
-        }
-        else
-        {
+    // char *data;
+    // FILE *fp = fopen("/etc/passwd","r");
+    // data = (char *)kmalloc(get_file_size(fp));
+    // if(data == NULL)
+    // {
+    //     printf("Malloc error\n");
+    //     fclose(fp);
+    //     return -1;
+    // }
+    // char line[256];
+    // while (fgets(line, sizeof(line), fp) != NULL)
+    // {
+    //     if(compare_username(line, username) == TRUE)
+    //     {
+    //         return 1;
+    //     }
+    //     else
+    //     {
 
-        }
-    }
-    return -2;
+    //     }
+    // }
+    // return -2;
 
 }
 
 
 
 
-long get_file_size(FILE *file) {
-    // FILE* file = fopen(file_name, "rb");
-    if (file == NULL) {
-        // Error opening the file
-        return -1;
-    }
 
-    // Seek to the end of the file
-    if (fseek(file, 0, SEEK_END) != 0) {
-        // Error seeking to the end
-        fclose(file);
-        return -1;
-    }
-
-    // Get the current file position, which is the file size
-    long size = ftell(file);
-    
-    // Close the file
-    // fclose(file);
-
-    return size;
-}
 
 
 /**
@@ -138,8 +117,8 @@ bool addUser(const char *username, const char *password, int access_level, const
 
     // Open /etc/passwd for appending in binary mode
     FILE *passwd_file = fopen("/etc/passwd", "ab");
-    FILE *shadow_file = fopen("/etc/shadow", "ab");
-
+    FILE *shadow_file = fopen("/sec/shadow", "ab");
+ 
     if (passwd_file == NULL || shadow_file == NULL) {
         printf("Failed to open system files.\n");
         return false;
@@ -151,8 +130,9 @@ bool addUser(const char *username, const char *password, int access_level, const
 
     // Create user entry strings for /etc/passwd and /etc/shadow
     char passwd_entry[256]; // Adjust the buffer size as needed.
+    printf("home->%s\n",home);
     snprintf(passwd_entry, sizeof(passwd_entry), "%s:%s:%s:%s:%s:%s:%s\n", username, password, access_level_str, access_level_str, "GECOS", home, shell);
-
+    printf("entry->%s\n",passwd_entry);
     char shadow_entry[256]; // Adjust the buffer size as needed.
     snprintf(shadow_entry, sizeof(shadow_entry), "%s:%s:%s:additional_fields\n", username, hashed_password, salt_str);
 
@@ -167,7 +147,7 @@ bool addUser(const char *username, const char *password, int access_level, const
     if(fl_is_dir(home) != 1)
     {
         printf("home->%s",home);
-        // fl_createdirectory(home);
+        fl_createdirectory(home);
     }
     return true; // User addition succeeded.
 }
@@ -182,7 +162,7 @@ bool validateUserCredentials(const char *username, const char *password) {
         return false;
     }
 
-    char line[256]; // Adjust the buffer size as needed.
+    char line[400]; // Adjust the buffer size as needed.
     
     while (fgets(line, sizeof(line), shadow_file) != NULL) {
         // Extract the username, stored hash, and stored salt manually.
@@ -197,8 +177,11 @@ bool validateUserCredentials(const char *username, const char *password) {
             uint64_t *hashed_password = SHA256Hash((uint8_t *)salted_password, strlen(salted_password));
 
             // Compare the computed hash with the stored hash
-            if (memcmp(hashed_password, stored_hash, sizeof(uint64_t)) == 0) {
+            if (strcmp(hashed_password, stored_hash) == 0) {
+                // printf("Hashedpassword: %s\n",hashed_password);
+                // printf("stored hass   : %s\n",stored_hash);
                 fclose(shadow_file);
+                free(hashed_password);
                 return true; // User credentials are valid.
             }
             
@@ -214,8 +197,14 @@ bool validateUserCredentials(const char *username, const char *password) {
 bool getUserInfo(const char *username, UserInfo *user) {
     // Open /etc/passwd for reading
      // Open /etc/passwd for reading
-    FILE *passwd_file = fopen("/etc/passwd", "r");
+    FILE *passwd_file = fopen("/etc/passwd", "rb");
+       size_t fs_s = get_file_size(passwd_file);
+    char *buf = (char *)kmalloc(fs_s);
+    fl_fread(buf,sizeof(char),fs_s,passwd_file);
 
+    printf("buf = %s",buf);
+    printf("\t\n");
+    kfree(buf);
     if (passwd_file == NULL) {
         printf("Failed to open /etc/passwd.\n");
         return false;
@@ -224,23 +213,25 @@ bool getUserInfo(const char *username, UserInfo *user) {
     char line[256]; // Adjust the buffer size as needed.
     
     while (fgets(line, sizeof(line), passwd_file) != NULL) {
+        printf("LINE: %s\n", line);
         // Extract the username and other information manually.
         char *stored_username = strtok(line, ":");
         // You can extract other fields here as needed.
         
         if (strcmp(username, stored_username) == 0) {
+            
             // Parse and store user information in the struct
             strncpy(user->username, stored_username, sizeof(user->username));
             user->access_level = atoi(strtok(NULL, ":"));
             strncpy(user->gecos, strtok(NULL, ":"), sizeof(user->gecos));
             strncpy(user->home_directory, strtok(NULL, ":"), sizeof(user->home_directory));
             strncpy(user->login_shell, strtok(NULL, ":"), sizeof(user->login_shell));
-
+            printf("\npath (%s)\n",user->home_directory);
             fclose(passwd_file);
             return true; // User information found.
         }
     }
-
+    
     fclose(passwd_file);
     return false; // User information not found.
 }
