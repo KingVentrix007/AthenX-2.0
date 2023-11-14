@@ -729,6 +729,7 @@ enum AuxID
 #define ELFDEFNNAME(x) CONCAT(ELF, CONCAT(ELFSIZE, CONCAT(_, x)))
 #endif
 
+char* read_txt_section(const char* file_path);
 #if defined(ELFSIZE) && (ELFSIZE == 32)
 #define Elf_Ehdr Elf32_Ehdr
 #define Elf_Phdr Elf32_Phdr

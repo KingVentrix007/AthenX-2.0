@@ -64,7 +64,8 @@
         "password.h": "c",
         "auth.h": "c",
         "multiboot.h": "c",
-        "mod.h": "c"
+        "mod.h": "c",
+        "serial.h": "c"
     },
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here

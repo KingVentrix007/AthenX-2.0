@@ -410,11 +410,11 @@ void kmain(unsigned long magic, unsigned long addr) {
         else
         {
             printf("No modules found\n");
-             int mod_count = 0;
-            LoadedModule * modules = get_loaded_modules(mboot_info,&mod_count);
-            void *buffer = get_module_value(modules[0]);
-            printf("%s\n",buffer);
-            free(buffer);
+            //  int mod_count = 0;
+            // LoadedModule * modules = get_loaded_modules(mboot_info,&mod_count);
+            // void *buffer = get_module_value(modules[0]);
+            // printf("%s\n",buffer);
+            // free(buffer);
 
         }
             unsigned char* bios_start = (unsigned char*)0xE0000;
@@ -837,12 +837,12 @@ void terminal_main()
         
         
     }
-    if(attempts >= 9)
-    {
-        printf("INVALID LOGIN, MAX ATTEMPTS\n");
-        for(;;);
+    // if(attempts >= 9)
+    // {
+    //     printf("INVALID LOGIN, MAX ATTEMPTS\n");
+    //     for(;;);
 
-    }
+    // }
     
     
     // flanterm_write(ft_ctx, msg, sizeof(msg));

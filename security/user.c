@@ -37,9 +37,72 @@ int valid_user(const char *username)
 
 
 
+int replace_line_by_username(const char* file_path, const char* username_to_replace, const char* new_line) {
+    // Open the file for reading
+    FILE* file = fopen(file_path, "r");
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        return -1;
+    }
 
+    // Create a temporary file for writing
+    FILE* temp_file = fopen("/tmp/tempfile.tmp", "w");
+    if (temp_file == NULL) {
+        perror("Error creating temporary file");
+        fclose(file);
+        return -1;
+    }
 
+    // Buffer to store each line
+    char buffer[256];
 
+    // Iterate through the file line by line
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
+        // Check if the line contains the specified username
+        if (strstr(buffer, username_to_replace) != NULL) {
+            // Write the new line to the temporary file
+            fputs(new_line, temp_file);
+        } else {
+            // Write the original line to the temporary file
+            fputs(buffer, temp_file);
+        }
+    }
+
+    // Close the original file
+    fclose(file);
+
+    // Close the temporary file
+    fclose(temp_file);
+
+    // Open the original file for writing
+    file = fopen(file_path, "w");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return -1;
+    }
+
+    // Open the temporary file for reading
+    temp_file = fopen("/tmp/tempfile.tmp", "r");
+    if (temp_file == NULL) {
+        perror("Error opening temporary file for reading");
+        fclose(file);
+        return -1;
+    }
+
+    // Copy the content from the temporary file to the original file
+    while (fgets(buffer, sizeof(buffer), temp_file) != NULL) {
+        fputs(buffer, file);
+    }
+
+    // Close both files
+    fclose(file);
+    fclose(temp_file);
+
+    // Remove the temporary file
+    remove("/tmp/tempfile.tmp");
+
+    return 0;
+}
 
 /**
  * Function Name: compare_username
@@ -101,7 +164,71 @@ bool authenticatePassword(const char *password) {
     return false; // Password authentication failed.
 }
 
-// Function to add a new user
+// Function to validate the contents of the passwd file
+bool validatePasswdFile(const char *expected_content) {
+    FILE *passwd_file = fopen("/etc/passwd", "r");
+    if (passwd_file == NULL) {
+        printf("Failed to open /etc/passwd.\n");
+        return false;
+    }
+
+    char line[256];
+    fgets(line, sizeof(line), passwd_file);
+
+    fclose(passwd_file);
+
+    // Compare the contents of the file with the expected content
+    if (strcmp(line, expected_content) != 0) {
+        printf("Passwd file content does not match expected.\n");
+        printf("Expected: %s\n", expected_content);
+        printf("Actual: %s\n", line);
+        return false;
+    }
+
+    return true;
+}
+
+// Function to validate the contents of the shadow file
+bool validateShadowFile(const char *expected_content) {
+    FILE *shadow_file = fopen("/sec/shadow", "r");
+    if (shadow_file == NULL) {
+        printf("Failed to open /sec/shadow.\n");
+        return false;
+    }
+
+    char line[256];
+    fgets(line, sizeof(line), shadow_file);
+
+    fclose(shadow_file);
+
+    // Compare the contents of the file with the expected content
+    if (strcmp(line, expected_content) != 0) {
+        printf("Shadow file content does not match expected.\n");
+        printf("Expected: %s\n", expected_content);
+        printf("Actual: %s\n", line);
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Function Name: addUser
+ * Description: Adds a new user to the system. Writes to passwd and shadow files sequentially.
+ *              Checks if content in passwd file is correct before writing to shadow file.
+ *              Checks if content in shadow file is correct before closing both files.
+ *              Finally, reopens both files to verify their contents.
+ *
+ * Parameters:
+ *   username (const char*) - The username of the new user.
+ *   password (const char*) - The password of the new user.
+ *   access_level (int) - The access level of the new user.
+ *   shell (const char*) - The shell of the new user.
+ *   home (const char*) - The home directory of the new user.
+ *
+ * Return:
+ *   bool - Returns true if user addition succeeded, false otherwise.
+ */
 bool addUser(const char *username, const char *password, int access_level, const char *shell, const char *home) {
     // Generate a random salt (replace with your secure salt generation).
     int salt = 12345; // Example salt value (should be generated securely).
@@ -117,10 +244,8 @@ bool addUser(const char *username, const char *password, int access_level, const
 
     // Open /etc/passwd for appending in binary mode
     FILE *passwd_file = fopen("/etc/passwd", "ab");
-    FILE *shadow_file = fopen("/sec/shadow", "ab");
- 
-    if (passwd_file == NULL || shadow_file == NULL) {
-        printf("Failed to open system files.\n");
+    if (passwd_file == NULL) {
+        printf("Failed to open /etc/passwd.\n");
         return false;
     }
 
@@ -128,37 +253,79 @@ bool addUser(const char *username, const char *password, int access_level, const
     char access_level_str[20]; // Adjust the size as needed.
     snprintf(access_level_str, sizeof(access_level_str), "%d", access_level);
 
-    // Create user entry strings for /etc/passwd and /etc/shadow
+    // Create user entry string for /etc/passwd
     char passwd_entry[256]; // Adjust the buffer size as needed.
-    printf("home->%s\n",home);
     snprintf(passwd_entry, sizeof(passwd_entry), "%s:%s:%s:%s:%s:%s:%s\n", username, password, access_level_str, access_level_str, "GECOS", home, shell);
-    printf("entry->%s\n",passwd_entry);
+
+    // Write the user's information to /etc/passwd
+    fwrite(passwd_entry, 1, strlen(passwd_entry), passwd_file);
+
+    fclose(passwd_file);
+
+    // Validate the contents of /etc/passwd
+    if (!validatePasswdFile(passwd_entry)) {
+        replace_line_by_username("/etc/passwd",username,passwd_entry);
+        printf("(1) File (passwd file) has been invalidated\n");
+        return false;
+    }
+
+    // Open /sec/shadow for appending in binary mode
+    FILE *shadow_file = fopen("/sec/shadow", "ab");
+    if (shadow_file == NULL) {
+        printf("Failed to open /sec/shadow.\n");
+        return false;
+    }
+
+    // Create user entry string for /sec/shadow
     char shadow_entry[256]; // Adjust the buffer size as needed.
     snprintf(shadow_entry, sizeof(shadow_entry), "%s:%s:%s:additional_fields\n", username, hashed_password, salt_str);
 
-    // Write the user's information to /etc/passwd and /etc/shadow
-    fwrite(passwd_entry, 1, strlen(passwd_entry), passwd_file);
+    // Write the user's information to /sec/shadow
     fwrite(shadow_entry, 1, strlen(shadow_entry), shadow_file);
 
-    fclose(passwd_file);
     fclose(shadow_file);
 
+    // Validate the contents of /sec/shadow
+    if (!validateShadowFile(shadow_entry)) {
+        replace_line_by_username("/sec/shadow",username,shadow_entry);
+        printf("(1) File (shadow file) has been invalidated\n");
+        return false;
+    }
+
+    // Reopen /etc/passwd for reading and verify its contents
+    // passwd_file = fopen("/etc/passwd", "rb");
+
+    if (!validatePasswdFile(passwd_entry)) {
+        replace_line_by_username("/etc/passwd",username,passwd_entry);
+        printf("(2) File (passwd file) has been invalidated\n");
+        // return false;
+    }
+    // fclose(passwd_file);
+
+    // Reopen /sec/shadow for reading and verify its contents
+    // shadow_file = fopen("/sec/shadow", "rb");
+    if (!validateShadowFile(shadow_entry)) {
+        replace_line_by_username("/sec/shadow",username,shadow_entry);
+        printf("(2) File (shadow file) has been invalidated\n");
+        // return false;
+    }
+    // fclose(shadow_file);
+
     free(hashed_password); // Free the memory allocated for the password hash.
-    if(fl_is_dir(home) != 1)
-    {
-        printf("home->%s",home);
+
+    if (fl_is_dir(home) != 1) {
+        printf("home->%s", home);
         fl_createdirectory(home);
     }
     return true; // User addition succeeded.
 }
 
-
 bool validateUserCredentials(const char *username, const char *password) {
     // Open /etc/shadow for reading
-    FILE *shadow_file = fopen("/etc/shadow", "r");
+    FILE *shadow_file = fopen("/sec/shadow", "r");
 
     if (shadow_file == NULL) {
-        printf("Failed to open /etc/shadow.\n");
+        printf("Failed to open /sec/shadow.\n");
         return false;
     }
 

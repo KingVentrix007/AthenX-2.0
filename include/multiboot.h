@@ -4,6 +4,7 @@
 #include "../include/types.h"
 
 #define MULTIBOOT_MAGIC_HEADER      0x1BADB002
+#define MULTIBOOT_MAGIC_HEADER_2    0xE85250D6
 #define MULTIBOOT_BOOTLOADER_MAGIC  0x2BADB002
 
 /* The Multiboot header. */

@@ -62,7 +62,7 @@ clean:
 	rm -rf $(OUT_DIR)/*.bin $(OUT_DIR)/*.map $(OUT_DIR)/*.img $(OBJ_DIR)/*
 	rm -rf scripts/*.img
 	rm -rf *.img
-	rm *rf inspect/
+	sudo rm -rf inspect/
 
 
 libc-f:
