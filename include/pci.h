@@ -157,6 +157,7 @@ typedef struct PCI_device_t {
 PCIDevice *PCI_search_device(uint16 vendor_id, uint16 device_id);
 
 
-
+uint8_t get_bar_type(uint8_t bus, uint8_t device, uint8_t function, int bar_index);
+uint32_t get_bar_offset(int bar_index);
 
 #endif /* PCI_H */

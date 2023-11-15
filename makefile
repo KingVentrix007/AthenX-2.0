@@ -12,7 +12,7 @@ SCRIPTS_DIR = script
 HDR_DIR = include
 # Define source and object directory for each subdirectory
 OBJ_DIR = obj
-SRC_DIRS = arch kernel drivers fs libk ui utils install security
+SRC_DIRS = arch kernel drivers fs libk ui utils install security drivers/net network
 OBJ_DIRS = $(addprefix $(OBJ_DIR)/,$(SRC_DIRS))
 
 # Create object directories if they don't exist

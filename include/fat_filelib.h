@@ -151,4 +151,5 @@ int ferror(FILE *stream);
 int ungetc(int character, FILE *stream);
 long get_file_size(FILE *file);
 int is_file(const char *path);
+int rename(const char* old_name, const char* new_name);
 #endif

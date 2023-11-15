@@ -65,7 +65,18 @@
         "auth.h": "c",
         "multiboot.h": "c",
         "mod.h": "c",
-        "serial.h": "c"
+        "serial.h": "c",
+        "timer.h": "c",
+        "ethernet.h": "c",
+        "e1000.h": "c",
+        "pmm.h": "c",
+        "speaker.h": "c",
+        "pci.h": "c",
+        "arp.h": "c",
+        "image.h": "c",
+        "dhcp.h": "c",
+        "limits": "c",
+        "algorithm": "c"
     },
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here

@@ -8,14 +8,14 @@
 #include "../include/pci.h"
 #include <stdint.h>
 #include "../include/stddef.h"
-#include "../include/ethernet.h"
+#include "../include/e1000.h"
 #include "../include/pci.h"
 #include "../include/string.h"
 //#include "../include/memory.h"
 #include "../include/speaker.h"
 #include "../include/errno.h"
 #include "../include/kheap.h"
-
+#include "../include/DHCP.h"
 
 const char* eth_error_to_string(uint16_t error_code) {
     //printf("HERE");
@@ -162,6 +162,10 @@ int init_e82540EM_ethernet_card(uint8_t bus, uint8_t device, uint8_t function) {
     //init_E1000();
     RegisteredPCIDeviceInfo *device_info;
     device_info = return_registered_pci_device(bus,device,function);
+    PCI_Device *device_info_add = PCI_search_device(device_info->vendor_id,device_info->device_id);
+    int offset = get_bar_offset(0);
+    bar_type = get_bar_type(bus,device,function,0);
+    printf("bar type = %d\n",bar_type);
     //map_e82540EM_memory_regions(bus,device,function);      // Step 3: Map memory regions
     uint32_t bar0 = device_info->header.bar[0]; // Step 4:
     // uint32_t bar1 = pci_read(bus,device,function,0x14);
@@ -176,6 +180,13 @@ int init_e82540EM_ethernet_card(uint8_t bus, uint8_t device, uint8_t function) {
     //printf("EEPROM exists: %d",detectEEProm());
     detectEEProm();
     card.mac_address = read_eep_mac();
+    printf("\nmac->");
+    for (size_t i = 0; i < sizeof(mac)/sizeof(mac[0]); i++)
+    {
+       mac[i] = card.mac_address.bytes[i];
+       printf("%d:",mac[i]);
+    }
+    printf("\n");
     strcpy(card.card_name,device_info->device_name);
     print_mac_address(&card.mac_address);
     setup_link();
@@ -184,18 +195,21 @@ int init_e82540EM_ethernet_card(uint8_t bus, uint8_t device, uint8_t function) {
         writeCommand(0x5200 + i*4, 0);
     }
         
-    // enableInterrupt();
-    // isr_register_interrupt_handler(device_info->header.interrupt_line,fire);
+    enableInterrupt();
+    isr_register_interrupt_handler(IRQ0_TIMER+device_info->header.interrupt_line,fire);
     e1000_rxinit();
     e1000_txinit();
      
     
-    char *data = "This text";
+    const void* data = "This text";
     size_t len = sizeof(data);
     printf("[Ethernet] sending packet\n");
     
     int ret = sendPacket(data, len);
-
+    // sendArpBroadcast();
+    
+	DHCP_Send_Discovery(card.mac_address);
+    // ARP_SendRequest(IPv4_PackIP(192,168,0,1),mac);
     if(ret != 0)
     {
         return main_exit(ETHERNET_ERROR,ETH_ERR_INITIALIZATION_FAILED,__FUNCTION__,true,eth_error_to_string);
@@ -231,14 +245,15 @@ int detectEEProm()
 
 uint32_t readCommand( uint16_t p_address)
 {
-    if ( 0 == 0 )
+    if ( bar_type == 0 )
     {
         return mmio_read32(mem_base+p_address);
     }
     else
     {
-        // Ports::outportl(io_base, p_address);
-        // return Ports::inportl(io_base + 4);
+        
+        outportl(io_base, p_address);
+        return inportl(io_base + 4);
     }
 }
 
@@ -276,14 +291,15 @@ void mmio_write64(uint64_t p_address, uint64_t p_value) {
 
 void writeCommand( uint16_t p_address, uint32_t p_value)
 {
-    if (0 == 0 )
+    if (bar_type == 0 )
     {
+        // outportl(io_base, p_address);
         mmio_write32(mem_base+p_address,p_value);
     }
     else
     {
-        // outportl(io_base, p_address);
-        // outportl(io_base + 4, p_value);
+        outportl(io_base, p_address);
+        outportl(io_base + 4, p_value);
     }
 }
 
@@ -370,153 +386,106 @@ int compare_mac_addresses(const char* qemuMac, const MacAddress* osMac) {
 }
 
 
-void e1000_rxinit() {
-    FUNC_ADDR_NAME(&e1000_rxinit,0,"");
-    uint8_t *ptr;
-    
+void e1000_rxinit()
+{
+    uint8_t * ptr;
     struct e1000_rx_desc *descs;
-    // Allocate buffer for receive descriptors. For simplicity, you should handle virtual and physical addresses.
-    ptr = (uint8_t *)(kmalloc(sizeof(struct e1000_rx_desc) * E1000_NUM_RX_DESC + 16));
-    //?printf("rx = 0x%x\n",&ptr);
+ 
+    // Allocate buffer for receive descriptors. For simplicity, in my case khmalloc returns a virtual address that is identical to it physical mapped address.
+    // In your case you should handle virtual and physical addresses as the addresses passed to the NIC should be physical ones
+ 
+    ptr = (uint8_t *)(kmalloc(sizeof(struct e1000_rx_desc)*E1000_NUM_RX_DESC + 16));
+ 
     descs = (struct e1000_rx_desc *)ptr;
-    for (int i = 0; i < E1000_NUM_RX_DESC; i++) {
-        rx_descs[i] = (struct e1000_rx_desc *)((uint8_t *)descs  + i * 16);
+    for(int i = 0; i < E1000_NUM_RX_DESC; i++)
+    {
+        rx_descs[i] = (struct e1000_rx_desc *)((uint8_t *)descs + i*16);
         rx_descs[i]->addr = (uint64_t)(uint8_t *)(kmalloc(8192 + 16));
         rx_descs[i]->status = 0;
     }
-
-    writeCommand(REG_TXDESCLO, (uint32_t)((uint64_t)ptr >> 32));
+ 
+    writeCommand(REG_TXDESCLO, (uint32_t)((uint64_t)ptr >> 32) );
     writeCommand(REG_TXDESCHI, (uint32_t)((uint64_t)ptr & 0xFFFFFFFF));
-
+ 
     writeCommand(REG_RXDESCLO, (uint64_t)ptr);
     writeCommand(REG_RXDESCHI, 0);
-
+ 
     writeCommand(REG_RXDESCLEN, E1000_NUM_RX_DESC * 16);
-
+ 
     writeCommand(REG_RXDESCHEAD, 0);
-    writeCommand(REG_RXDESCTAIL, E1000_NUM_RX_DESC - 1);
+    writeCommand(REG_RXDESCTAIL, E1000_NUM_RX_DESC-1);
     rx_cur = 0;
-    writeCommand(REG_RCTRL, RCTL_EN | RCTL_SBP | RCTL_UPE | RCTL_MPE | RCTL_LBM_NONE | RTCL_RDMTS_HALF | RCTL_BAM | RCTL_SECRC | RCTL_BSIZE_8192);
+    writeCommand(REG_RCTRL, RCTL_EN| RCTL_SBP| RCTL_UPE | RCTL_MPE | RCTL_LBM_NONE | RTCL_RDMTS_HALF | RCTL_BAM | RCTL_SECRC  | RCTL_BSIZE_8192);
+ 
 }
 
-void e1000_txinit() {
-    FUNC_ADDR_NAME(&e1000_txinit,0,"");
-    uint8_t *ptr;
-    
+void e1000_txinit()
+{    
+    uint8_t *  ptr;
     struct e1000_tx_desc *descs;
-    // Allocate buffer for transmit descriptors. For simplicity, you should handle virtual and physical addresses.
-    ptr = (uint8_t *)(kmalloc(sizeof(struct e1000_tx_desc) * E1000_NUM_TX_DESC + 16));
-    //?printf("tx = 0x%x\n",ptr);
+    // Allocate buffer for receive descriptors. For simplicity, in my case khmalloc returns a virtual address that is identical to it physical mapped address.
+    // In your case you should handle virtual and physical addresses as the addresses passed to the NIC should be physical ones
+    ptr = (uint8_t *)(kmalloc(sizeof(struct e1000_tx_desc)*E1000_NUM_TX_DESC + 15));
+ 
     descs = (struct e1000_tx_desc *)ptr;
-    for (int i = 0; i < E1000_NUM_TX_DESC; i++) {
-        //tx_descs[i] = (struct e1000_tx_desc *)((uint8_t *)descs  + i * 16);
+    for(int i = 0; i < E1000_NUM_TX_DESC; i++)
+    {
+        tx_descs[i] = (struct e1000_tx_desc *)((uint8_t*)descs + i*16);
         tx_descs[i]->addr = 0;
         tx_descs[i]->cmd = 0;
         tx_descs[i]->status = TSTA_DD;
     }
-
-    // writeCommand(REG_TXDESCHI, (uint32_t)((uint64_t)ptr >> 32));
-    // writeCommand(REG_TXDESCLO, (uint32_t)((uint64_t)ptr & 0xFFFFFFFF));
-    writeCommand(REG_TXDESCLO, (uint32_t)tx_descs);
-	writeCommand(REG_TXDESCHI, 0);
-    //?printf("REG_TXDESCH = 0x%x\n",readCommand(REG_TXDESCHI));
-    //?printf("REG_TXDESCLO = 0x%x\n",readCommand(REG_TXDESCLO));
-    // Setup total length of descriptors
+ 
+    writeCommand(REG_TXDESCHI, (uint32_t)((uint64_t)ptr >> 32) );
+    writeCommand(REG_TXDESCLO, (uint32_t)((uint64_t)ptr & 0xFFFFFFFF));
+ 
+ 
+    //now setup total length of descriptors
     writeCommand(REG_TXDESCLEN, E1000_NUM_TX_DESC * 16);
-
-    // Setup numbers
-    writeCommand(REG_TXDESCHEAD, 0);
-    writeCommand(REG_TXDESCTAIL, 0);
+ 
+ 
+    //setup numbers
+    writeCommand( REG_TXDESCHEAD, 0);
+    writeCommand( REG_TXDESCTAIL, 0);
     tx_cur = 0;
-    // writeCommand(REG_TCTRL,  TCTL_EN
-    //     | TCTL_PSP
-    //     | (15 << TCTL_CT_SHIFT)
-    //     | (64 << TCTL_COLD_SHIFT)
-    //     | TCTL_RTLC);
-
-    // Configure TCTRL register for e1000e cards
-    writeCommand(REG_TCTRL, 0b0110000000000111111000011111010);
-    writeCommand(REG_TIPG, 0x0060200A);
+    writeCommand(REG_TCTRL,  TCTL_EN
+        | TCTL_PSP
+        | (15 << TCTL_CT_SHIFT)
+        | (64 << TCTL_COLD_SHIFT)
+        | TCTL_RTLC);
+ 
+    // This line of code overrides the one before it but I left both to highlight that the previous one works with e1000 cards, but for the e1000e cards 
+    // you should set the TCTRL register as follows. For detailed description of each bit, please refer to the Intel Manual.
+    // In the case of I217 and 82577LM packets will not be sent if the TCTRL is not configured using the following bits.
+    // writeCommand(REG_TCTRL,  0b0110000000000111111000011111010);
+    // writeCommand(REG_TIPG,  0x0060200A);
+ 
 }
 
-int sendPacket(uint8 *buffer, uint16 length)
-{   
-    FUNC_ADDR_NAME(&sendPacket,2,"ci"); 
-    
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->addr = p_data;
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->length = p_len;
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->cmd = CMD_EOP | CMD_IFCS | CMD_RS;
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->status = 0;
-    // uint32_t old = readCommand(REG_TXDESCTAIL);
-    // printf("Tail = 0x%x\n",readCommand(REG_TXDESCTAIL));
-    // writeCommand(REG_TXDESCTAIL,readCommand(REG_TXDESCTAIL)+1);
-    // return exit(SUCCESS);
-    uint32 packet_addr32 = (uint32)buffer;
-	uint64 packet_addr64 = packet_addr32;
-
-	tx_descs[tx_cur]->addr = packet_addr32;
-	tx_descs[tx_cur]->length = length;
-	tx_descs[tx_cur]->cmd = CMD_EOP | CMD_IFCS | CMD_RS | CMD_RPS;
-	tx_descs[tx_cur]->status = 0;
-
-	uint8 old_cur = tx_cur;
-	tx_cur = (tx_cur + 1) % E1000_NUM_TX_DESC;
-	writeCommand(REG_TXDESCTAIL, tx_cur);
-    int count = 0;
-	while(!(tx_descs[old_cur]->status & 0xff))
-    {
-        count = count +1;
-        if(count >= MAX_PACKET_SEND_CHECKS)
-        {
-            return main_exit(ETHERNET_ERROR,ETH_ERR_PACKET_DROPPED,__FUNCTION__,true, eth_error_to_string);
-            //printf("EXIT");
-            count = 0;
-        }
-    };
-    return main_exit(SUCCESS,SUCCESS,__FUNCTION__,true, eth_error_to_string);
-//    printf("loaded descriptor[0x%x] at 0x%x\n",tx_cur,tx_descs[tx_cur]);
-//     printf("Packet[%d] data = %s\n",tx_cur,tx_descs[tx_cur]->addr);
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->addr = (uint64_t)p_data;
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->length = p_len;
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->cmd = CMD_EOP | CMD_IFCS | CMD_RS;
-    // tx_descs[readCommand(REG_TXDESCTAIL)]->status = 0;
+int sendPacket(const void * p_data, uint16_t p_len)
+{ 
+    uint32_t index = readCommand(E1000_REG_TDT);
+    uint8_t *netBuffer = (uint8_t *)(uint32_t)tx_descs[index]->addr;
+    memcpy(netBuffer, p_data, p_len);
+    tx_descs[index]->checksum_off = 0;
+    tx_descs[index]->checksum_st = 0;
+    tx_descs[index]->cmd = E1000_TX_CMD_EOP;
+    tx_descs[index]->length = p_len;
+    tx_descs[index]->special = 0;
+    tx_descs[index]->status = 0;
+    index = (index + 1) % E1000_NUM_TX_DESC;
+    writeCommand(E1000_REG_TDT,index);
+    // tx_descs[index]->addr = (uint64_t)p_data;
+    // tx_descs[index]->length = p_len;
+    // tx_descs[index]->cmd = CMD_EOP | CMD_IFCS | CMD_RS;
+    // tx_descs[index]->status = 0;
+    // tx_descs[index]->special = 0;
     // uint8_t old_cur = tx_cur;
     // tx_cur = (tx_cur + 1) % E1000_NUM_TX_DESC;
-    // writeCommand(REG_TXDESCTAIL, tx_cur);
-
-    // while(!(tx_descs[readCommand(REG_TXDESCHEAD)-1]->status & 0xff));
-    // printf("Packet[%d] data = %s\n",readCommand(REG_TXDESCHEAD),tx_descs[readCommand(REG_TXDESCHEAD)]->addr);
-    // printf("Packet[%d] data = %s\n",readCommand(REG_TXDESCHEAD)-1,tx_descs[readCommand(REG_TXDESCHEAD)-1]->addr);
-    
-    // return 0;
-    // tx_descs[tx_cur]->addr = &tx_descs[tx_cur];
-    // tx_descs[tx_cur]->length = p_len;
-    // tx_descs[tx_cur]->cmd = CMD_EOP | CMD_IFCS | CMD_RS;
-    // tx_descs[tx_cur]->status = 0;
-    // uint8_t old_cur = tx_cur;
-    // tx_cur = (tx_cur + 1) % E1000_NUM_TX_DESC;
-    // // printf("tx_cur =0x%x\n",&tx_descs[tx_cur]);
-    // // printf("old_cur = 0x%x\n",&tx_descs[old_cur]);
-    
-    // //printf("out = 0x%x\n",out);
-    // asm volatile("cli");
-    // writeCommand(REG_TXDESCTAIL, tx_cur);
-    // uint16_t out = readCommand(REG_TXDESCTAIL);
-    // printf("status = 0x%x",tx_descs[old_cur]->status & 0x01);
-    // if((tx_descs[old_cur]->status & 0x01) == TSTA_DD || (tx_descs[tx_cur]->status & 0x01) == TSTA_DD)
-    // {
-    //     printf("STAT");
-    // }
-    //  for (;;) {
-    //     if (tx_descs[old_cur]->status & 0x01) {
-    //         asm volatile("sti");
-    //         break;
-    //     }
-    //     //m_wait_queue.wait_forever("E1000NetworkAdapter"sv);
-    // }
-    //  return exit(ETHERNET_ERROR);
+    // writeCommand(REG_TXDESCTAIL, tx_cur);   
+    // while(!(tx_descs[old_cur]->status & 0xff));    
+    return 0;
 }
-
 
 int send_raw(const void * p_data, uint16_t p_len)
 {
@@ -591,7 +560,7 @@ void handleReceive()
 {
     uint16_t old_cur;
     bool got_packet = false;
- 
+    
     while((rx_descs[rx_cur]->status & 0x1))
     {
             got_packet = true;
@@ -622,3 +591,115 @@ void setup_link()
     uint32_t flags = readCommand(REG_CTRL);//in32(REG_CTRL);
     writeCommand(REG_CTRL, flags | ECTRL_SLU);
 }
+
+int sendArpBroadcast() {
+    // Create an ARP broadcast packet
+    ArpPacket arpPacket;
+
+    // Fill in the ARP packet fields (you need to set appropriate values based on your requirements)
+    arpPacket.hardware_type = 1;  // Assuming Ethernet
+    arpPacket.protocol_type = 0;  // Assuming IPv4
+    arpPacket.hardware_addr_len = 6;  // Assuming Ethernet MAC address length
+    arpPacket.protocol_addr_len = 4;  // Assuming IPv4 address length
+    arpPacket.operation = 1;  // ARP Request
+
+    // Set your valid MAC address as the sender's hardware address
+    // Replace the following line with your actual MAC address
+    const uint8_t myMacAddress[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
+    memcpy(arpPacket.sender_hardware_addr, mac, 6);
+
+    // Set sender protocol address (you need to set your IP address)
+    arpPacket.sender_protocol_addr = 0;  // Set your IP address
+
+    // Set target hardware address (all zeros for broadcast)
+    memset(arpPacket.target_hardware_addr, 0, 6);
+
+    // Set target protocol address (all zeros for broadcast)
+    arpPacket.target_protocol_addr = 0;
+
+    // Send the ARP packet using the sendPacket function
+    if (sendPacket(&arpPacket, sizeof(ArpPacket)) == 0) {
+        printf("ARP broadcast packet sent successfully.\n");
+        return 0;
+    } else {
+        printf("Error sending ARP broadcast packet.\n");
+        return -1;
+    }
+}
+// uint32_t IPv4_PackIP(uint8_t first, uint8_t second, uint8_t third, uint8_t fourth)
+// {
+//     return (fourth << 24 | third << 16 | second << 8 | first);
+// // }
+// enableInterrupt()
+// {
+//     writeCommand(REG_IMASK ,0x1F6DC);
+//     writeCommand(REG_IMASK ,0xff & ~4);
+//     readCommand(0xc0);
+ 
+// // }
+// void e1000_TX_Init()
+// {
+//     // Perform transmit initialization (From the Intel Manual:)
+
+//     // Allocate memory for the transmit descriptor list (16-byte aligned)
+//     void *txDescListMemory = kmalloc(sizeof(structe 1000_tx_desc ) * E1000_NUM_TX_DESC + 15);
+
+//     // Ensure the descriptor list is aligned on a 16-byte boundary
+//     if ((uint32_t)txDescListMemory % 16 != 0)
+//         tx_descs = (struct e1000_tx_desc *)((uint32_t)txDescListMemory + 16 - ((uint32_t)txDescListMemory % 16));
+//     else
+//         tx_descs = (struct e1000_tx_desc *)txDescListMemory;
+
+//     // Zero out the descriptor list
+//     memset(tx_descs, 0, sizeof(struct e1000_tx_desc) * TX_DESCRIPTORS);
+
+//     // Initialize the descriptor list with pre-allocated buffers
+//     // (We can do this because we know MyOS will never send a packet larger than 1024 bytes)
+//     for (int i = 0; i < TX_DESCRIPTORS; ++i)
+//     {
+//         // TODO: We may need to make sure buffer address is a physical address if malloc changes
+//         tx_descs[i].bufferAddress = (uint64_t)malloc(MAX_TX_PACKET);
+//     }
+
+//     // Program the Transmit Descriptor Base Address TDBAL register with the address of the region
+//     e1000_Write_Register(REG_TDBAL, (uint32_t)tx_descs);
+
+//     // Set the Transmit Descriptor Length (TDLEN) register to the size (in bytes) of the descriptor ring.
+//     // This value must be 128 - byte aligned (with 16 descriptors, it will be)
+//     uint32_t tdLength = TX_DESCRIPTORS * sizeof(TX_DESC_LEGACY);
+    
+//     if (tdLength % 128 != 0)
+//         terminal_writestring("Error: TDLEN isn't properly calculated!\n");
+    
+//     e1000_Write_Register(REG_TDLEN, tdLength);
+
+//     // The Transmit Descriptor Head and Tail (TDH/TDT) registers are initialized (by hardware) to 0b
+//     // after a power - on or a software initiated Ethernet controller reset. Software should write 0b to both
+//     // these registers to ensure this.
+//     e1000_Write_Register(REG_TDH, 0);
+//     e1000_Write_Register(REG_TDT, 0);
+
+//     /* Initialize the Transmit Control Register (TCTL) for desired operation to include the following:
+//         -Set the Enable (TCTL.EN) bit to 1b for normal operation.
+//         -Set the Pad Short Packets (TCTL.PSP) bit to 1b.
+//         -Configure the Collision Threshold (TCTL.CT) to the desired value. Ethernet standard is 10h.
+// This setting only has meaning in half duplex mode.
+//         -Configure the Collision Distance (TCTL.COLD) to its expected value. For full duplex
+// operation, this value should be set to 40h. For gigabit half duplex, this value should be set to
+// 200h. For 10/100 half duplex, this value should be set to 40h. */
+
+//     // TODO: Pay attention to the duplex mode
+//     uint32_t tctl = TCTL_TX_ENABLE | TCTL_PAD_SHORT_PACKET | TCTL_DEFAULT_COLLISION_THRESHOLD;
+//     tctl |= TCTL_DEFAULT_COLLISION_DISTANCE | TCTL_RETRANSMIT_ON_LATE_COLLISION;
+//     e1000_Write_Register(REG_TCTL, tctl);
+
+//     /*  -Program the Transmit IPG (TIPG) register with the following decimal values to get the minimum
+// legal Inter Packet Gap:
+//             IPGT = 10
+//             IPGR1 = 10
+//             IPGR2 = 10
+//     */
+    
+//     // (QEMU seems to ignore this register)
+//     e1000_Write_Register(REG_TIPG, TIPG_DEFAULTS);
+// }

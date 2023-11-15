@@ -10,6 +10,7 @@ typedef signed char sint8;
 typedef signed short sint16;
 typedef signed int sint32;
 typedef unsigned long long uint64;
+typedef unsigned long phys_bytes;	/* physical addr/length in bytes */
 // typedef unsigned __int128 __uint128_t;
 
 typedef uint8 byte;

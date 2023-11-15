@@ -207,3 +207,24 @@ void pmm_free_blocks(void* p, uint32 size) {
 }
 
 
+void* alloc_contig(size_t len, int flags, phys_bytes *phys)
+{
+    void* buf;
+    // Simulate mmapflags based on provided flags
+    int mmapflags = MAP_ANON;
+    if(flags & AC_CONTIG)
+        mmapflags |= MAP_CONTIG;
+
+    buf = (void*)pmm_mmap_first_free_by_size(len / PMM_BLOCK_SIZE);
+
+    if (buf == NULL) {
+        return NULL;  // Memory allocation failed.
+    }
+
+    // Get physical address, if requested.
+    if (phys != NULL) {
+        *phys = (uintptr_t)buf;
+    }
+
+    return buf;
+}

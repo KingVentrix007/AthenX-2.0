@@ -1,7 +1,7 @@
 #include "../include/debug.h"
 #include "../include/pci.h"
 #include "../include/io_ports.h"
-#include "../include/ethernet.h"
+#include "../include/e1000.h"
 #include "../include/string.h"
 #include "../include/vesa_display.h"
 #include "../include/vesa.h"
@@ -704,4 +704,15 @@ PCIDevice *PCI_search_device(uint16 vendor_id, uint16 device_id) {
     // }
 
     return 0;
+}
+uint8_t get_bar_type(uint8_t bus, uint8_t device, uint8_t function, int bar_index) {
+    // Read the 32-bit value from the PCI configuration space for the specified BAR
+    uint32_t bar_value = pci_read(bus, device, function, PCI_CONFIG_ADDRESS + (bar_index * 4));
+
+    // Extract the BAR type (bits 4-7)
+    return (uint8_t)((bar_value >> 4) & 0xF);
+}
+uint32_t get_bar_offset(int bar_index) {
+    // The BARs are 32 bits wide, so each BAR takes 4 bytes in the PCI configuration space
+    return PCI_CONFIG_ADDRESS + (bar_index * 4);
 }

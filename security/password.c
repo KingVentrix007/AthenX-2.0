@@ -34,6 +34,7 @@ const static uint32_t K[64] =
 // Calculate the Nth block of W
 uint32_t *W256(int N, uint32_t *M)
 {
+    // /printf("malloc %d",__LINE__);
     uint32_t *w = (uint32_t*) malloc(sizeof(uint32_t) * 64);
     uint32_t *mPtr = &M[(N * 16)];
     
@@ -80,6 +81,7 @@ PaddedMsg preprocess256(uint8_t *msg, size_t len)
     
     padded.length = ((l + k + 1) / 8) + 8;
     //printf("padded.length = %zu\n", padded.length);
+    // printf("malloc %d",__LINE__);
     padded.msg = (uint8_t*) malloc(sizeof(uint8_t) * padded.length);
     memset(&padded.msg[0], 0, padded.length);
     for (size_t i = 0; i < len; ++i)
@@ -158,6 +160,7 @@ uint32_t *get256Hash(PaddedMsg *p)
     free(p->msg);
     
     // Now the array h is the hash of the original message M
+    // printf("malloc %d",__LINE__);
     uint32_t *retVal = (uint32_t*) malloc(sizeof(uint32_t) * SHA256_ARRAY_LEN);
     memcpy(retVal, h, sizeof(uint32_t) * SHA256_ARRAY_LEN);
     return retVal;

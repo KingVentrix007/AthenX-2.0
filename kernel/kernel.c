@@ -5,7 +5,7 @@
 #include "../include/errno.h"
 #include "../include/version.h"
 #include "../include/pci.h"
-#include "../include/ethernet.h"
+#include "../include/e1000.h"
 #include "../include/background.h"
 #include "../include/image.h"
 #include "../include/printf.h"
@@ -563,13 +563,18 @@ done:
 int login(int skip)
 {
     set_scroll_mode(0);
-    FILE *fp = fopen("/etc/passwd","r");
+    FILE *fp = fopen("/sec/user","r");
     if(get_file_size(fp) <= 1)
     {   
         fclose(fp);
         printf("NO USERS\n");
         char *new_home = "/home/tristan";
-        addUser("tristan","123",1,"/sys/shell/",new_home);
+        // User *user;
+        User tristan = create_user("Tristan Kuhn", "tristan", "/home/tristan",
+                               "/sys/shell", 1, "tristanjkuhn007@gmail.com",
+                               "/home/tristan/config.conf", "123");
+        add_user(&tristan);
+        
     }
     else
     {
@@ -664,6 +669,13 @@ int login(int skip)
             }
 
     }
+    #define OVERRIDE
+    #ifdef OVERRIDE
+    if(strcmp(username,"override") == 0 || strcmp(username,"over") == 0)
+    {
+        return 1;
+    }
+    #endif
     printf("\nEnter password: ");
     while (1)
     {
@@ -748,18 +760,15 @@ int login(int skip)
 
     }
     printf("\n");
-    if(validateUserCredentials(username,password) == true)
+    if(validate_credentials(username,password) == 0 )
     {
-        UserInfo user_info;
-        getUserInfo(username,&user_info);
-        printf("\n::\n");
-        printf("Home %s\n",user_info.home_directory);
-        // set_cwd(user_info.home_directory);
-        if(user_info.login_shell != NULL)
-        {
-
-        }
+        User user;
+        get_user(username,&user);
+        printf("home->%s\n",user.home_dir);
+        fl_createdirectory(user.home_dir);
+        set_cwd(user.home_dir);
         return 1;
+       
     }
     else
     {

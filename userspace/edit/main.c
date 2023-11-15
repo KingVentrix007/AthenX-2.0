@@ -100,17 +100,17 @@ void redraw(bool all) {
 		drawrect(0, 1, 80, 23, 0xF0);
 		terminal_setcolor(0x70);
 		terminal_goto(0, 0);
-		terminal_writestring("\263");
+		printf("\263");
 		terminal_setcolor(0x78);
-		terminal_writestring("F");
+		printf("F");
 		terminal_setcolor(0x70);
-		terminal_writestring("ile\263");
+		printf("ile\263");
 		terminal_setcolor(0x78);
-		terminal_writestring("H");
+		printf("H");
 		terminal_setcolor(0x70);
-		terminal_writestring("elp\263                  AthenX-2.0 Text Editor                              ");
+		printf("elp\263                  AthenX-2.0 Text Editor                              ");
 		terminal_goto(0, 24);
-		terminal_writestring(" Hold Alt to access menus                                                      ");
+		printf(" Hold Alt to access menus                                                      ");
 		terminal_putentryat(' ', 0x70, 79, 24);
 		terminal_setcolor(0xF0);
 		for (uint8_t i = 1; i < 23; i++) {
@@ -357,30 +357,30 @@ void gui() {
 		// 			drawrect(0, 1, 10, 5, 0x70);
 		// 			terminal_goto(0, 1);
 		// 			terminal_setcolor(0x78);
-		// 			terminal_putchar('N');
+		// 			printf('N');
 		// 			terminal_setcolor(0x70);
 		// 			printf("ew");
 		// 			terminal_goto(0, 2);
 		// 			terminal_setcolor(0x78);
-		// 			terminal_putchar('O');
+		// 			printf('O');
 		// 			terminal_setcolor(0x70);
 		// 			printf("pen");
 		// 			terminal_goto(0, 3);
 		// 			terminal_setcolor(0x78);
-		// 			terminal_putchar('S');
+		// 			printf('S');
 		// 			terminal_setcolor(0x70);
 		// 			printf("ave");
 		// 			terminal_goto(0, 4);
-		// 			terminal_writestring("Sav");
+		// 			printf("Sav");
 		// 			terminal_setcolor(0x78);
-		// 			terminal_putchar('e');
+		// 			printf('e');
 		// 			terminal_setcolor(0x70);
 		// 			printf(" as");
 		// 			terminal_goto(0, 5);
 		// 			terminal_setcolor(0x70);
-		// 			terminal_putchar('E');
+		// 			printf('E');
 		// 			terminal_setcolor(0x78);
-		// 			terminal_putchar('x');
+		// 			printf('x');
 		// 			terminal_setcolor(0x70);
 		// 			printf("it");
 		// 		}
@@ -389,7 +389,7 @@ void gui() {
 		// 			drawrect(5, 1, 15, 1, 0x70);
 		// 			terminal_goto(5, 1);
 		// 			terminal_setcolor(0x78);
-		// 			terminal_putchar('A');
+		// 			printf('A');
 		// 			terminal_setcolor(0x70);
 		// 			printf("bout");
 		// 		}
@@ -461,7 +461,7 @@ void main(uint32_t argc, char **argv) {
 	}
 }
 
-int terminal_writestring(char *data)
+int printf(char *data)
 {
 	printf("%s",data);
 }

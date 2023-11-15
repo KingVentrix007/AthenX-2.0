@@ -6,399 +6,378 @@
 #include "fat_filelib.h"
 #include "string.h"
 #include "kheap.h"
-//! username:password:UID:GID:GECOS:home_directory:login_shell
-//! username:password_hash:salt:additional_fields
-int valid_user(const char *username)
-{
-    // char *data;
-    // FILE *fp = fopen("/etc/passwd","r");
-    // data = (char *)kmalloc(get_file_size(fp));
-    // if(data == NULL)
-    // {
-    //     printf("Malloc error\n");
-    //     fclose(fp);
-    //     return -1;
-    // }
-    // char line[256];
-    // while (fgets(line, sizeof(line), fp) != NULL)
-    // {
-    //     if(compare_username(line, username) == TRUE)
-    //     {
-    //         return 1;
-    //     }
-    //     else
-    //     {
+#include "timer.h"
+// // Constants
+// #define MAX_USERNAME_LENGTH 50
+// #define MAX_PASSWORD_LENGTH 64  // Adjust as needed
+// #define MAX_EMAIL_LENGTH 100
+// #define MAX_NAME_LENGTH 100
+// #define MAX_QUESTION_COUNT 20
+// #define MAX_QUESTION_LENGTH 100
+// #define MAX_ANSWER_LENGTH 100
+// #define MAX_SALT_LENGTH 32  // Adjust as needed
+// #define MAX_PATH_LENGTH 256
+// #define MAX_INVALID_LOGIN_COUNT 10
+// #define SHA256_DIGEST_LENGTH 2566
+// // User structure
+// typedef struct {
+//     char username[MAX_USERNAME_LENGTH];
+//     unsigned char password_hash[SHA256_DIGEST_LENGTH];
+//     char salt[MAX_SALT_LENGTH];
+//     // Additional information
+//     int user_id;
+//     char email[MAX_EMAIL_LENGTH];
+//     char full_name[MAX_NAME_LENGTH];
+//     // Date/time information
+//     // struct tm registration_date;
+//     // struct tm last_login_time;
+//     // Account status: 0 for active, 1 for suspended, 2 for deleted
+//     int account_status;
+//     // Security questions and answers
+//     char security_questions[MAX_QUESTION_COUNT][MAX_QUESTION_LENGTH];
+//     char security_answers[MAX_QUESTION_COUNT][MAX_ANSWER_LENGTH];
+//     // New fields
+//     int needs_key;  // 1 or 0
+//     char key_path[MAX_PATH_LENGTH];
+//     char home_dir[MAX_PATH_LENGTH];
+//     char shell_path[MAX_PATH_LENGTH];
+//     char config_file_path[MAX_PATH_LENGTH];
+//     // Invalid login counter
+//     int invalid_login_count;
+// } User;
 
-    //     }
-    // }
-    // return -2;
-
-}
 
 
 
-int replace_line_by_username(const char* file_path, const char* username_to_replace, const char* new_line) {
-    // Open the file for reading
-    FILE* file = fopen(file_path, "r");
-    if (file == NULL) {
-        perror("Error opening file for reading");
-        return -1;
+// Function to get a user based on user_id
+int get_user_by_id(int user_id, User* result_user) {
+    FILE* user_file;
+
+    // Open the user file in binary mode
+    user_file = fopen("/sec/user", "rb");
+    if (user_file == NULL) {
+        printf("Error opening the user file.\n");
+        return 1;
     }
 
-    // Create a temporary file for writing
-    FILE* temp_file = fopen("/tmp/tempfile.tmp", "w");
-    if (temp_file == NULL) {
-        perror("Error creating temporary file");
-        fclose(file);
-        return -1;
-    }
+    fseek(user_file, 0, SEEK_SET);
 
-    // Buffer to store each line
-    char buffer[256];
-
-    // Iterate through the file line by line
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        // Check if the line contains the specified username
-        if (strstr(buffer, username_to_replace) != NULL) {
-            // Write the new line to the temporary file
-            fputs(new_line, temp_file);
-        } else {
-            // Write the original line to the temporary file
-            fputs(buffer, temp_file);
+    while (fread(result_user, sizeof(User), 1, user_file) == 1) {
+        if (result_user->user_id == user_id) {
+            fclose(user_file);
+            return 0;  // User found
         }
     }
 
-    // Close the original file
-    fclose(file);
+    // Cleanup: Close the user file
+    fclose(user_file);
 
-    // Close the temporary file
+    return 2;  // User not found
+}
+
+// Function to remove a user based on user_id
+int remove_user(int user_id) {
+    FILE* user_file;
+    FILE* temp_file;
+
+    // Open the user file in binary mode
+    user_file = fopen("/sec/user", "rb");
+    if (user_file == NULL) {
+        printf("Error opening the user file.\n");
+        return 1;
+    }
+
+    // Create a temporary file
+    temp_file = fopen("/sec/temp_user", "wb");
+    if (temp_file == NULL) {
+        printf("Error creating the temporary file.\n");
+        fclose(user_file);
+        return 2;
+    }
+
+    User current_user;
+
+    while (fread(&current_user, sizeof(User), 1, user_file) == 1) {
+        // Skip the user to be removed
+        if (current_user.user_id == user_id) {
+            continue;
+        }
+
+        // Write the other users to the temporary file
+        fwrite(&current_user, sizeof(User), 1, temp_file);
+    }
+
+    // Cleanup: Close the files
+    fclose(user_file);
     fclose(temp_file);
 
-    // Open the original file for writing
-    file = fopen(file_path, "w");
-    if (file == NULL) {
-        perror("Error opening file for writing");
-        return -1;
+    // Remove the original user file
+    if (remove("/sec/user") != 0) {
+        printf("Error removing the original user file.\n");
+        return 3;
     }
 
-    // Open the temporary file for reading
-    temp_file = fopen("/tmp/tempfile.tmp", "r");
-    if (temp_file == NULL) {
-        perror("Error opening temporary file for reading");
-        fclose(file);
-        return -1;
+    // Rename the temporary file to the original user file
+    if (rename("/sec/temp_user", "/sec/user") != 0) {
+        printf("Error renaming the temporary file.\n");
+        return 4;
     }
 
-    // Copy the content from the temporary file to the original file
-    while (fgets(buffer, sizeof(buffer), temp_file) != NULL) {
-        fputs(buffer, file);
-    }
+    printf("User with ID %d removed successfully.\n", user_id);
 
-    // Close both files
-    fclose(file);
-    fclose(temp_file);
-
-    // Remove the temporary file
-    remove("/tmp/tempfile.tmp");
-
-    return 0;
+    return 0;  // Success
 }
 
-/**
- * Function Name: compare_username
- * Description: Splits a string at the colon (':') and compares the first part to a variable called 'username'.
- *
- * Parameters:
- *   input_string (const char*) - The input string to be split and compared.
- *   username (const char*) - The username to compare with the first part of the input string.
- *
- * Return:
- *   true if the first part of the input string matches the 'username', otherwise false.
- */
-bool compare_username(const char* input_string, const char* username) {
-    // Find the position of the colon (':') in the input string
-    const char* colon_position = strchr(input_string, ':');
-    
-    // Check if the colon was found and if the username is the same as the first part
-    if (colon_position != NULL) {
-        size_t colon_index = colon_position - input_string;
-        if (strncmp(input_string, username, colon_index) == 0) {
-            return true;
-        }
-    }
-    
-    return false;
-}
+// Function to update an existing user based on user_id
+int update_user(int user_id, User* updated_user) {
+    FILE* user_file;
 
-
-
-bool authenticatePassword(const char *password) {
-    FILE *shadow_file = fopen("/etc/shadow", "r");
-
-    if (shadow_file == NULL) {
-        printf("Failed to open /etc/shadow.\n");
-        return false;
+    // Open the user file in binary mode
+    user_file = fopen("/sec/user", "rb+");
+    if (user_file == NULL) {
+        printf("Error opening the user file.\n");
+        return 1;
     }
 
-    char line[256]; // Adjust the buffer size as needed.
-    
-    while (fgets(line, sizeof(line), shadow_file) != NULL) {
-        // Extract the username, stored hash, and stored salt manually.
-        char *username = strtok(line, ":");
-        char *stored_hash = strtok(NULL, ":");
-        char *stored_salt = strtok(NULL, ":");
-        
-        // Hash the provided password with the stored salt
-        uint8_t salted_password[256]; // Adjust the size as needed.
-        snprintf(salted_password, sizeof(salted_password), "%s:%s", password, stored_salt);
-        uint64_t *hashed_password = SHA256Hash((uint8_t *)salted_password, strlen(salted_password));
-        
-        // Compare the computed hash with the stored hash
-        if (memcmp(hashed_password, stored_hash, sizeof(uint64_t)) == 0) {
-            fclose(shadow_file);
-            return true; // Password authentication succeeded.
+    fseek(user_file, 0, SEEK_SET);
+
+    User current_user;
+
+    while (fread(&current_user, sizeof(User), 1, user_file) == 1) {
+        // Find the user to update
+        if (current_user.user_id == user_id) {
+            // Update the user with new information
+            fseek(user_file, -sizeof(User), SEEK_CUR);
+            fwrite(updated_user, sizeof(User), 1, user_file);
+
+            fclose(user_file);
+
+            printf("User with ID %d updated successfully.\n", user_id);
+
+            return 0;  // Success
         }
     }
 
-    fclose(shadow_file);
-    return false; // Password authentication failed.
+    // Cleanup: Close the user file
+    fclose(user_file);
+
+    printf("User with ID %d not found.\n", user_id);
+
+    return 2;  // User not found
 }
 
-// Function to validate the contents of the passwd file
-bool validatePasswdFile(const char *expected_content) {
-    FILE *passwd_file = fopen("/etc/passwd", "r");
-    if (passwd_file == NULL) {
-        printf("Failed to open /etc/passwd.\n");
-        return false;
+// Function to validate user credentials
+int validate_credentials(const char* username, const char* password) {
+    User check_user;
+
+    // Get the user based on the username
+    if (get_user(username, &check_user) != 0) {
+        printf("User not found. Couldn't validate user\n");
+        return 1;  // User not found
     }
 
-    char line[256];
-    fgets(line, sizeof(line), passwd_file);
+    // Hash the provided password with the stored salt
+    unsigned char provided_password_hash[SHA256_DIGEST_LENGTH];
+    char salted_password[MAX_PASSWORD_LENGTH + MAX_SALT_LENGTH];
 
-    fclose(passwd_file);
-
-    // Compare the contents of the file with the expected content
-    if (strcmp(line, expected_content) != 0) {
-        printf("Passwd file content does not match expected.\n");
-        printf("Expected: %s\n", expected_content);
-        printf("Actual: %s\n", line);
-        return false;
+    snprintf(salted_password, sizeof(salted_password), "%s%s", password, check_user.salt);
+    printf("here %d",__LINE__);
+    strcpy(provided_password_hash,SHA256Hash(salted_password));
+    if (provided_password_hash == NULL) {
+        printf("Error hashing the provided password.\n");
+        return 2;  // Error hashing provided password
     }
-
-    return true;
-}
-
-// Function to validate the contents of the shadow file
-bool validateShadowFile(const char *expected_content) {
-    FILE *shadow_file = fopen("/sec/shadow", "r");
-    if (shadow_file == NULL) {
-        printf("Failed to open /sec/shadow.\n");
-        return false;
-    }
-
-    char line[256];
-    fgets(line, sizeof(line), shadow_file);
-
-    fclose(shadow_file);
-
-    // Compare the contents of the file with the expected content
-    if (strcmp(line, expected_content) != 0) {
-        printf("Shadow file content does not match expected.\n");
-        printf("Expected: %s\n", expected_content);
-        printf("Actual: %s\n", line);
-        return false;
-    }
-
-    return true;
-}
-
-/**
- * Function Name: addUser
- * Description: Adds a new user to the system. Writes to passwd and shadow files sequentially.
- *              Checks if content in passwd file is correct before writing to shadow file.
- *              Checks if content in shadow file is correct before closing both files.
- *              Finally, reopens both files to verify their contents.
- *
- * Parameters:
- *   username (const char*) - The username of the new user.
- *   password (const char*) - The password of the new user.
- *   access_level (int) - The access level of the new user.
- *   shell (const char*) - The shell of the new user.
- *   home (const char*) - The home directory of the new user.
- *
- * Return:
- *   bool - Returns true if user addition succeeded, false otherwise.
- */
-bool addUser(const char *username, const char *password, int access_level, const char *shell, const char *home) {
-    // Generate a random salt (replace with your secure salt generation).
-    int salt = 12345; // Example salt value (should be generated securely).
-
-    // Generate the salt string from the salt value (assumed to be of type int).
-    char salt_str[20]; // Adjust the size as needed.
-    snprintf(salt_str, sizeof(salt_str), "%d", salt);
-
-    // Hash the password with the salt
-    uint8_t salted_password[256]; // Adjust the size as needed.
-    snprintf(salted_password, sizeof(salted_password), "%s:%s", password, salt_str);
-    uint64_t *hashed_password = SHA256Hash((uint8_t *)salted_password, strlen(salted_password));
-
-    // Open /etc/passwd for appending in binary mode
-    FILE *passwd_file = fopen("/etc/passwd", "ab");
-    if (passwd_file == NULL) {
-        printf("Failed to open /etc/passwd.\n");
-        return false;
-    }
-
-    // Convert access_level to a string
-    char access_level_str[20]; // Adjust the size as needed.
-    snprintf(access_level_str, sizeof(access_level_str), "%d", access_level);
-
-    // Create user entry string for /etc/passwd
-    char passwd_entry[256]; // Adjust the buffer size as needed.
-    snprintf(passwd_entry, sizeof(passwd_entry), "%s:%s:%s:%s:%s:%s:%s\n", username, password, access_level_str, access_level_str, "GECOS", home, shell);
-
-    // Write the user's information to /etc/passwd
-    fwrite(passwd_entry, 1, strlen(passwd_entry), passwd_file);
-
-    fclose(passwd_file);
-
-    // Validate the contents of /etc/passwd
-    if (!validatePasswdFile(passwd_entry)) {
-        replace_line_by_username("/etc/passwd",username,passwd_entry);
-        printf("(1) File (passwd file) has been invalidated\n");
-        return false;
-    }
-
-    // Open /sec/shadow for appending in binary mode
-    FILE *shadow_file = fopen("/sec/shadow", "ab");
-    if (shadow_file == NULL) {
-        printf("Failed to open /sec/shadow.\n");
-        return false;
-    }
-
-    // Create user entry string for /sec/shadow
-    char shadow_entry[256]; // Adjust the buffer size as needed.
-    snprintf(shadow_entry, sizeof(shadow_entry), "%s:%s:%s:additional_fields\n", username, hashed_password, salt_str);
-
-    // Write the user's information to /sec/shadow
-    fwrite(shadow_entry, 1, strlen(shadow_entry), shadow_file);
-
-    fclose(shadow_file);
-
-    // Validate the contents of /sec/shadow
-    if (!validateShadowFile(shadow_entry)) {
-        replace_line_by_username("/sec/shadow",username,shadow_entry);
-        printf("(1) File (shadow file) has been invalidated\n");
-        return false;
-    }
-
-    // Reopen /etc/passwd for reading and verify its contents
-    // passwd_file = fopen("/etc/passwd", "rb");
-
-    if (!validatePasswdFile(passwd_entry)) {
-        replace_line_by_username("/etc/passwd",username,passwd_entry);
-        printf("(2) File (passwd file) has been invalidated\n");
-        // return false;
-    }
-    // fclose(passwd_file);
-
-    // Reopen /sec/shadow for reading and verify its contents
-    // shadow_file = fopen("/sec/shadow", "rb");
-    if (!validateShadowFile(shadow_entry)) {
-        replace_line_by_username("/sec/shadow",username,shadow_entry);
-        printf("(2) File (shadow file) has been invalidated\n");
-        // return false;
-    }
-    // fclose(shadow_file);
-
-    free(hashed_password); // Free the memory allocated for the password hash.
-
-    if (fl_is_dir(home) != 1) {
-        printf("home->%s", home);
-        fl_createdirectory(home);
-    }
-    return true; // User addition succeeded.
-}
-
-bool validateUserCredentials(const char *username, const char *password) {
-    // Open /etc/shadow for reading
-    FILE *shadow_file = fopen("/sec/shadow", "r");
-
-    if (shadow_file == NULL) {
-        printf("Failed to open /sec/shadow.\n");
-        return false;
-    }
-
-    char line[400]; // Adjust the buffer size as needed.
     
-    while (fgets(line, sizeof(line), shadow_file) != NULL) {
-        // Extract the username, stored hash, and stored salt manually.
-        char *stored_username = strtok(line, ":");
-        char *stored_hash = strtok(NULL, ":");
-        char *stored_salt = strtok(NULL, ":");
+
+    // Compare hashed passwords
+    if (memcmp(check_user.password_hash, provided_password_hash, SHA256_DIGEST_LENGTH) == 0) {
+        printf("Username and password are correct.\n");
+
+        // Reset invalid login counter on successful login
+        check_user.invalid_login_count = 0;
         
-        if (strcmp(username, stored_username) == 0) {
-            // Hash the provided password with the stored salt
-            uint8_t salted_password[256]; // Adjust the size as needed.
-            snprintf(salted_password, sizeof(salted_password), "%s:%s", password, stored_salt);
-            uint64_t *hashed_password = SHA256Hash((uint8_t *)salted_password, strlen(salted_password));
+        // Update last login time
+        // time_t current_time = time(NULL);
+        // check_user.last_login_time = *localtime(&current_time);
 
-            // Compare the computed hash with the stored hash
-            if (strcmp(hashed_password, stored_hash) == 0) {
-                // printf("Hashedpassword: %s\n",hashed_password);
-                // printf("stored hass   : %s\n",stored_hash);
-                fclose(shadow_file);
-                free(hashed_password);
-                return true; // User credentials are valid.
-            }
-            
-            free(hashed_password);
+        // Update the user in the file
+        FILE* user_file = fopen("/sec/user", "rb+");
+        if (user_file == NULL) {
+            printf("Error opening the user file.\n");
+            return 4;  // Error opening user file
         }
+
+        fseek(user_file, -sizeof(User), SEEK_CUR);
+        fwrite(&check_user, sizeof(User), 1, user_file);
+
+        fclose(user_file);
+        free(provided_password_hash);
+        return 0;  // Username and password are correct
+    } else {
+        printf("Incorrect password.\n");
+
+        // Increment invalid login counter
+        check_user.invalid_login_count++;
+
+        // Update the user in the file
+        FILE* user_file = fopen("/sec/user", "rb+");
+        if (user_file == NULL) {
+            printf("Error opening the user file.\n");
+            return 5;  // Error opening user file
+        }
+
+        fseek(user_file, -sizeof(User), SEEK_CUR);
+        fwrite(&check_user, sizeof(User), 1, user_file);
+
+        fclose(user_file);
+
+        // Check if the invalid login counter exceeds the limit
+        if (check_user.invalid_login_count > MAX_INVALID_LOGIN_COUNT) {
+            // Call the query_user function to ask security questions
+            query_user(&check_user);
+        }
+
+        return 3;  // Incorrect password
+    }
+}
+
+// Function to query user with security questions
+void query_user(User* user) {
+    printf("Answer security questions to reset the invalid login counter:\n");
+
+    // for (int i = 0; i < MAX_QUESTION_COUNT; ++i) {
+    //     char answer[MAX_ANSWER_LENGTH];
+
+    //     printf("Question %d: %s\n", i + 1, user->security_questions[i]);
+    //     printf("Your Answer: ");
+    //     // f_fgets(answer, MAX_ANSWER_LENGTH, stdin);
+
+    //     // Remove newline character if present
+    //     size_t length = strlen(answer);
+    //     if (length > 0 && answer[length - 1] == '\n') {
+    //         answer[length - 1] = '\0';
+    //     }
+
+    //     // Compare the provided answer with the stored answer
+    //     if (strcmp(answer, user->security_answers[i]) != 0) {
+    //         printf("Incorrect answer. Please try again later.\n");
+    //         return;
+    //     }
+    // }
+
+    // // If all answers are correct, reset the invalid login counter
+    // user->invalid_login_count = 0;
+
+    // // Update the user in the file
+    // FILE* user_file = fopen("/sec/user", "rb+");
+    // if (user_file == NULL) {
+    //     printf("Error opening the user file.\n");
+    //     return;  // Error opening user file
+    // }
+
+    // fseek(user_file, -sizeof(User), SEEK_CUR);
+    // fwrite(user, sizeof(User), 1, user_file);
+
+    // fclose(user_file);
+
+    // printf("Security questions answered correctly. Invalid login counter reset.\n");
+}
+// Function to get a user based on username
+int get_user(const char* username, User* result_user) {
+    FILE* user_file;
+
+    // Open the user file in binary mode
+    user_file = fopen("/sec/user", "rb");
+    if (user_file == NULL) {
+        printf("Error opening the user file.\n");
+        return 1;
     }
 
-    fclose(shadow_file);
-    return false; // User credentials are not valid.
+    fseek(user_file, 0, SEEK_SET);
+    int ret = fl_fread(result_user, sizeof(User), 1, user_file);
+    while (ret != 0 && ret != -1) {
+        printf("username->%s\n",result_user->username);
+        if (strcmp(result_user->username, username) == 0) {
+            fclose(user_file);
+            return 0;  // User found
+        }
+        ret = fl_fread(result_user, sizeof(User), 1, user_file);
+    }
+
+    // Cleanup: Close the user file
+    fclose(user_file);
+
+    return 2;  // User not found
+}
+
+// Function to add a new user
+int add_user(User* new_user) {
+    FILE* user_file;
+
+    // Open the user file in binary mode
+    user_file = fopen("/sec/user", "ab+");
+    if (user_file == NULL) {
+        printf("Error opening the user file.\n");
+        return 1;
+    }
+
+    // Write the new user to the file
+    fseek(user_file, 0, SEEK_END);
+    fwrite(new_user, sizeof(User), 1, user_file);
+
+    // Cleanup: Close the user file
+    fclose(user_file);
+
+    printf("User '%s' added successfully.\n", new_user->username);
+    print_user_info(new_user);
+    return 0;  // Success
 }
 
 
-bool getUserInfo(const char *username, UserInfo *user) {
-    // Open /etc/passwd for reading
-     // Open /etc/passwd for reading
-    FILE *passwd_file = fopen("/etc/passwd", "rb");
-       size_t fs_s = get_file_size(passwd_file);
-    char *buf = (char *)kmalloc(fs_s);
-    fl_fread(buf,sizeof(char),fs_s,passwd_file);
 
-    printf("buf = %s",buf);
-    printf("\t\n");
-    kfree(buf);
-    if (passwd_file == NULL) {
-        printf("Failed to open /etc/passwd.\n");
-        return false;
-    }
 
-    char line[256]; // Adjust the buffer size as needed.
-    
-    while (fgets(line, sizeof(line), passwd_file) != NULL) {
-        printf("LINE: %s\n", line);
-        // Extract the username and other information manually.
-        char *stored_username = strtok(line, ":");
-        // You can extract other fields here as needed.
-        
-        if (strcmp(username, stored_username) == 0) {
-            
-            // Parse and store user information in the struct
-            strncpy(user->username, stored_username, sizeof(user->username));
-            user->access_level = atoi(strtok(NULL, ":"));
-            strncpy(user->gecos, strtok(NULL, ":"), sizeof(user->gecos));
-            strncpy(user->home_directory, strtok(NULL, ":"), sizeof(user->home_directory));
-            strncpy(user->login_shell, strtok(NULL, ":"), sizeof(user->login_shell));
-            printf("\npath (%s)\n",user->home_directory);
-            fclose(passwd_file);
-            return true; // User information found.
-        }
-    }
-    
-    fclose(passwd_file);
-    return false; // User information not found.
+User create_user(const char* full_name, const char* username, const char* home_dir,
+                 const char* shell_path, int needs_key, const char* email,
+                 const char* config_file_path, const char* password) {
+    User new_user;
+
+    // Set user information
+    strncpy(new_user.full_name, full_name, MAX_NAME_LENGTH - 1);
+    strncpy(new_user.username, username, MAX_USERNAME_LENGTH - 1);
+    strncpy(new_user.home_dir, home_dir, MAX_PATH_LENGTH - 1);
+    strncpy(new_user.shell_path, shell_path, MAX_PATH_LENGTH - 1);
+    new_user.needs_key = needs_key;
+    strncpy(new_user.email, email, MAX_EMAIL_LENGTH - 1);
+    strncpy(new_user.config_file_path, config_file_path, MAX_PATH_LENGTH - 1);
+
+    // Hash the password and set the salt
+    // (Replace SHA256Hash with your actual password hashing implementation)
+    const char* hashed_password = SHA256Hash(password);
+    strncpy(new_user.salt, "4356", MAX_SALT_LENGTH - 1);  // Replace with actual salt
+    strncpy(new_user.password_hash, hashed_password, SHA256_DIGEST_LENGTH);
+
+    // Set other default values
+    new_user.user_id = 0;  // You might want to generate a unique user ID
+    new_user.account_status = 0;  // Default account status is active
+    new_user.invalid_login_count = 0;
+
+    return new_user;
+}
+
+void print_user_info(const User* user) {
+    printf("User Information:\n");
+    printf("Username: %s\n", user->username);
+    printf("Full Name: %s\n", user->full_name);
+    printf("Home Directory: %s\n", user->home_dir);
+    printf("Shell Path: %s\n", user->shell_path);
+    printf("Needs Key: %d\n", user->needs_key);
+    printf("Email: %s\n", user->email);
+    printf("Config File Path: %s\n", user->config_file_path);
+    printf("User ID: %d\n", user->user_id);
+    printf("Account Status: %d\n", user->account_status);
+    printf("Invalid Login Count: %d\n", user->invalid_login_count);
+
+    // You can add more fields as needed
+
+    printf("\n");
 }

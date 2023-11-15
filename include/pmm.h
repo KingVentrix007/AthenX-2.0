@@ -10,8 +10,17 @@ typedef uint32 PMM_PHYSICAL_ADDRESS;
 */
 
 #define PMM_BLOCK_SIZE    4096 //Bytes
-
-
+#define MAP_PREALLOC        0x01
+#define MAP_CONTIG          0x02
+#define MAP_ANON            0x04
+#define MAP_LOWER16M        0x08
+#define MAP_LOWER1M         0x10
+#define MAP_ALIGNMENT_64KB  0x20
+#define AC_ALIGN4K	0x01
+#define AC_LOWER16M	0x02
+#define AC_ALIGN64K	0x04
+#define AC_LOWER1M	0x08
+#define AC_CONTIG   0x09
 typedef struct {
     uint32 memory_size;
     uint32 max_blocks;

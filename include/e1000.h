@@ -21,6 +21,17 @@ typedef struct
     MacAddress mac_address;
     char card_name[200];
 }NicCardInfo;
+typedef struct {
+    uint16_t hardware_type;         // Hardware type (e.g., Ethernet is 1)
+    uint16_t protocol_type;         // Protocol type (e.g., IPv4 is 0x0800)
+    uint8_t  hardware_addr_len;     // Length of hardware address in bytes (e.g., 6 for Ethernet MAC address)
+    uint8_t  protocol_addr_len;     // Length of protocol address in bytes (e.g., 4 for IPv4 address)
+    uint16_t operation;             // ARP operation (request or reply)
+    uint8_t  sender_hardware_addr[6];  // Sender's hardware address (MAC address)
+    uint32_t sender_protocol_addr;      // Sender's protocol address (IP address)
+    uint8_t  target_hardware_addr[6];  // Target's hardware address (MAC address)
+    uint32_t target_protocol_addr;      // Target's protocol address (IP address)
+} ArpPacket;
 // Function to map memory regions for the Intel e82540EM Ethernet card
 void map_e82540EM_memory_regions(uint8_t bus, uint8_t device, uint8_t function);
 
@@ -87,7 +98,7 @@ const char* eth_error_to_string(uint16_t error_code);
 #define REG_TXDESCHI    0x3804
 #define REG_TXDESCLEN   0x3808
 #define REG_TXDESCHEAD  0x3810
-#define REG_TXDESCTAIL  0x3818
+#define REG_TXDESCTAIL  0x03818
  
  
 #define REG_RDTR         0x2820 // RX Delay Timer Register
@@ -179,23 +190,52 @@ struct e1000_rx_desc {
         volatile uint16_t special;
 } __attribute__((packed));
  
-struct e1000_tx_desc {
-        volatile uint64_t addr;
-        volatile uint16_t length;
-        volatile uint8_t cso;
-        volatile uint8_t cmd;
-        volatile uint8_t status;
-        volatile uint8_t css;
-        volatile uint16_t special;
-} __attribute__((packed));
+typedef struct e1000_tx_desc
+{
+    uint64_t addr;              /**< Address of the transmit buffer (64-bit). */
+    uint32_t buffer_h;          /**< High 32-bits of the transmit buffer (unused). */
+    uint16_t length;            /**< Size of the transmit buffer contents. */
+    uint8_t checksum_off;       /**< Checksum Offset. */
+    uint8_t cmd;                /**< Command field. */
+    uint8_t status;             /**< Status field. */
+    uint8_t checksum_st;        /**< Checksum Start. */
+    uint8_t cso;                /**< Checksum Offset. */
+    uint8_t css;                /**< Checksum Start. */
+    uint16_t special;           /**< Optional special bits. */
+};
+
+// typedef struct e1000
+// {
+//     int irq;			  /**< Interrupt Request Vector. */
+//     int irq_hook;                 /**< Interrupt Request Vector Hook. */
+//     uint8_t *regs;		  	  /**< Memory mapped hardware registers. */
+//     uint8_t *flash;		  /**< Optional flash memory. */
+//     uint32_t flash_base_addr;	  /**< Flash base address. */
+//     uint16_t (*eeprom_read)(struct e1000 *, int reg);
+// 				  /**< Function to read the EEPROM. */
+//     int eeprom_done_bit;	  /**< Offset of the EERD.DONE bit. */    
+//     int eeprom_addr_off;	  /**< Offset of the EERD.ADDR field. */
+
+//     struct e1000_rx_desc *rx_desc;	  /**< Receive Descriptor table. */
+//     int rx_desc_count;		  /**< Number of Receive Descriptors. */
+//     char *rx_buffer;		  /**< Receive buffer returned by malloc(). */
+//     int rx_buffer_size;		  /**< Size of the receive buffer. */
+
+//     struct e1000_tx_desc *tx_desc;	  /**< Transmit Descriptor table. */
+//     int tx_desc_count;		  /**< Number of Transmit Descriptors. */
+//     char *tx_buffer;		  /**< Transmit buffer returned by malloc(). */
+//     int tx_buffer_size;		  /**< Size of the transmit buffer. */
+// } e1000_t;
+
 
 void e1000_rxinit();
 void e1000_txinit();
-int sendPacket(uint8 *buffer, uint16 length);
+int sendPacket(const void *p_data, uint16_t p_len);
 void writeCommand( uint16_t p_address, uint32_t p_value);
 void fire (REGISTERS *r);
 int send_raw(const void * p_data, uint16_t p_len);
-
+int sendArpBroadcast();
+// uint32_t IPv4_PackIP(uint8_t first, uint8_t second, uint8_t third, uint8_t fourth);
 #define MAX_PACKET_SEND_CHECKS 100000000
 
 //!Copied form the minex source code
@@ -402,5 +442,6 @@ typedef struct e1000
     char *tx_buffer;		  /**< Transmit buffer returned by malloc(). */
     int tx_buffer_size;		  /**< Size of the transmit buffer. */
 } e1000_t;
-#endif /* e82540EM_ETHERNET_H */
 void init_E1000();
+#endif /* e82540EM_ETHERNET_H */
+

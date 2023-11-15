@@ -1715,3 +1715,37 @@ int is_file(const char *path)
     fclose(fp);
 }
 
+int rename(const char* old_name, const char* new_name) {
+    // Open the file with the current name for reading.
+    FILE* old_file = fopen(old_name, "rb");
+    if (old_file == NULL) {
+        perror("Error opening the file for reading");
+        return -1;
+    }
+
+    // Open a new file with the desired name for writing.
+    FILE* new_file = fopen(new_name, "wb");
+    if (new_file == NULL) {
+        perror("Error opening the file for writing");
+        fclose(old_file);
+        return -1;
+    }
+
+    // Read and write the file content.
+    int c;
+    while ((c = fgetc(old_file)) != EOF) {
+        fputc(c, new_file);
+    }
+
+    // Close the files.
+    fclose(old_file);
+    fclose(new_file);
+
+    // Remove the old file.
+    if (remove(old_name) != 0) {
+        perror("Error deleting the old file");
+        return -1;
+    }
+
+    return 0; // Success
+}

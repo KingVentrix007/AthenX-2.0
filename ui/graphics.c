@@ -243,7 +243,7 @@ void cool_colors()
 //     itoa(buffer, exponent, 10);
 // }
 
-// void terminal_putchar(char c)
+// void printf(char c)
 // {
 //     //draw_char(c,45,67,x,y,0);
 //     if(c == 10)
@@ -303,7 +303,7 @@ void cool_colors()
 // {
 //     size_t i;
 //     for (i = 0; i < size; i++)
-//         terminal_putchar(data[i]);
+//         printf(data[i]);
 // }
 
 // int putchar(int ic)

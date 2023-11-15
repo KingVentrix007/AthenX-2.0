@@ -7,7 +7,7 @@ int init_user()
 
 }
 
-int get_user(char username[30], int password[30])
+int get_user_ui(char username[30], int password[30])
 {
     
 }

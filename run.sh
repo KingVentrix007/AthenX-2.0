@@ -108,7 +108,7 @@ if [ -f "$image_file" ]; then
   sudo cp "ui/cmdhandler.c" "/mnt/AthenX/root/cmd.c"
   sudo cp "LICENSE.txt" "/mnt/AthenX/root/license.txt"
   sudo cp "test.fac" "/mnt/AthenX/root/test.fac"
-  sudo cp -r "sysroot" "/mnt/AthenX/home/"
+  # sudo cp -r "sysroot" "/mnt/AthenX/home/"
    
   # Unmount the image
   # sudo losetup -d /dev/loop0
