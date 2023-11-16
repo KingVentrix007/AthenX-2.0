@@ -32,6 +32,8 @@
 #include "../include/ssfs.h"
 #include "../include/tui.h"
 #include "../include/acpi.h"
+#include "../include/TFTP.h"
+#include "../include/e1000.h"
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
@@ -305,6 +307,18 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
         
         
     }
+    else if (strcmp(arguments[0],"grab") == 0)
+    {
+        char buffer[1000] = {0};
+        uint32_t port = TFTP_GetFile(0xC0A80002,arguments[1],buffer,1000,100);
+        printf("\nport = %d",port);
+        while (!TFTP_TransactionComplete())
+        {
+            // You can do other things while waiting if needed
+        }
+        printf("got the file\n");
+    }
+    
     else if (strcmp(arguments[0],"install") == 0)
         {
             if(arg_count >= 3)

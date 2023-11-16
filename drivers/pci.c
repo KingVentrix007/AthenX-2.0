@@ -746,3 +746,25 @@ uint32_t get_bar_offset(int bar_index) {
     // The BARs are 32 bits wide, so each BAR takes 4 bytes in the PCI configuration space
     return PCI_CONFIG_ADDRESS + (bar_index * 4);
 }
+void PCI_EnableBusMastering(uint8_t bus, uint8_t slot, uint8_t function)
+{
+    // read in the old command word
+    uint16_t command = pci_read(bus, slot, function, COMMAND_OFFSET);
+
+    // ensure the bus mastering bit is set
+    command |= BUS_MASTER_ENABLED;
+
+    // write out the command word
+    PCI_SetCommand(bus, slot, function, command);
+}
+void PCI_SetCommand(uint8_t bus, uint8_t device, uint8_t function, uint16_t command)
+{
+    // read in the uint32_t associated with command (command and status)
+    uint32_t dataDWORD = pci_read(bus, device, function, COMMAND_OFFSET);
+
+    // modify the command part of the data, overwriting the old command
+    dataDWORD = (dataDWORD & 0xFFFF0000) | command;
+
+    // write out the new dword
+    pci_write(bus, device, function, COMMAND_OFFSET, dataDWORD);
+}

@@ -155,7 +155,7 @@ void e1000_RX_Init();
 void e1000_TX_Init();
 
 void e1000_Write_Register(uint32_t regOffset, uint32_t value);
-
+uint8_t *return_mac();
 
 #endif /* e82540EM_ETHERNET_H */
 

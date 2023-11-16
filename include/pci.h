@@ -27,6 +27,8 @@
 #define PCI_ERR_IRQ_CONFLICT 0x2011
 #define PCI_ERR_DEVICE_NOT_ENABLED 0x2012
 #define PCI_ERR_INVALID_CONFIG_SPACE 0x2013
+#define BUS_MASTER_ENABLED  0x04
+#define COMMAND_OFFSET          0x04
 int dummy(uint8_t dummy1, uint8_t dummy2, uint8_t dummy3);
 
 // Define constants for maximum values

@@ -54,13 +54,8 @@ uint32_t IPv4_PackIP(uint8_t first, uint8_t second, uint8_t third, uint8_t fourt
 
 void IPv4_PrintIP(uint32_t ip)
 {
-    printf("%d",ip & 0xFF);
-    printf('.');
-    printf("%d",(ip >> 8) & 0xFF);
-    printf('.');
-    printf("%d",(ip >> 16) & 0xFF);
-    printf('.');
-    printf("%d",(ip >> 24) & 0xFF);
+    printf("%d.%d.%d.%d", ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF, (ip >> 24) & 0xFF);
+
 }
 
 void IPv4_ProcessReceivedPacket(IPv4_Header *ipHeader, uint8_t *sourceMAC)

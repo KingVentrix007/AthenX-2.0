@@ -123,7 +123,10 @@ void e1000_Get_Mac()
     memcpy(&mac_addr[2], &word1, 2);
     memcpy(&mac_addr[4], &word2, 2);
 }
-
+uint8_t *return_mac()
+{
+    return mac_addr;
+}
 void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
 {
     
@@ -180,7 +183,7 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
     e1000_TX_Init();
 
     // enable PCI bus mastering
-    // PCI_EnableBusMastering(bus, slot, function);
+    PCI_EnableBusMastering(bus, slot, function);
 
     // Setup an interrupt handler for this device
 
@@ -207,7 +210,7 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
 
     printf("\n     Requesting IP address via DHCP...\n");
 
-    ARP_SendRequest(IPv4_PackIP(192, 168, 0, 100), mac_addr);
+    // ARP_SendRequest(IPv4_PackIP(192, 168, 0, 1), mac_addr);
     DHCP_Send_Discovery(mac_addr);
     
     printf("    e1000 driver initialized.\n");
@@ -311,14 +314,14 @@ void e1000_SendPacket(Ethernet_Header *packet, uint16_t dataSize)
 
     e1000_Write_Register(REG_TDT, index);
     
-    if(debugLevel)
-        printf("Packet sent\n");
+    // if(1)
+        // printf("Packet sent\n");
 }
 
 void e1000_ReceivePacket()
 {
     volatile uint32_t tail = e1000_Read_Register(REG_RDT);// % RX_DESCRIPTORS;
-    
+    // printf("recive\n");
     if(debugLevel)
         printf("tail %d", tail);
 

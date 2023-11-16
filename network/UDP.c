@@ -58,6 +58,6 @@ void UDP_ProcessReceivedPacket(UDP_Header *packet, uint8_t *sourceMAC)
 
     if (sourcePort == TFTP_PORT)
     {
-        // TFTP_ProcessPacket((TFTP_Header *)packet->data, sourcePort, destinationPort, size - UDP_HEADER_SIZE, sourceMAC);
+        TFTP_ProcessPacket((TFTP_Header *)packet->data, sourcePort, destinationPort, size - UDP_HEADER_SIZE, sourceMAC);
     }
 }
