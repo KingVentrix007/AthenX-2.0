@@ -98,5 +98,5 @@ void kprintf(char * template,...)
         // }
     }
     va_end(parameters);
-    return written;
+    // //return written;
 }

@@ -76,7 +76,10 @@
         "image.h": "c",
         "dhcp.h": "c",
         "limits": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "pageing.h": "c",
+        "intrin.h": "c",
+        "console.h": "c"
     },
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here

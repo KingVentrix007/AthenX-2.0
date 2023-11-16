@@ -61,6 +61,16 @@ uint32_t pci_read(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset)
     outportl(0xCF8, address);
     return inportl(0xCFC);
 }
+void pci_write(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset, uint32_t data) {
+    // Construct the PCI configuration address
+    uint32_t address = (1U << 31) | ((uint32_t)bus << 16) | ((uint32_t)device << 11) | ((uint32_t)function << 8) | (offset & 0xFC);
+
+    // Write the address to the PCI configuration address port
+    outportl(0xCF8, address);
+
+    // Write the data to the PCI configuration data port
+    outportl(0xCFC, data);
+}
 // uint32_t pci_read_config(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset) {
 //     uint32_t address = (1U << 31) | ((uint32_t)bus << 16) | ((uint32_t)device << 11) | ((uint32_t)func << 8) | (offset & 0xFC);
 //     outl(PCI_CONFIG_ADDRESS, address);
@@ -251,7 +261,7 @@ void init_pci_device()
     printf("Initializing PCI Device Headers\n");
     // RegisteredPCIDeviceInfo newDevice;
 
-    int ret = create_device_list(0x100e,0x8086,0x2,true,"82540EM Gigabit Ethernet Controller","Intel Corporation",init_e82540EM_ethernet_card);
+    int ret = create_device_list(0x100e,0x8086,0x2,true,"82540EM Gigabit Ethernet Controller","Intel Corporation",e1000_Net_Init);
     if(ret != 0) return main_exit(PCI_ERROR,PCI_ERR_DEVICE_NOT_FOUND,__FUNCTION__,true,&dummy);
     ret = create_device_list(0x2415,0x8086,0x4,false,"82801AA AC'97 Audio Controller","Intel Corporation",dummy);
     if(ret != 0) return main_exit(PCI_ERROR,PCI_ERR_DEVICE_NOT_FOUND,__FUNCTION__,true,&dummy);
@@ -644,11 +654,30 @@ void list_running_devices()
 
 void initialize_registered_devices()
 {
+    asm("sti");
     printf("Initializing registered devices\n");
     for (size_t i = 0; i < num_found_devices__registered; i++)
     {
         if(pci_registered_device_list[i].has_driver == true && pci_registered_device_list[i].is_running == false)
         {
+            if (pci_registered_device_list[i].header.interrupt_line + IRQ_BASE == 42 && pci_registered_device_list[i].header.device_id == 0x100e) {
+            // Read and print the old IRQ
+            uint32_t old_config = pci_read(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function, 0x3C);
+            uint8_t old_irq = (uint8_t)(old_config & 0x000000FF);
+            printf("Old IRQ: %u\n", old_irq);
+
+            // Set the new IRQ
+            uint8_t new_irq = 13;  // Change this to the desired IRQ line
+            uint32_t current_config = pci_read(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function, 0x3C);
+            current_config &= 0xFFFFFF00;  // Clear the lower 8 bits
+            current_config |= new_irq;
+
+            // Print the new IRQ
+            printf("New IRQ: %u\n", new_irq);
+            pci_registered_device_list[i].header.interrupt_line = new_irq;
+            // Update the IRQ
+            pci_write(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function, 0x3C, current_config);
+}
             printf("Calling %s initialization function \n", pci_registered_device_list[i].device_name);
             pci_registered_device_list[i].init_device(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function);
             pci_registered_device_list[i].is_running = true;
@@ -656,6 +685,7 @@ void initialize_registered_devices()
             //printf("initialized");
         }
     }
+    asm("cli");
     
 }
 

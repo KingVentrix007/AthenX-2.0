@@ -49,7 +49,7 @@
 #include "../include/elf_exe.h"
 #include "user.h"
 #include "mod.h"
-
+#include "qemu.h"
 
 // #include "flanterm.h"
 // #include "fb.h"
@@ -144,8 +144,8 @@ int mac_cmp() {
     const char* qemuMac = "52:54:00:12:34:56";
     
     // Read the MAC address from your custom OS
-    MacAddress osMac = read_mac_address();
-     print_mac_address(&osMac);
+    // MacAddress osMac = read_mac_address();
+    //  print_mac_address(&osMac);
     // Compare the MAC addresses
     // if (compare_mac_addresses(qemuMac, &osMac)) {
     //    // beep();
@@ -318,13 +318,16 @@ void kmain(unsigned long magic, unsigned long addr) {
         //kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
         int ret = display_init(0,x,y,32);
         printf("\nTotal memory size = %d",end-start);
-        char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
+        // char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
         ata_init();
         clear_screen();
         set_screen_x(0);
         set_screen_y(0);
+        set_scroll_mode(0);
         // init_virt();enable_paging()
-       
+        char* cmdlines = (char*)(uintptr_t)mboot_info->cmdline;
+        printf("args = %s\n",cmdlines);
+
         printf("kernel memory start address this postion = %p\n",mboot_info->addr);
         // printf("args->%s\n",cmdline);
          fl_init();
@@ -337,7 +340,15 @@ void kmain(unsigned long magic, unsigned long addr) {
         {
             
         }
-        
+        if(strstr(cmdlines,"update") != NULL)
+        {
+            clear_screen();
+            cmd_handler("update","");
+            clear_display();
+            printf("Update complete\n");
+            printf("restart device\n");
+            reboot_qemu(0x60);
+        }
         
          const char* filename = "/var/env.txt";
          FILE *f = fl_fopen(filename,"r");
@@ -382,8 +393,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("Error saving environmental variables.\n");
         }
         }
-          char* cmdlines = (char*)(uintptr_t)mboot_info->cmdline;
-          printf("args = %s\n",cmdlines);
+          
         //  if (loadAndDrawImage("/gui/sunset.tga", 0, 0) == 0) {
         // printf("succsess\n");
         // set_screen_x(0);
@@ -417,30 +427,30 @@ void kmain(unsigned long magic, unsigned long addr) {
             // free(buffer);
 
         }
-            unsigned char* bios_start = (unsigned char*)0xE0000;
-            unsigned int bios_length = 0x20000;  // 128 KB
+            // unsigned char* bios_start = (unsigned char*)0xE0000;
+            // unsigned int bios_length = 0x20000;  // 128 KB
 
-            struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
+            // struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
 
-            if (rsdp) {
-                printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
-                struct ACPISDTHeader* RSDT = (struct ACPISDTHeader*)rsdp->RsdtAddress;
-                // bool valid = doChecksum(RSDT);
-                // if(valid == TRUE)
-                // {
-                //     printf("Creator ID: %d\n",RSDT->CreatorID);
-                // }
-                // else
-                // {
-                //     printf("[ERROR]Invalid RSDT Table found\n");
-                // }
-                // //printf("Version: %d\n",rsdp->Revision);
+            // if (rsdp) {
+            //     printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
+            //     struct ACPISDTHeader* RSDT = (struct ACPISDTHeader*)rsdp->RsdtAddress;
+            //     // bool valid = doChecksum(RSDT);
+            //     // if(valid == TRUE)
+            //     // {
+            //     //     printf("Creator ID: %d\n",RSDT->CreatorID);
+            //     // }
+            //     // else
+            //     // {
+            //     //     printf("[ERROR]Invalid RSDT Table found\n");
+            //     // }
+            //     // //printf("Version: %d\n",rsdp->Revision);
             
-                // Access other information in the RSDP as needed
-            } else {
-                printf("RSDP not found.\n");
-            }
-
+            //     // Access other information in the RSDP as needed
+            // } else {
+            //     printf("RSDP not found.\n");
+            // }
+        initAcpi();
         timer_init();//!DO NOT PUT BEFORE INIT VESA
 
         // if(strstr(output,"Memory Configuration") != NULL)
@@ -535,7 +545,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             //  init_paging();
             fpu_enable();
             // printf("\033[100;500m");
-
+            asm("int $45");
             printf("Initialization complete\nAthenX %s:%d.%d.%d started successfully with %d errors\n",VERSION_MAIN,VERSION_SUB_MAIN,VERSION_SUB_MINOR,VERSION_SUB_PATCH,get_num_errors());
             printf("Welcome to AthenX-2.0. This is the default terminal, please run load <name> to execute your terminal or <name> to run a script\n");
             

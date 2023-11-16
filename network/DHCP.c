@@ -7,18 +7,18 @@
 #include "IPv4.h"
 #include "TFTP.h"
 
-void DHCP_Send_Discovery(MacAddress mac)
+void DHCP_Send_Discovery(uint8_t *sourceMAC)
 {
 
     
-    uint8_t sourceMAC[6];
-    printf("sourceMAC ->");
-    for (size_t i = 0; i < sizeof(sourceMAC)/sizeof(sourceMAC[0]); i++)
-    {
-            sourceMAC[i] = mac.bytes[i];
-            printf("%0X:",sourceMAC[i]);
-    }
-    printf("\n");
+    // uint8_t sourceMAC[6];
+    // printf("sourceMAC ->");
+    // for (size_t i = 0; i < sizeof(sourceMAC)/sizeof(sourceMAC[0]); i++)
+    // {
+    //         sourceMAC[i] = mac.bytes[i];
+    //         printf("%0X:",sourceMAC[i]);
+    // }
+    // printf("\n");
     DHCP_HEADER *dhcpData;
     uint16_t packetSize = sizeof(DHCP_HEADER) - 76 + 8;
     Ethernet_Header *packet = UDP_Create_Packet(0xFFffFFff, 68, 67, &packetSize, sourceMAC, &dhcpData);
@@ -49,7 +49,7 @@ void DHCP_Send_Discovery(MacAddress mac)
     //printf("\n");
 
     // now send the packet
-    printf("%0X:%0X:%0X:%0X:%0X:%0X",sourceMAC[0],sourceMAC[1],sourceMAC[2],sourceMAC[3],sourceMAC[4],sourceMAC[5]);
+    printf("%0X:%0X:%0X:%0X:%0X:%0X\n",sourceMAC[0],sourceMAC[1],sourceMAC[2],sourceMAC[3],sourceMAC[4],sourceMAC[5]);
     EthernetSendPacket(packet, packetSize);
 }
 

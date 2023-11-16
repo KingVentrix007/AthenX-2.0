@@ -56,7 +56,7 @@ run-script:
 	sudo (cd script && bash run.sh)
 run: AthenX.bin
 	bash ./run.sh
-	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -netdev user,id=network0 -device e1000,netdev=network0,mac=52:5E:56:12:34:56 -no-reboot -no-shutdown -serial stdio
+	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -device e1000,netdev=n1 -netdev user,id=n1 -M hpet=on -serial stdio
 
 clean:
 	rm -rf $(OUT_DIR)/*.bin $(OUT_DIR)/*.map $(OUT_DIR)/*.img $(OBJ_DIR)/*

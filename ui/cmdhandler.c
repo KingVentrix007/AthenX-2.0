@@ -31,7 +31,7 @@
 #include "../include/man.h"
 #include "../include/ssfs.h"
 #include "../include/tui.h"
-
+#include "../include/acpi.h"
 //* This file handles all the commands passed to it from the main function //*
 
 //* Main command handling
@@ -187,6 +187,10 @@ void parse_command(const char* command, char programs[MAX_PROGRAMS][20]) {
         // }
          
        
+    }
+    else if(strcmp(arguments[0],"shutdown") == 0)
+    {
+        acpiPowerOff();
     }
     else if (strcmp(arguments[0],"man") == 0)
     {

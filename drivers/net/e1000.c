@@ -16,7 +16,7 @@
 #include "../include/errno.h"
 #include "../include/kheap.h"
 #include "../include/DHCP.h"
-
+#include "pageing.h"
 
 // TODO: Support multiple NIC's
 // TODO: Check for malloc failure
@@ -28,7 +28,9 @@ uint32_t lastReceiveTail = 0;
 
 TX_DESC_LEGACY *txDescriptorList = 0;
 RX_DESCRIPTOR  *rxDescriptorList = 0;
-
+int debugLevel = 0;
+void IRQ_Enable_Line(unsigned char IRQline);
+static inline void io_wait(void);
 /*bool e1000_Get_IO_Base(uint8_t bus, uint8_t slot, uint8_t function)
 {
     bool ioAddrFound = false;
@@ -41,7 +43,7 @@ RX_DESCRIPTOR  *rxDescriptorList = 0;
     {
         barValue = PCI_ConfigReadDWord(bus, slot, function, barOffset);
 
-        //kprintf("0x%lX\n", barValue);
+        //printf("0x%lX\n", barValue);
 
         if (barValue & IOBIT)
         {
@@ -62,12 +64,14 @@ RX_DESCRIPTOR  *rxDescriptorList = 0;
 bool e1000_Get_MMIO(uint8_t bus, uint8_t slot, uint8_t function)
 {
     // Get value stored in BAR0
-    uint32_t bar0 = PCI_GetBaseAddress0(bus, slot, function);
+    RegisteredPCIDeviceInfo *device_info = return_registered_pci_device(bus,slot,function);
+    
+    uint32_t bar0 = device_info->header.bar[0];
 
     // See if we're using MMIO (We should be)
     if ((bar0 & BAR_MMIO_OR_IO_BIT) == BAR_USING_IO)
     {
-        terminal_writestring("\n      BAR0 isn't using MMIO. This driver doesn't handle that.\n");
+        printf("\n      BAR0 isn't using MMIO. This driver doesn't handle that.\n");
         return false;
     }
 
@@ -76,11 +80,11 @@ bool e1000_Get_MMIO(uint8_t bus, uint8_t slot, uint8_t function)
     if ((bar0 & BAR_ADDRESS_TYPE) == BAR_64BIT)
     {
         // bar1 (upper address) should be 0 since we want to use 32-bit access
-        uint32_t upperAddress = PCI_GetBaseAddress1(bus, slot, function);
+        uint32_t upperAddress = device_info->header.bar[1];
         if (upperAddress != 0)
         {
             uint64_t address = (((uint64_t)upperAddress << 4) + e1000_mmAddress);
-            kprintf("\n      64-bit MMIO isn't supported right now. Device is mapped to 0x%llX\n", address);
+            printf("\n      64-bit MMIO isn't supported right now. Device is mapped to 0x%llX\n", address);
             return false;
         }
     }
@@ -88,7 +92,7 @@ bool e1000_Get_MMIO(uint8_t bus, uint8_t slot, uint8_t function)
     {
         if ((bar0 & BAR_ADDRESS_TYPE) != BAR_32BIT)
         {
-            terminal_writestring("\n      Invalid memory address size in BAR0\n");
+            printf("\n      Invalid memory address size in BAR0\n");
             return false;
         }
     }
@@ -113,7 +117,7 @@ void e1000_Get_Mac()
     uint16_t word2 = (uint16_t)macHigh;
 
     if(debugLevel)
-        kprintf("\nword0: %X\nword1: %X\nword2: %x\n", word0, word1, word2);
+        printf("\nword0: %X\nword1: %X\nword2: %x\n", word0, word1, word2);
 
     memcpy(&mac_addr[0], &word0, 2);
     memcpy(&mac_addr[2], &word1, 2);
@@ -122,41 +126,43 @@ void e1000_Get_Mac()
 
 void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
 {
-    (void)bus; (void)slot; (void)function;
+    
 
-    terminal_writestring("    Initializing e1000 driver...\n");
+    printf("    Initializing e1000 driver...\n");
         
     /*if (!e1000_Get_IO_Base(bus, slot, function))
     {
-        terminal_writestring("     Error: Unable to find IO Register Base Address\n");
+        printf("     Error: Unable to find IO Register Base Address\n");
         return;
     }*/
 
     if (!e1000_Get_MMIO(bus, slot, function))
         return;
 
-    kprintf("     MMIO Address: 0x%lX", e1000_mmAddress);
-    //kprintf("     Base Address: 0x%lX", e1000_base_port);
+    printf("     MMIO Address: 0x%lX", e1000_mmAddress);
+    //printf("     Base Address: 0x%lX", e1000_base_port);
 
     // Map the MMIO in the page table
     uint32_t mmioPage = e1000_mmAddress / FOUR_MEGABYTES;
-    pageDir[mmioPage] = ((mmioPage * FOUR_MEGABYTES)
-                         | DIRECTORY_ENTRY_PRESENT | DIRECTORY_ENTRY_USER_ACCESSIBLE | DIRECTORY_ENTRY_WRITABLE | DIRECTORY_ENTRY_4MB);
+    // pageDir[mmioPage] = ((mmioPage * FOUR_MEGABYTES)
+                        //  | DIRECTORY_ENTRY_PRESENT | DIRECTORY_ENTRY_USER_ACCESSIBLE | DIRECTORY_ENTRY_WRITABLE | DIRECTORY_ENTRY_4MB);
 
     // get the IRQ
-    e1000_IRQ = PCI_GetInterruptLine(bus, slot, function);
-    kprintf(" - IRQ %d", e1000_IRQ);
+    RegisteredPCIDeviceInfo *device_info = return_registered_pci_device(bus,slot,function);
+    PCIDevice *di = PCI_search_device(device_info->vendor_id,device_info->device_id);
+    e1000_IRQ = di->IRQ;
+    printf(" - IRQ %d", e1000_IRQ);
 
     // make sure an IRQ line is being used
-    if (e1000_IRQ == 0xFF)
-    {
-        terminal_writestring("\n      Can't use I/O APIC interrupts. Aborting.\n");
-        return;
-    }
+    // if (e1000_IRQ == 0xFF)
+    // {
+    //     printf("\n      Can't use I/O APIC interrupts. Aborting.\n");
+    //     return;
+    // }
 
     // Get the MAC address
     e1000_Get_Mac();
-    terminal_writestring(" - MAC: ");
+    printf(" - MAC: ");
     EthernetPrintMAC(mac_addr);
 
     // Read the control register and set (or unset) the appropriate bits to reset the NIC
@@ -174,7 +180,7 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
     e1000_TX_Init();
 
     // enable PCI bus mastering
-    PCI_EnableBusMastering(bus, slot, function);
+    // PCI_EnableBusMastering(bus, slot, function);
 
     // Setup an interrupt handler for this device
 
@@ -182,12 +188,14 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
     if (e1000_IRQ == 9 || e1000_IRQ == 11)
     {
         // Support IRQ sharing
-        Interrupts_Add_Shared_Handler(e1000_SharedInterruptHandler, e1000_IRQ);
+        printf("Hasre");
+        // Interrupts_Add_Shared_Handler(e1000_SharedInterruptHandler, e1000_IRQ);
     }
     else
     {
         // No irq sharing
-        Set_IDT_Entry((unsigned long)e1000_InterruptHandler, HARDWARE_INTERRUPTS_BASE + e1000_IRQ);
+        // Set_IDT_Entry((unsigned long)e1000_InterruptHandler, HARDWARE_INTERRUPTS_BASE + e1000_IRQ);
+        isr_register_interrupt_handler(IRQ_BASE+ e1000_IRQ,e1000_InterruptHandler);
 
         // Tell the PIC to enable the NIC's IRQ
         IRQ_Enable_Line(e1000_IRQ);
@@ -197,73 +205,66 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
     EthernetRegisterNIC_SendFunction(e1000_SendPacket);
     EthernetRegisterNIC_MAC(mac_addr);
 
-    terminal_writestring("\n     Requesting IP address via DHCP...\n");
+    printf("\n     Requesting IP address via DHCP...\n");
 
-    //ARP_SendRequest(IPv4_PackIP(10, 0, 2, 4), mac_addr);
+    ARP_SendRequest(IPv4_PackIP(192, 168, 0, 100), mac_addr);
     DHCP_Send_Discovery(mac_addr);
     
-    terminal_writestring("    e1000 driver initialized.\n");
+    printf("    e1000 driver initialized.\n");
 }
 
-void _declspec(naked) e1000_InterruptHandler()
+void e1000_InterruptHandler()
 {
-    _asm pushad;
-
-    ++interrupts_fired;
-
+    
     if (debugLevel)
-        terminal_writestring(" --------- e1000 interrupt fired! -------\n");
+        printf(" --------- e1000 interrupt fired! -------\n");
 
     // Get the interrupt status (This will also reset the isr status register)
     uint32_t isr;
     isr = e1000_Read_Register(REG_ICR);
 
     if (debugLevel)
-        kprintf("isr: 0x%lX\n", isr);
+        printf("isr: 0x%lX\n", isr);
 
     if (isr & IMS_RXT0)
         e1000_ReceivePacket();
 
     //e1000_Read_Register(REG_ICR);
 
-    PIC_sendEOI(HARDWARE_INTERRUPTS_BASE + e1000_IRQ);
+    // PIC_sendEOI(HARDWARE_INTERRUPTS_BASE + e1000_IRQ);
 
     if (debugLevel)
-        terminal_writestring(" --------- e1000 net interrupt done! -------\n");
+        printf(" --------- e1000 net interrupt done! -------\n");
 
-    _asm
-    {
-        popad
-        iretd
-    }
+   
 }
 
 bool e1000_SharedInterruptHandler(void)
 {
-    ++interrupts_fired;
+    // ++interrupts_fired;
 
-    if (debugLevel)
-        terminal_writestring(" --------- e1000 shared interrupt fired! -------\n");
+    // if (debugLevel)
+    //     printf(" --------- e1000 shared interrupt fired! -------\n");
 
-    // Get the interrupt status (This will also reset the isr status register)
-    uint32_t isr;
-    isr = e1000_Read_Register(REG_ICR);
+    // // Get the interrupt status (This will also reset the isr status register)
+    // uint32_t isr;
+    // isr = e1000_Read_Register(REG_ICR);
 
-    if (debugLevel)
-        kprintf("isr: 0x%lX\n", isr);
+    // if (debugLevel)
+    //     printf("isr: 0x%lX\n", isr);
 
-    if (isr & IMS_RXT0)
-        e1000_ReceivePacket();
+    // if (isr & IMS_RXT0)
+    //     e1000_ReceivePacket();
 
-    //e1000_Read_Register(REG_ICR);
+    // //e1000_Read_Register(REG_ICR);
 
-    if (debugLevel)
-        terminal_writestring(" --------- e1000 net interrupt done! -------\n");
+    // if (debugLevel)
+    //     printf(" --------- e1000 net interrupt done! -------\n");
 
-    if (isr)
-        return true;
+    // if (isr)
+    //     return true;
 
-    return false;
+    // return false;
 }
 
 uint32_t e1000_Read_Register(uint32_t regOffset)
@@ -276,18 +277,18 @@ void e1000_SendPacket(Ethernet_Header *packet, uint16_t dataSize)
 {
     if (dataSize > MAX_TX_PACKET)
     {
-        kprintf("TODO: Sending packet larger than %d bytes is unsupported\n", MAX_TX_PACKET);
+        printf("TODO: Sending packet larger than %d bytes is unsupported\n", MAX_TX_PACKET);
         return;
     }
 
     if (debugLevel)
-        terminal_writestring("e1000_SendPacket called\n");
+        printf("e1000_SendPacket called\n");
 
     // Determine which transmit descriptor we'll be using from the value of the tail register
     uint32_t index = e1000_Read_Register(REG_TDT);
 
     if(debugLevel)
-        kprintf("transmit descriptor index: %d\n", index);
+        printf("transmit descriptor index: %d\n", index);
 
     // TODO: (maybe) convert packet to a physical address and use it directly
 
@@ -311,7 +312,7 @@ void e1000_SendPacket(Ethernet_Header *packet, uint16_t dataSize)
     e1000_Write_Register(REG_TDT, index);
     
     if(debugLevel)
-        terminal_writestring("Packet sent\n");
+        printf("Packet sent\n");
 }
 
 void e1000_ReceivePacket()
@@ -319,7 +320,7 @@ void e1000_ReceivePacket()
     volatile uint32_t tail = e1000_Read_Register(REG_RDT);// % RX_DESCRIPTORS;
     
     if(debugLevel)
-        kprintf("tail %d", tail);
+        printf("tail %d", tail);
 
     // Read every packet received
     while (rxDescriptorList[lastReceiveTail].status & RDESC_STATUS_DESCRIPTOR_DONE)
@@ -336,7 +337,7 @@ void e1000_ReceivePacket()
         e1000_Write_Register(REG_RDT, ++tail);
         
         if(debugLevel)
-            kprintf("     %d\n", lastReceiveTail);
+            printf("     %d\n", lastReceiveTail);
 
         // Clear the interrupt
         e1000_Write_Register(REG_ICR, IMS_RXT0);
@@ -359,7 +360,7 @@ void e1000_RX_Init()
     int descLength = sizeof(RX_DESCRIPTOR) * RX_DESCRIPTORS;
 
     if (descLength % 128)
-        terminal_writestring("\nError: rx descriptor length imprperly calculated!");
+        printf("\nError: rx descriptor length imprperly calculated!");
 
     // Allocate the descriptor list (must be aligned on a 16-bit boundary)
     RX_DESCRIPTOR *descMemory = malloc(descLength + 15);
@@ -426,7 +427,7 @@ void e1000_TX_Init()
     uint32_t tdLength = TX_DESCRIPTORS * sizeof(TX_DESC_LEGACY);
     
     if (tdLength % 128 != 0)
-        terminal_writestring("Error: TDLEN isn't properly calculated!\n");
+        printf("Error: TDLEN isn't properly calculated!\n");
     
     e1000_Write_Register(REG_TDLEN, tdLength);
 
@@ -465,4 +466,40 @@ void e1000_Write_Register(uint32_t regOffset, uint32_t value)
 {
     volatile uint32_t *ptr = (uint32_t*)(e1000_mmAddress + regOffset);
     *ptr = value;
+}
+#define PIC1		    0x20		/* IO base address for master PIC */
+#define PIC2		    0xA0		/* IO base address for slave PIC */
+#define PIC1_COMMAND	PIC1
+#define PIC1_DATA	    (PIC1+1)
+#define PIC2_COMMAND	PIC2
+#define PIC2_DATA	    (PIC2+1)
+void IRQ_Enable_Line(unsigned char IRQline)
+{
+    uint16_t port;
+    uint8_t value;
+
+    if (IRQline < 8)
+    {
+        port = PIC1_DATA;
+    }
+    else
+    {
+        port = PIC2_DATA;
+        IRQline -= 8;
+
+        // Make sure IRQ2 of PIC1 is enabled or we'll never receive the interrupt from PIC2
+        value = inportb(PIC1_DATA) & ~(1 << 2);
+        outportb(PIC1_DATA, value);
+        io_wait();
+    }
+    value = inportb(port) & ~(1 << IRQline);
+    outportb(port, value);
+}
+static inline void io_wait(void)
+{
+    /* Port 0x80 is used for 'checkpoints' during POST. */
+    /* The Linux kernel seems to think it is free for use :-/ */
+    out_bytes(0x80, 0);
+    //asm volatile ("outb %%al, $0x80" : : "a"(0));
+    /* %%al instead of %0 makes no difference.  TODO: does the register need to be zeroed? */
 }

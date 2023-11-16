@@ -40,4 +40,16 @@ bool doChecksum(struct ACPISDTHeader *tableHeader);
 //   struct ACPISDTHeader h;
 //   uint32_t PointerToOtherSDT[(h.Length - sizeof(h)) / 4];
 // };
+unsigned int *acpiCheckRSDPtr(unsigned int *ptr);
+
+unsigned int *acpiGetRSDPtr(void);
+
+int acpiCheckHeader(unsigned int *ptr, char *sig);
+
+int acpiEnable(void);
+
+int initAcpi(void);
+
+void acpiPowerOff(void);
+
 #endif

@@ -64,6 +64,7 @@ void ARP_RegisterIP(uint32_t ip, char *macAddress)
 
 void ARP_SendRequest(uint32_t targetIP, uint8_t *sourceMAC)
 {
+    printf("arp packet\n");
     uint16_t packetSize = sizeof(ARP_IPv4);
     ARP_IPv4 *ipv4_packet;
 

@@ -48,6 +48,6 @@ typedef struct DHCP_HEADER
 #pragma pack(pop, 1)
 
 void DHCP_ProcessReply(DHCP_HEADER *reply, uint8_t *sourceMAC);
-void DHCP_Send_Discovery(MacAddress mac);
+void DHCP_Send_Discovery(uint8_t *sourceMAC);
 
 //void DHCP_Send_Request(uint8_t *sourceMAC);

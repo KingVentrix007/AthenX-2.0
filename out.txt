@@ -1174,7 +1174,7 @@ Symbol table '.symtab' contains 1343 entries:
   1170: 00104874   267 FUNC    GLOBAL DEFAULT    1 display_kernel_m[...]
   1171: 0011006a   102 FUNC    GLOBAL DEFAULT    1 fl_attach_media
   1172: 00424000     0 NOTYPE  GLOBAL DEFAULT    2 __kernel_data_se[...]
-  1173: 00120baf    40 FUNC    GLOBAL DEFAULT    1 kprintf
+  1173: 00120baf    40 FUNC    GLOBAL DEFAULT    1 printf
   1174: 001044d7    83 FUNC    GLOBAL DEFAULT    1 testRead
   1175: 001166e0   349 FUNC    GLOBAL DEFAULT    1 print_events
   1176: 0074cd04     0 NOTYPE  GLOBAL DEFAULT    5 _end

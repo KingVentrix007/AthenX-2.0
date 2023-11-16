@@ -4,7 +4,7 @@
 #include "../include/string.h"
 #include "../include/printf.h"
 // #include <stivale2.h>
-#define printf kprintf
+#define printf printf
 /*                                BASIC EXPLANATION
  *
  * virtual memory is a memory management technique that allows us to map virtual
@@ -158,13 +158,13 @@ void init_virt()
 
     // // /* limine mapped the kernel for us, but let's do it again */
     // virt_map_multi(kernel_page_map, 0, 0x8000000, 0, 0b11);
-    // // kprintf("[id map]");
+    // // printf("[id map]");
     // virt_map_multi(kernel_page_map, 0, 0x100000000, HIGHER_HALF, 0b11);
-    // // kprintf("[data]");
+    // // printf("[data]");
     // virt_map_multi(kernel_page_map, 0, 0x8000000, KERNEL_OFFS, 0b11);
-    // // kprintf("[kernel]");
+    // // printf("[kernel]");
 
     // virt_load_page_map((uint64_t)kernel_page_map);
 
-    // kprintf("[done]\n");
+    // printf("[done]\n");
 }

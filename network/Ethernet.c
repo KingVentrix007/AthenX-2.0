@@ -71,17 +71,18 @@ void EthernetSendPacket(Ethernet_Header *packet, uint16_t dataSize)
     // }
 
     // TODO: Support multiple NIC's and send this packet to the NIC owning the MAC in the packet
-    sendPacket(packet, dataSize);
+    e1000_SendPacket(packet, dataSize);
 }
 
 void EthernetPrintMAC(uint8_t *macAddress)
 {
+    // printf("\n");
     for (int i = 0; i < 5; ++i)
     {
-        printf("0x%x",macAddress[i]);
-        printf(':');
+        printf("%0x:",macAddress[i]);
+        
     }
-    printf("0x%x",macAddress[5]);
+    printf("%0x\n",macAddress[5]);
 }
 
 // we need to be passed the MAC, because the packet may have a broadcast address for destination
