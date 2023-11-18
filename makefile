@@ -65,9 +65,10 @@ libc:
 
 AthenX.bin: $(OBJ_FILES_C) $(OBJ_FILES_S) $(OBJ_FILES_ASM)
 	ld $(LDPARAMS) -o $@ $^
+	mv AthenX.bin out/
 
 # Output directory
-OUT_DIR = build
+OUT_DIR = out
 
 # Copy the output binary to the build directory
 COPY_OUTPUT = cp AthenX.bin $(OUT_DIR)/
@@ -101,3 +102,7 @@ user-c:
 	(cd userspace && make clean)
 
 # curlty i need to add cases for each indvil subdir, can u make it automatic, so if it finds a subdir it will siply search in it
+dis: $(OUT_DIR)/AthenX.bin
+	objdump -D -b binary -m i386 $< > disassembly.asm
+
+

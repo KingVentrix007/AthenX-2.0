@@ -68,7 +68,7 @@ if [ -f "$image_file" ]; then
   # sleep 5
   check_multiboot_header "AthenX.bin"
   # sleep 6
-  sudo cp "AthenX.bin" "/mnt/AthenX/tmp/AthenX.bin"
+  sudo cp "out/AthenX.bin" "/mnt/AthenX/tmp/AthenX.bin"
   sudo cp -r "/mnt/AthenX/" "inspect/"
   # sleep 5
   # sudo chroot /mnt/AthenX
@@ -163,7 +163,7 @@ else
   sudo cp -r "sysroot"/* /mnt/AthenX/
   # Copy your OS files and GRUB configuration
 
-  sudo cp AthenX.bin /mnt/AthenX/boot
+  sudo cp out/AthenX.bin /mnt/AthenX/boot
   check_multiboot_header "AthenX.bin"
   # sleep 6
   # Install GRUB to the MBR (Master Boot Record)
