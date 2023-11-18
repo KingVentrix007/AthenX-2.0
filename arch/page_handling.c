@@ -46,9 +46,9 @@ uint32_t nextPageDirectory; // TEMPTEMP where the next created page directory wi
 //     if (pages > paging4MPagesAvailable)
 //         pages = paging4MPagesAvailable;
 
-//     /*terminal_writestring("Need to allocate ");
+//     /*printf("Need to allocate ");
 //     terminal_print_int(pages);
-//     terminal_writestring(" pages.\n");*/
+//     printf(" pages.\n");*/
 
 //     uint32_t nextPage = pagingNextAvailableMemory / FOUR_MEGABYTES;
 

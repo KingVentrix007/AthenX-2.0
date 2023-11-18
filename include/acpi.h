@@ -30,6 +30,10 @@ struct ACPISDTHeader {
   uint32_t CreatorID;
   uint32_t CreatorRevision;
 };
+struct RSDT {
+  struct ACPISDTHeader h;
+  uint32_t PointerToOtherSDT[]; // Flexible array member, size is determined at runtime
+};
 bool doChecksum(struct ACPISDTHeader *tableHeader);
 //!XsdtPointer
 // struct XSDT {
@@ -51,5 +55,6 @@ int acpiEnable(void);
 int initAcpi(void);
 
 void acpiPowerOff(void);
-
+void initAcpi2(void);
+struct FACP* findFACP(struct ACPISDTHeader* rsdt);
 #endif

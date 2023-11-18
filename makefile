@@ -12,7 +12,7 @@ SCRIPTS_DIR = script
 HDR_DIR = include
 # Define source and object directory for each subdirectory
 OBJ_DIR = obj
-SRC_DIRS = arch kernel drivers fs libk ui utils install security drivers/net network
+SRC_DIRS = arch kernel drivers fs libk ui utils install security drivers/net network drivers/audio drivers/dma
 OBJ_DIRS = $(addprefix $(OBJ_DIR)/,$(SRC_DIRS))
 
 # Create object directories if they don't exist
@@ -56,7 +56,9 @@ run-script:
 	sudo (cd script && bash run.sh)
 run: AthenX.bin
 	bash ./run.sh
-	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -device e1000,netdev=n1 -netdev user,id=n1,net=192.168.0.1/24,tftp=/home/king/AthenXDev/tftp -object filter-dump,id=f1,netdev=n1,file=dump.dat -M hpet=on -serial stdio
+	qemu-system-i386 -name "INSTALLED" --no-reboot --no-shutdown -drive file=AthenX.img,format=raw -vga std -device intel-hda -device ac97 -device sb16  -m 4G -device e1000,netdev=n1 -netdev user,id=n1,net=192.168.0.1/24,tftp=/home/king/AthenXDev/tftp -object filter-dump,id=f1,netdev=n1,file=dump.dat -M hpet=on -serial stdio
+
+# qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw  -vga std -device intel-hda  -device ac97 -soundhw pcspk -m 4G -device e1000,netdev=n1 -netdev user,id=n1,net=192.168.0.1/24,tftp=/home/king/AthenXDev/tftp -object filter-dump,id=f1,netdev=n1,file=dump.dat -M hpet=on -serial stdio
 run-tap:
 	bash ./run.sh
 	qemu-system-i386 -name "INSTALLED" -drive file=AthenX.img,format=raw -vga std -device intel-hda -device ac97 -soundhw pcspk -m 4G -device e1000,netdev=n1 -netdev bridge,id=n1,br=Network\ Bridge -M hpet=on -serial stdio

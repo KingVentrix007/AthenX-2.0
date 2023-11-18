@@ -8,7 +8,7 @@ LIBS = libc/libc.a
 SUBDIRS := $(wildcard */)
 
 # Filter out any directories you want to exclude (if necessary)
-EXCLUDE_DIRS := libc/  test/ kilo/ edit/ tcc/
+EXCLUDE_DIRS := libc/  test/ kilo/ edit/ tcc/ tar/
 SUBDIRS := $(filter-out $(EXCLUDE_DIRS),$(SUBDIRS))
 
 # List of source files to compile in each subdirectory

@@ -656,3 +656,33 @@ int int_print(REGISTERS* reg)
         // printf("ss: %d\n", reg->ss);
 }
 
+void IRQ_Enable_Line(unsigned char IRQline)
+{
+    uint16_t port;
+    uint8_t value;
+
+    if (IRQline < 8)
+    {
+        port = PIC1_DATA;
+    }
+    else
+    {
+        port = PIC2_DATA;
+        IRQline -= 8;
+
+        // Make sure IRQ2 of PIC1 is enabled or we'll never receive the interrupt from PIC2
+        value = inportb(PIC1_DATA) & ~(1 << 2);
+        outportb(PIC1_DATA, value);
+        io_wait();
+    }
+    value = inportb(port) & ~(1 << IRQline);
+    outportb(port, value);
+}
+static inline void io_wait(void)
+{
+    /* Port 0x80 is used for 'checkpoints' during POST. */
+    /* The Linux kernel seems to think it is free for use :-/ */
+    out_bytes(0x80, 0);
+    //asm volatile ("outb %%al, $0x80" : : "a"(0));
+    /* %%al instead of %0 makes no difference.  TODO: does the register need to be zeroed? */
+}

@@ -150,6 +150,13 @@ Simply add any changes you want then and save them, then type 'make run' and wat
 * [ ] Port some games
 * [ ] Make some games
 * [ ] network drivers
+  * [X] DHCP
+  * [X] UDP
+  * [X] ARP
+  * [X] IPv4
+  * [ ] TCP
+  * [ ] HTTP
+  * [ ] HTTPS
 * [ ] Apps
   * [ ] web browser
   * [ ] chat application
@@ -204,6 +211,7 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
 * [OS](https://github.com/pritamzope/OS): I used A LOT of his code, ATA driver, VESA, FPU, etc
 * My mom:  she did all my editing and made sure my grammar was correct
 * [Incon8](https://icons8.com/):The smaller logos
+* [MyOS/codeTrevor](https://github.com/coderTrevor/MyOS/tree/master) I used his e1000 driver and his Networ kStack
 
 ## Images
 

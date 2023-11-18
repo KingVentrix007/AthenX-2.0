@@ -50,6 +50,7 @@
 #include "user.h"
 #include "mod.h"
 #include "qemu.h"
+#include "sb16.h"
 
 // #include "flanterm.h"
 // #include "fb.h"
@@ -282,7 +283,7 @@ void kmain(unsigned long magic, unsigned long addr) {
    
     gdt_init();
     idt_init();
-     init_serial(DEFAULT_COM_DEBUG_PORT);
+    init_serial(DEFAULT_COM_DEBUG_PORT);
     //
     //ata_get_drive_by_model
     set_scroll_mode(1);
@@ -292,7 +293,7 @@ void kmain(unsigned long magic, unsigned long addr) {
         //multi_boot_info = mboot_info;
         memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
         if (get_kernel_memory_map(&g_kmap, mboot_info) < 0) {
-            printf("error: failed to get kernel memory map\n");
+            printf_("error: failed to get kernel memory map\n");
             kassert(1,0,4);
             return;
         }
@@ -314,9 +315,10 @@ void kmain(unsigned long magic, unsigned long addr) {
         int x = 1280;
         int y = 768;
         
-         keyboard_init();
+        
         //kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
         int ret = display_init(0,x,y,32);
+        keyboard_init();
         printf("\nTotal memory size = %d",end-start);
         // char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
         ata_init();
@@ -435,23 +437,53 @@ void kmain(unsigned long magic, unsigned long addr) {
             // if (rsdp) {
             //     printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
             //     struct ACPISDTHeader* RSDT = (struct ACPISDTHeader*)rsdp->RsdtAddress;
-            //     // bool valid = doChecksum(RSDT);
-            //     // if(valid == TRUE)
-            //     // {
-            //     //     printf("Creator ID: %d\n",RSDT->CreatorID);
-            //     // }
-            //     // else
-            //     // {
-            //     //     printf("[ERROR]Invalid RSDT Table found\n");
-            //     // }
-            //     // //printf("Version: %d\n",rsdp->Revision);
+                
+            //     bool valid = doChecksum(RSDT);
+            //     if(valid == TRUE)
+            //     {
+            //         printf("Creator ID: %d\n",RSDT->CreatorID);
+            //     }
+            //     else
+            //     {
+            //         printf("[ERROR]Invalid RSDT Table found\n");
+            //     }
+            //     //printf("Version: %d\n",rsdp->Revision);
             
             //     // Access other information in the RSDP as needed
             // } else {
             //     printf("RSDP not found.\n");
             // }
-        initAcpi();
+        // initAcpi();
+        // acpiEnable();
+        
         timer_init();//!DO NOT PUT BEFORE INIT VESA
+        // sleep(10); 
+    //     SB16_Init();
+    //   uint16_t sampleRate = 44100;  // 44.1 kHz
+    // uint8_t sampleSize = 16;      // 16-bit sample size
+    //     uint32_t duration = 5000000;  // 5 seconds (in microseconds)
+
+    //     // Calculate the number of samples based on sample rate and duration
+    //     uint32_t numSamples = (sampleRate * duration) / 1000000;
+
+    //     // Allocate memory for the sound data (assuming 16-bit samples)
+    //     uint8_t* soundData = (uint8_t*)malloc(numSamples * (sampleSize / 8));
+
+    //     // Generate a simple sine wave for the sound data
+    //     for (uint32_t i = 0; i < numSamples; ++i) {
+    //         double t = (double)i / sampleRate;
+    //         double sineValue = 0.5 * sin(2.0 * PI * 440.0 * t);  // 440 Hz sine wave
+    //         int16_t sample = (int16_t)(sineValue * INT16_MAX);
+    //         memcpy(&soundData[i * (sampleSize / 8)], &sample, sampleSize / 8);
+    //     }
+
+    //     // Play the generated sound
+    //     SB16_Write(0xD1); // turn speaker on if it's off
+    //     SB16_Play(soundData, numSamples * (sampleSize / 8), 11025);
+
+    //     // Free the allocated memory
+    //     free(soundData);
+    //     sleep(10);
 
         // if(strstr(output,"Memory Configuration") != NULL)
         // {

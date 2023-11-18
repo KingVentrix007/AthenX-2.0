@@ -181,4 +181,8 @@ uint32_t get_ESI();
 
 // Function to get the value of EDI register
 uint32_t get_EDI();
+
+void IRQ_Enable_Line(unsigned char IRQline);
+
+static inline void io_wait(void);
 #endif

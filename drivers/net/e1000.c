@@ -29,8 +29,8 @@ uint32_t lastReceiveTail = 0;
 TX_DESC_LEGACY *txDescriptorList = 0;
 RX_DESCRIPTOR  *rxDescriptorList = 0;
 int debugLevel = 0;
-void IRQ_Enable_Line(unsigned char IRQline);
-static inline void io_wait(void);
+
+
 /*bool e1000_Get_IO_Base(uint8_t bus, uint8_t slot, uint8_t function)
 {
     bool ioAddrFound = false;
@@ -476,33 +476,4 @@ void e1000_Write_Register(uint32_t regOffset, uint32_t value)
 #define PIC1_DATA	    (PIC1+1)
 #define PIC2_COMMAND	PIC2
 #define PIC2_DATA	    (PIC2+1)
-void IRQ_Enable_Line(unsigned char IRQline)
-{
-    uint16_t port;
-    uint8_t value;
 
-    if (IRQline < 8)
-    {
-        port = PIC1_DATA;
-    }
-    else
-    {
-        port = PIC2_DATA;
-        IRQline -= 8;
-
-        // Make sure IRQ2 of PIC1 is enabled or we'll never receive the interrupt from PIC2
-        value = inportb(PIC1_DATA) & ~(1 << 2);
-        outportb(PIC1_DATA, value);
-        io_wait();
-    }
-    value = inportb(port) & ~(1 << IRQline);
-    outportb(port, value);
-}
-static inline void io_wait(void)
-{
-    /* Port 0x80 is used for 'checkpoints' during POST. */
-    /* The Linux kernel seems to think it is free for use :-/ */
-    out_bytes(0x80, 0);
-    //asm volatile ("outb %%al, $0x80" : : "a"(0));
-    /* %%al instead of %0 makes no difference.  TODO: does the register need to be zeroed? */
-}
