@@ -56,5 +56,6 @@ int initAcpi(void);
 
 void acpiPowerOff(void);
 void initAcpi2(void);
-struct FACP* findFACP(struct ACPISDTHeader* rsdt);
+struct FACP* findFACP(struct RSDT* rsdt);
+// struct DSDT* findDSDT(struct FACP* facp);
 #endif

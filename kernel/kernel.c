@@ -454,16 +454,18 @@ void kmain(unsigned long magic, unsigned long addr) {
             // } else {
             //     printf("RSDP not found.\n");
             // }
+        
+        
         // initAcpi();
         // acpiEnable();
-        
         timer_init();//!DO NOT PUT BEFORE INIT VESA
         reserve_irq(42);
+        
         // sleep(10); 
-        DMA_InitBuffer();
-        init_audio();
+        // DMA_InitBuffer();
+        // init_audio();
         // play_sound_file("/sys/sound.wav");
-        play_beep(10000);
+        // play_beep(10000);
    
     //     // Free the allocated memory
     //     free(soundData);

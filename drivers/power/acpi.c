@@ -1,53 +1,6 @@
 #include "../include/acpi.h"
 #include "../include/string.h"
 
-struct XSDP_t* find_rsdp(unsigned char* start, unsigned int length) {
-    for (unsigned int i = 0; i < length - sizeof(struct XSDP_t); i++) {
-        if (memcmp(start + i, RSDP_SIGNATURE, sizeof(RSDP_SIGNATURE) - 1) == 0) {
-            struct XSDP_t* rsdp = (struct XSDP_t*)(start + i);
-            // Checksum verification and other checks can be added here
-            return rsdp;
-        }
-    }
-    return NULL;
-}
-
-bool doChecksum(struct ACPISDTHeader *tableHeader)
-{
-    unsigned char sum = 0;
- 
-    for (int i = 0; i < tableHeader->Length; i++)
-    {
-        sum += ((char *) tableHeader)[i];
-    }
- 
-    return sum == 0;
-}
-
-
-// void *findFACP(void *RootSDT)
-// {
-//     struct RSDT *rsdt = (struct RSDT *) RootSDT;
-//     int entries = (rsdt->h.Length - sizeof(rsdt->h)) / 4;
- 
-//     for (int i = 0; i < entries; i++)
-//     {
-//         struct ACPISDTHeader *h = (struct ACPISDTHeader *) rsdt->PointerToOtherSDT[i];
-//         if (!strncmp(h->Signature, "FACP", 4))
-//             return (void *) h;
-//     }
- 
-//     // No FACP found
-//     return NULL;
-// }
-
-
-#include <stddef.h>
-#include <printf.h>
-#include <string.h>
-#include <io_ports.h>
-
-
 dword *SMI_CMD;
 byte ACPI_ENABLE;
 byte ACPI_DISABLE;
@@ -164,7 +117,6 @@ int acpiCheckHeader(unsigned int *ptr, char *sig)
 {
    if (memcmp(ptr, sig, 4) == 0)
    {
-      printf("cecking ptr(sig(%s))\n",sig);
       char *checkPtr = (char *) ptr;
       int len = *(ptr + 1);
       char check = 0;
@@ -244,138 +196,119 @@ int acpiEnable(void)
 //
 int initAcpi(void)
 {
-   // initAcpi2();
-   return 1;
-   // unsigned int *ptr = acpiGetRSDPtr();
-   //  printf("init acpi\n");
-   // // check if address is correct  ( if acpi is available on this pc )
-   // struct RSDPtr rsdp;
-   // uint32_t rsdt  = rsdp.RsdtAddress;
-   
-   // if (ptr != NULL && acpiCheckHeader(ptr, "RSDT") == 0)
-   // {
-   //    // the RSDT contains an unknown number of pointers to acpi tables
-   //    int entrys = *(ptr + 1);
-   //    entrys = (entrys-36) /4;
-   //    ptr += 36/4;   // skip header information
-   //    printf("looking for FACP(%d)\n",entrys);
-   //    while (0<entrys--)
-   //    {
-   //       printf("here");
-   //       // check if the desired table is reached
-        
-   //       if (acpiCheckHeader((unsigned int *) *ptr, "FACP") == 0)
-   //       {
-   //          entrys = -2;
-   //          struct FACP *facp = (struct FACP *) *ptr;
-   //          if (acpiCheckHeader((unsigned int *) facp->DSDT, "DSDT") == 0)
-   //          {
-   //             // search the \_S5 package in the DSDT
-   //             char *S5Addr = (char *) facp->DSDT +36; // skip header
-   //             int dsdtLength = *(facp->DSDT+1) -36;
-   //             while (0 < dsdtLength--)
-   //             {
-   //                if ( memcmp(S5Addr, "_S5_", 4) == 0)
-   //                   break;
-   //                S5Addr++;
-   //             }
-   //             // check if \_S5 was found
-   //             if (dsdtLength > 0)
-   //             {
-   //                // check for valid AML structure
-   //                if ( ( *(S5Addr-1) == 0x08 || ( *(S5Addr-2) == 0x08 && *(S5Addr-1) == '\\') ) && *(S5Addr+4) == 0x12 )
-   //                {
-   //                   S5Addr += 5;
-   //                   S5Addr += ((*S5Addr &0xC0)>>6) +2;   // calculate PkgLength size
+   unsigned int *ptr = acpiGetRSDPtr();
 
-   //                   if (*S5Addr == 0x0A)
-   //                      S5Addr++;   // skip byteprefix
-   //                   SLP_TYPa = *(S5Addr)<<10;
-   //                   S5Addr++;
+   // check if address is correct  ( if acpi is available on this pc )
+   if (ptr != NULL && acpiCheckHeader(ptr, "RSDT") == 0)
+   {
+      // the RSDT contains an unknown number of pointers to acpi tables
+      // int entrys = *(ptr + 1);
+      // entrys = (entrys-36) /4;
+      // ptr += 36/4;   // skip header information
+      struct RSDT *rsdt = ( struct RSDT *)ptr;
+      
+       struct FACP *facp = findFACP(rsdt);
+       if(facp == NULL)
+       {
+         printf("FACP ERROR\n");
+         return -1;
+       }
+       else
+       {
+            printf("FACP->%d\n",facp->Length);
+            // entrys = -2;
+               // struct FACP *facp = (struct FACP *) *ptr;
+            // struct DSDT *dsdt = findDSDT(facp);
+            struct ACPISDTHeader *dsdt = (struct ACPISDTHeader *) facp->DSDT;
+            if(doChecksum(dsdt) != true)
+            {
+               printf("dsdt invalid checksum\n");
+               return -1;
+            }
+            printf("DSDT->%s\n",dsdt->Signature);
+            
+            
+            
+            if (strstr(dsdt->Signature,"DSDT") != NULL)
+            {
+               printf("DSDT\n");
+               // search the \_S5 package in the DSDT
+               char *S5Addr = (char *) facp->DSDT+sizeof(struct ACPISDTHeader); // skip header
+               // printf("loaction = %d",strstr(S5Addr, "_S5_"));
+               int dsdtLength = dsdt->Length;
+               printf("adder->0x%x\n",S5Addr);
+               while (0 < dsdtLength--)
+               {
+                  if (memcmp(S5Addr, "_S5_", 4) == 0)
+                  {
+                     printf("found _S5_\n");
+                     break;
+                  }
+                    
+                  S5Addr++;
+               }
+               printf("adder->0x%x\n",S5Addr);
+               // check if \_S5 was found
+               if (dsdtLength > 0)
+               {
+                  printf("Finding AML struct\n");
+                  // check for valid AML structure
+                  if ( ( *(S5Addr-1) == 0x08 || ( *(S5Addr-2) == 0x08 && *(S5Addr-1) == '\\') ) && *(S5Addr+4) == 0x12 )
+                  {
+                     S5Addr += 5;
+                     S5Addr += ((*S5Addr &0xC0)>>6) +2;   // calculate PkgLength size
 
-   //                   if (*S5Addr == 0x0A)
-   //                      S5Addr++;   // skip byteprefix
-   //                   SLP_TYPb = *(S5Addr)<<10;
+                     if (*S5Addr == 0x0A)
+                        S5Addr++;   // skip byteprefix
+                     SLP_TYPa = *(S5Addr)<<10;
+                     S5Addr++;
 
-   //                   SMI_CMD = facp->SMI_CMD;
+                     if (*S5Addr == 0x0A)
+                        S5Addr++;   // skip byteprefix
+                     SLP_TYPb = *(S5Addr)<<10;
 
-   //                   ACPI_ENABLE = facp->ACPI_ENABLE;
-   //                   ACPI_DISABLE = facp->ACPI_DISABLE;
+                     SMI_CMD = facp->SMI_CMD;
 
-   //                   PM1a_CNT = facp->PM1a_CNT_BLK;
-   //                   PM1b_CNT = facp->PM1b_CNT_BLK;
+                     ACPI_ENABLE = facp->ACPI_ENABLE;
+                     ACPI_DISABLE = facp->ACPI_DISABLE;
+
+                     PM1a_CNT = facp->PM1a_CNT_BLK;
+                     PM1b_CNT = facp->PM1b_CNT_BLK;
                      
-   //                   PM1_CNT_LEN = facp->PM1_CNT_LEN;
+                     PM1_CNT_LEN = facp->PM1_CNT_LEN;
 
-   //                   SLP_EN = 1<<13;
-   //                   SCI_EN = 1;
+                     SLP_EN = 1<<13;
+                     SCI_EN = 1;
 
-   //                   return 0;
-   //                } else {
-   //                   printf("\\_S5 parse error.\n");
-   //                }
-   //             } else {
-   //                printf("\\_S5 not present.\n");
-   //             }
-   //          } else {
-   //             printf("DSDT invalid.\n");
-   //          }
-   //       }
-   //       else
-   //       {
-   //          printf("no RSDT\n");
-   //       }
-   //       ptr++;
-   //    }
-   //    printf("no valid FA present.\n");
-   // } else {
-   //    printf("no acpi.\n");
-   // }
+                     return 0;
+                  } else {
+                     printf("\\_S5 parse error.\n");
+                  }
+               } else {
+                  printf("\\_S5 not present.\n");
+               }
+            } else {
+               printf("DSDT invalid(%s).\n",dsdt->Signature);
+            }
+       }
+      // while (0<entrys--)
+      // {
+      //    // check if the desired table is reached
+      //    if (acpiCheckHeader((unsigned int *) *ptr, "FACP") == 0)
+      //    {
+            
+      //    }
+      //    ptr++;
+      // }
+      // printf("no valid FACP present.\n");
+   } else {
+      printf("no acpi.\n");
+   }
 
-   // return -1;
+   return -1;
 }
 
-void initAcpi2(void)
-{
-    unsigned int *ptr = acpiGetRSDPtr();
-    printf("init acpi\n");
 
-    // Check if address is correct (if ACPI is available on this PC)
-    struct RSDPtr *rsdp = (struct RSDPtr *)ptr;
-
-    // Access the RSDT
-    struct ACPISDTHeader* RSDT = (struct ACPISDTHeader*)rsdp->RsdtAddress;
-
-    // Find the FACP within the RSDT
-    struct FACP* facp = findFACP(RSDT);
-
-    if (facp != NULL) {
-        // Extract information from the FACP
-        // For example, you might want to check the DSDT pointer and PM1a_CNT_BLK address
-        dword *dsdtPointer = facp->DSDT;
-        dword *pm1aCntBlk = facp->PM1a_CNT_BLK;
-
-        // ... (do something with the information)
-    } else {
-        // FACP not found, handle the case accordingly
-        // ...
-    }
-}
-// void *findFACP(void *RootSDT)
-// {
-//     struct RSDT *rsdt = (struct RSDT *) RootSDT;
-//     int entries = (rsdt->h.Length - sizeof(rsdt->h)) / 4;
- 
-//     for (int i = 0; i < entries; i++)
-//     {
-//         struct ACPISDTHeader *h = (struct ACPISDTHeader *) rsdt->PointerToOtherSDT[i];
-//         if (!strncmp(h->Signature, "FACP", 4))
-//             return (void *) h;
-//     }
- 
-//     // No FACP found
-//     return NULL;
-// }
 
 void acpiPowerOff(void)
 {
@@ -386,35 +319,55 @@ void acpiPowerOff(void)
    acpiEnable();
 
    // send the shutdown command
-   outports((unsigned int) PM1a_CNT, SLP_TYPa | SLP_EN );
+   outportb((unsigned int) PM1a_CNT, SLP_TYPa | SLP_EN );
    if ( PM1b_CNT != 0 )
-      outports((unsigned int) PM1b_CNT, SLP_TYPb | SLP_EN );
+      outportb((unsigned int) PM1b_CNT, SLP_TYPb | SLP_EN );
 
    printf("acpi poweroff failed.\n");
 }
-
-struct FACP* findFACP(struct ACPISDTHeader* rsdt)
-{
-    // Check if the provided pointer is not NULL
-    if (rsdt == NULL) {
-        return NULL;
-    }
-
-    // Get the number of entries in the RSDT
-    int entryCount = (rsdt->Length - sizeof(struct ACPISDTHeader)) / sizeof(uint32_t);
-    uint32_t* entries = (uint32_t*)(rsdt + 1);  // Start of the table entries
-
-    // Iterate through the entries in the RSDT
-    for (int i = 0; i < entryCount; ++i) {
-        // Access each table using the entry addresses
-        struct ACPISDTHeader* currentTable = (struct ACPISDTHeader*)entries[i];
-
-        // Check if the current table has the FACP signature
-        if (currentTable->Signature == 0x50434146 /* 'FACP' in ASCII */) {
-            return (struct FACP*)currentTable;  // Found the FACP, return its pointer
-        }
-    }
-
-    // FACP not found in the RSDT
+struct FACP* findFACP(struct RSDT* rsdt) {
+  if (rsdt == NULL) {
+    // Invalid RSDT pointer
     return NULL;
+  }
+
+  // Iterate through the list of pointers to other SDTs
+  for (int i = 0; i < (rsdt->h.Length - sizeof(rsdt->h)) / 4; ++i) {
+    // Assuming the other SDT structures have a signature field
+    struct ACPISDTHeader* currentSDT = (struct ACPISDTHeader*)(rsdt->PointerToOtherSDT[i]);
+    
+    if (strncmp(currentSDT->Signature, "FACP", 4) == 0) {
+      // Found the FACP
+      return (struct FACP*)currentSDT;
+    }
+  }
+
+  // FACP not found
+  return NULL;
+}
+
+// struct DSDT* findDSDT(struct FACP* facp) {
+//   if (facp == NULL) {
+//     // Invalid FACP pointer
+//     return NULL;
+//   }
+
+//   // Assuming the FACP structure has a valid DSDT pointer
+//   uint32_t dsdtAddress = facp->DSDT;
+
+//   // Assuming dsdtAddress is a physical address
+//   struct DSDT* dsdt = (struct DSDT*)dsdtAddress;
+
+//   return dsdt;
+// }
+bool doChecksum(struct ACPISDTHeader *tableHeader)
+{
+    unsigned char sum = 0;
+ 
+    for (int i = 0; i < tableHeader->Length; i++)
+    {
+        sum += ((char *) tableHeader)[i];
+    }
+ 
+    return sum == 0;
 }
