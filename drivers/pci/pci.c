@@ -660,24 +660,10 @@ void initialize_registered_devices()
     {
         if(pci_registered_device_list[i].has_driver == true && pci_registered_device_list[i].is_running == false)
         {
-            if (pci_registered_device_list[i].header.interrupt_line + IRQ_BASE == 42 && pci_registered_device_list[i].header.device_id == 0x100e) {
+           
             // Read and print the old IRQ
-            uint32_t old_config = pci_read(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function, 0x3C);
-            uint8_t old_irq = (uint8_t)(old_config & 0x000000FF);
-            printf("Old IRQ: %u\n", old_irq);
-
-            // Set the new IRQ
-            uint8_t new_irq = 13;  // Change this to the desired IRQ line
-            uint32_t current_config = pci_read(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function, 0x3C);
-            current_config &= 0xFFFFFF00;  // Clear the lower 8 bits
-            current_config |= new_irq;
-
-            // Print the new IRQ
-            printf("New IRQ: %u\n", new_irq);
-            pci_registered_device_list[i].header.interrupt_line = new_irq;
-            // Update the IRQ
-            pci_write(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function, 0x3C, current_config);
-}
+            
+            
             printf("Calling %s initialization function \n", pci_registered_device_list[i].device_name);
             pci_registered_device_list[i].init_device(pci_registered_device_list[i].bus, pci_registered_device_list[i].device, pci_registered_device_list[i].function);
             pci_registered_device_list[i].is_running = true;
@@ -767,4 +753,33 @@ void PCI_SetCommand(uint8_t bus, uint8_t device, uint8_t function, uint16_t comm
 
     // write out the new dword
     pci_write(bus, device, function, COMMAND_OFFSET, dataDWORD);
+}
+
+int remap_irq(RegisteredPCIDeviceInfo *info, int irq)
+{
+    uint32_t old_config = pci_read(info->bus, info->device, info->function, 0x3C);
+        uint8_t old_irq = (uint8_t)(old_config & 0x000000FF);
+        printf("Old IRQ: %u\n", old_irq);
+
+        // Set the new IRQ
+        uint8_t new_irq = irq;//request_irq(pci_registered_device_list[i].device_id,old_irq);  // Change this to the desired IRQ line
+        // print_used_irq();
+        if(new_irq == -1)
+        {
+            printf("Error\n");
+        }
+        uint32_t current_config = pci_read(info->bus, info->device, info->function, 0x3C);
+        current_config &= 0xFFFFFF00;  // Clear the lower 8 bits
+        current_config |= new_irq;
+        
+        // Print the new IRQ
+        printf("New IRQ: %u\n", new_irq);
+        // 
+        info->header.interrupt_line = new_irq;
+        
+        // Update the IRQ
+        pci_write(info->bus, info->device, info->function, 0x3C, current_config);
+        uint32_t new_confg_read = pci_read(info->bus, info->device, info->function, 0x3C);
+        uint8_t new_irq_read = (uint8_t)(new_confg_read & 0x000000FF);
+        // printf("New2 IRQ: %u\n",new_irq_read);
 }

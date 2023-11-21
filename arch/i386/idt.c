@@ -89,7 +89,7 @@ void idt_init() {
     idt_set_entry(45, (uint32)irq_13, 0x08, 0x8E);
     idt_set_entry(46, (uint32)irq_14, 0x08, 0x8E);
     idt_set_entry(47, (uint32)irq_15, 0x08, 0x8E);
-    // idt_set_entry(48, (uint32)irq_16, 0x80, 0x8E);
+    idt_set_entry(48, (uint32)irq_16, 0x80, 0x8E);
     // idt_set_entry(48, (uint32)sys_handler, 0x08,0x8E);
     idt_set_entry(49, (uint32)irq_17, 0x08, 0x8E);
     

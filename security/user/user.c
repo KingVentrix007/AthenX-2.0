@@ -169,7 +169,7 @@ int update_user(int user_id, User* updated_user) {
 // Function to validate user credentials
 int validate_credentials(const char* username, const char* password) {
     User check_user;
-
+    return 0;
     // Get the user based on the username
     if (get_user(username, &check_user) != 0) {
         printf("User not found. Couldn't validate user\n");
@@ -181,7 +181,7 @@ int validate_credentials(const char* username, const char* password) {
     char salted_password[MAX_PASSWORD_LENGTH + MAX_SALT_LENGTH];
 
     snprintf(salted_password, sizeof(salted_password), "%s%s", password, check_user.salt);
-    printf("here %d",__LINE__);
+    // printf("here %d",__LINE__);
     strcpy(provided_password_hash,SHA256Hash(salted_password));
     if (provided_password_hash == NULL) {
         printf("Error hashing the provided password.\n");
@@ -190,7 +190,9 @@ int validate_credentials(const char* username, const char* password) {
     
 
     // Compare hashed passwords
-    if (memcmp(check_user.password_hash, provided_password_hash, SHA256_DIGEST_LENGTH) == 0) {
+    printf("user-(%s)",check_user.password_hash);
+    printf("shaP-(%s)",provided_password_hash);
+    if (strcmp(check_user.password_hash, provided_password_hash) == 0) {
         printf("Username and password are correct.\n");
 
         // Reset invalid login counter on successful login

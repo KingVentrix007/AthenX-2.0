@@ -103,6 +103,7 @@ if [ -f "$image_file" ]; then
 
   # sudo cp "grub/grub.cfg" "/mnt/AthenX/grub/grub.cfg"
   echo "Contents of the mount point and its subdirectories:"
+   sudo cp "../sound/sound.wav" /mnt/AthenX/sys/sound.wav
   ls -R /mnt/AthenX
 
   sudo cp "ui/cmdhandler.c" "/mnt/AthenX/root/cmd.c"
@@ -160,6 +161,7 @@ else
   # sudo mkdir -p /mnt/AthenX/user
   # sudo mkdir -p /mnt/AthenX/var/log
   # sudo mkdir -p /mnt/AthenX/man
+ 
   sudo cp -r "sysroot"/* /mnt/AthenX/
   # Copy your OS files and GRUB configuration
 

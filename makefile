@@ -12,7 +12,7 @@ SCRIPTS_DIR = script
 HDR_DIR = include
 # Define source and object directory for each subdirectory
 OBJ_DIR = obj
-SRC_DIRS = arch kernel emulator drivers fs libk ui utils installer security drivers/net network drivers/audio drivers/dma
+SRC_DIRS = arch kernel emulator drivers fs libk ui utils installer security drivers/net network drivers/audio drivers/dma hal
 OBJ_DIRS = $(addprefix $(OBJ_DIR)/,$(SRC_DIRS))
 
 # Create object directories if they don't exist
@@ -78,7 +78,7 @@ run-script:
 
 run: AthenX.bin
 	bash ./run.sh
-	qemu-system-i386 -name "INSTALLED" --no-reboot --no-shutdown -drive file=AthenX.img,format=raw -vga std -device intel-hda -device ac97 -device sb16  -m 4G -device e1000,netdev=n1 -netdev user,id=n1,net=192.168.0.1/24,tftp=/home/king/AthenXDev/tftp -object filter-dump,id=f1,netdev=n1,file=dump.dat -M hpet=on -serial stdio
+	qemu-system-i386 -name "INSTALLED" --no-reboot --no-shutdown -drive file=AthenX.img,format=raw -vga std -device sb16 -m 4G -device e1000,netdev=n1 -netdev user,id=n1,net=192.168.0.1/24,tftp=/home/king/AthenXDev/tftp -object filter-dump,id=f1,netdev=n1,file=dump.dat -M hpet=on -serial stdio
 
 run-tap:
 	bash ./run.sh

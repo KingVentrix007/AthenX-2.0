@@ -9,7 +9,18 @@ uint8_t sb16VersionMinor;
 uint8_t sb16IRQ = 5;    // TODO: provide some way to configure the SB16 IRQ
 uint8_t sb16_8bitDMAchannel = 1; // TODO: Make these configurable as well
 uint8_t sb16_16bitDMAchannel = 5;
-int debugLevelSB16 = 1;
+int debugLevelSB16 = 0;
+void readIRQ(uint16 port) {
+    // Read the IRQ value from the specified port
+    uint8_t irq = inportb(port);
+
+    // Print out the IRQ value
+    printf("IRQ Read: 0x%X\n", irq);
+}
+bool sb16_present()
+{
+    return sb16Present;
+}
 bool SB16_Reset(void)
 {
     sb16Present = false;
@@ -37,7 +48,7 @@ bool SB16_Reset(void)
 
 void SB16_Init(void)
 {
-    printf("SB16 driver is looking for a SoundBlaster compatible card...\n");
+    // printf("SB16 driver is looking for a SoundBlaster compatible card...\n");
 
     sb16BaseAddress = SB16_BASE0;
     
@@ -65,16 +76,16 @@ void SB16_Init(void)
     sb16VersionMajor = SB16_Read();
     sb16VersionMinor = SB16_Read();
 
-    printf("SoundBlaster 16 found at ");
-    printf("0x%x",sb16BaseAddress);
-    printf(", DSP Version ");
-    printf("%d",sb16VersionMajor);
-    printf('.');
-    printf("%d",sb16VersionMinor);
-    printf(", initialized.\n");
-
+    printf("SoundBlaster 16 found\n");
+    // printf("0x%x",sb16BaseAddress);
+    // printf(", DSP Version ");
+    // printf("%d",sb16VersionMajor);
+    // printf('.');
+    // printf("%d",sb16VersionMinor);
+    // printf(", initialized.\n");
+    readIRQ(MIXER_ADDR);
     // Add an interrupt handler for the SB16
-    printf("IRQ->%d\n",IRQ_BASE + sb16IRQ);
+    // printf("IRQ->%d\n",IRQ_BASE + sb16IRQ);
     isr_register_interrupt_handler(IRQ_BASE + sb16IRQ,SB16_Interrupt_Handler);
     // Set_IDT_Entry((unsigned long), );
 
@@ -83,10 +94,9 @@ void SB16_Init(void)
 }
 
 // TODO: Support various methods of playback - 8/16-bit, mono-stereo, etc...
-void SB16_Play(uint8_t *soundData, uint32_t sampleSize, uint16_t sampleRate)
-{
+// void SB16_Play(uint8_t *soundData, uint32_t sampleSize, uint16_t sampleRate)
+void SB16_Play( uint8_t* soundData, uint32_t sampleSize, uint16_t sampleRate) {
     //SB16_SetMixerSettings();
-
 
     // determine length of sample to send over DMA
     uint32_t sendLength = sampleSize;
@@ -96,9 +106,9 @@ void SB16_Play(uint8_t *soundData, uint32_t sampleSize, uint16_t sampleRate)
     if (debugLevelSB16)
     {
         printf("Playing ");
-        printf("%d",sendLength);
+        printf("%d", sendLength);
         printf(" byte sample at ");
-        printf("%d",sampleRate);
+        printf("%d", sampleRate);
         printf(" hz.\n");
     }
 
@@ -110,12 +120,12 @@ void SB16_Play(uint8_t *soundData, uint32_t sampleSize, uint16_t sampleRate)
     // Disable DMA channel while programming it
     DMA_DisableChannel(sb16_8bitDMAchannel);
 
-    // Set DMA modes
-    DMA_SetMode(sb16_8bitDMAchannel,
+    // Set DMA modes for 16-bit operation
+    DMA_SetMode(sb16_16bitDMAchannel,
                 DMA_MODE_SINGLE_MODE | DMA_MODE_ADDRESS_INC | DMA_MODE_SINGLE_CYCLE | DMA_MODE_TRANSFER_READ);
 
     // Clear Flip-Flop
-    DMA_ClearFlipFlop(sb16_8bitDMAchannel);
+    DMA_ClearFlipFlop(sb16_16bitDMAchannel);
 
     // Set the DMA buffer location
     // We only have one DMA buffer right now, but that may change in the future
@@ -127,7 +137,7 @@ void SB16_Play(uint8_t *soundData, uint32_t sampleSize, uint16_t sampleRate)
     if (debugLevelSB16)
     {
         printf("buffer: \n");
-        printf("0x%x",DMA_Buffer);
+        printf("0x%x", DMA_Buffer);
         printf("\n");
     }
 
@@ -137,33 +147,32 @@ void SB16_Play(uint8_t *soundData, uint32_t sampleSize, uint16_t sampleRate)
         memset((void *)((uint32_t)DMA_Buffer + sendLength), 0, DMA_BUFFER_SIZE - sendLength);
     }
 
-    DMA_SetBuffer(sb16_8bitDMAchannel, DMA_Buffer);
+    DMA_SetBuffer(sb16_16bitDMAchannel, DMA_Buffer);
 
-    DMA_SetTransferLength(sb16_8bitDMAchannel, sendLength);
+    DMA_SetTransferLength(sb16_16bitDMAchannel, sendLength / 2);  // Adjust for 16-bit samples
     
     // enable interrupts
     asm("sti");
     // enable DMA channel
-    DMA_EnableChannel(sb16_8bitDMAchannel);
+    DMA_EnableChannel(sb16_16bitDMAchannel);  // Use the 16-bit DMA channel
 
     // Set output sample rate
     SB16_Write(DSP_CMD_OUTPUT_RATE);
     SB16_Write(sampleRate >> 8);    // high byte of sampleRate
     SB16_Write(sampleRate & 0xFF);  // low byte of sampleRate
 
-    // set 8-bit, mono output
+    // set 16-bit, mono output
 
     // Write the command byte
-    SB16_Write(DSP_IO_CMD_8BIT | DSP_IO_CMD_SINGLE_CYCLE | DSP_IO_CMD_OUTPUT | DSP_IO_CMD_FIFO_ON);   // 8-bit, single cycle, FIFO on
+    SB16_Write(DSP_IO_CMD_16BIT | DSP_IO_CMD_SINGLE_CYCLE | DSP_IO_CMD_OUTPUT | DSP_IO_CMD_FIFO_ON);   // 16-bit, single cycle, FIFO on
 
     // Write the mode byte
-    SB16_Write(DSP_XFER_MODE_MONO | DSP_XFER_MODE_UNSIGNED);   // Mono, unsigned
+    SB16_Write(DSP_XFER_MODE_MONO | DSP_XFER_MODE_SIGNED);   // Mono, signed for 16-bit
 
     // Send transfer length to SB16
     SB16_Write((sendLength - 1) & 0xFF);            // Send low byte
     SB16_Write((uint8_t)((sendLength - 1) >> 8));   // followed by high byte
 }
-
 uint8_t SB16_Read()
 {
     // TODO: timeout after a while

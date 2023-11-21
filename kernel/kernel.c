@@ -50,7 +50,7 @@
 #include "user.h"
 #include "mod.h"
 #include "qemu.h"
-#include "sb16.h"
+#include "sound.h"
 
 // #include "flanterm.h"
 // #include "fb.h"
@@ -283,6 +283,7 @@ void kmain(unsigned long magic, unsigned long addr) {
    
     gdt_init();
     idt_init();
+    init_irq_manager();
     init_serial(DEFAULT_COM_DEBUG_PORT);
     //
     //ata_get_drive_by_model
@@ -457,33 +458,16 @@ void kmain(unsigned long magic, unsigned long addr) {
         // acpiEnable();
         
         timer_init();//!DO NOT PUT BEFORE INIT VESA
+        reserve_irq(42);
         // sleep(10); 
-    //     SB16_Init();
-    //   uint16_t sampleRate = 44100;  // 44.1 kHz
-    // uint8_t sampleSize = 16;      // 16-bit sample size
-    //     uint32_t duration = 5000000;  // 5 seconds (in microseconds)
-
-    //     // Calculate the number of samples based on sample rate and duration
-    //     uint32_t numSamples = (sampleRate * duration) / 1000000;
-
-    //     // Allocate memory for the sound data (assuming 16-bit samples)
-    //     uint8_t* soundData = (uint8_t*)malloc(numSamples * (sampleSize / 8));
-
-    //     // Generate a simple sine wave for the sound data
-    //     for (uint32_t i = 0; i < numSamples; ++i) {
-    //         double t = (double)i / sampleRate;
-    //         double sineValue = 0.5 * sin(2.0 * PI * 440.0 * t);  // 440 Hz sine wave
-    //         int16_t sample = (int16_t)(sineValue * INT16_MAX);
-    //         memcpy(&soundData[i * (sampleSize / 8)], &sample, sampleSize / 8);
-    //     }
-
-    //     // Play the generated sound
-    //     SB16_Write(0xD1); // turn speaker on if it's off
-    //     SB16_Play(soundData, numSamples * (sampleSize / 8), 11025);
-
+        DMA_InitBuffer();
+        init_audio();
+        // play_sound_file("/sys/sound.wav");
+        play_beep(10000);
+   
     //     // Free the allocated memory
     //     free(soundData);
-    //     sleep(10);
+        // sleep(10);
 
         // if(strstr(output,"Memory Configuration") != NULL)
         // {
@@ -601,9 +585,12 @@ done:
 
 
 
-
+#define NO_PASSWORD
 int login(int skip)
 {
+    #ifdef NO_PASSWORD
+    return 0;
+    #endif
     set_scroll_mode(0);
     FILE *fp = fopen("/sec/user","r");
     if(get_file_size(fp) <= 1)

@@ -81,7 +81,9 @@
         "intrin.h": "c",
         "console.h": "c",
         "ipv4.h": "c",
-        "isa_dma.h": "c"
+        "isa_dma.h": "c",
+        "sb16.h": "c",
+        "sound.h": "c"
     },
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here

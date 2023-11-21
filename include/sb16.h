@@ -95,4 +95,5 @@ void SB16_SetMixerSettings(void);
 
 void SB16_Write(uint8_t data);
 
+bool sb16_present();
 #endif

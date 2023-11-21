@@ -184,5 +184,40 @@ uint32_t get_EDI();
 
 void IRQ_Enable_Line(unsigned char IRQline);
 
+
 static inline void io_wait(void);
+/**
+ * Function Name: init_irq_manager
+ * Description: Initialize the IRQ manager and set up the data structures.
+ */
+void init_irq_manager();
+
+/**
+ * Function Name: request_irq
+ * Description: Request an IRQ for a device. If the preferred IRQ is available,
+ *              assign it; otherwise, find and assign an available IRQ.
+ *
+ * Parameters:
+ *   device_id (int) - The ID of the device requesting the IRQ.
+ *   preferred_irq (int) - The preferred IRQ requested by the device.
+ *
+ * Return:
+ *   int - The assigned IRQ.
+ */
+int request_irq(int device_id, int preferred_irq);
+
+
+/**
+ * Function Name: release_irq
+ * Description: Release an IRQ when a device is done using it.
+ *
+ * Parameters:
+ *   irq (int) - The IRQ to release.
+ */
+void release_irq(int irq);
+
+
+int reserve_irq(int irq_to_reserve);
+
+int print_used_irq();
 #endif

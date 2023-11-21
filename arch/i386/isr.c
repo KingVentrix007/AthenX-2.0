@@ -17,6 +17,7 @@
 #include "../userspace/libc/include/syscall.h"
 // For both exceptions and irq interrupt
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
+static int used_irqs[NO_INTERRUPT_HANDLERS];
 int isr_count = 0;
 volatile uint32_t *syscall_return = 0;
 // for more details, see Intel manual -> Interrupt & Exception Handling
@@ -62,6 +63,8 @@ void isr_register_interrupt_handler(int num, ISR handler) {
     printf_("IRQ %d registered\n", num);
     if (num < NO_INTERRUPT_HANDLERS)
         g_interrupt_handlers[num] = handler;
+        used_irqs[num-IRQ_BASE] = handler;
+
 }
 
 /*
@@ -658,6 +661,7 @@ int int_print(REGISTERS* reg)
 
 void IRQ_Enable_Line(unsigned char IRQline)
 {
+    printf("LINE = %d(0x%x)",IRQline,IRQline);
     uint16_t port;
     uint8_t value;
 
@@ -677,6 +681,7 @@ void IRQ_Enable_Line(unsigned char IRQline)
     }
     value = inportb(port) & ~(1 << IRQline);
     outportb(port, value);
+    printf("\nLINE(2) = %d(0x%x)\n",IRQline,IRQline);
 }
 static inline void io_wait(void)
 {
@@ -685,4 +690,61 @@ static inline void io_wait(void)
     out_bytes(0x80, 0);
     //asm volatile ("outb %%al, $0x80" : : "a"(0));
     /* %%al instead of %0 makes no difference.  TODO: does the register need to be zeroed? */
+}
+void init_irq_manager() {
+    // Initialize the used_irqs array to mark all IRQs as available.
+    for (int i = 0; i < NO_INTERRUPT_HANDLERS; ++i) {
+        used_irqs[i] = 0;  // 0 indicates an available IRQ.
+    }
+}
+
+int request_irq(int device_id, int preferred_irq) {
+    // Check if the preferred IRQ is available.
+    if (used_irqs[preferred_irq] == 0) {
+        printf("irq %d is free\n",preferred_irq);
+        // Preferred IRQ is available, mark it as used.
+        used_irqs[preferred_irq] = device_id;
+        return preferred_irq;
+    }
+
+    // Preferred IRQ is not available, find the next available IRQ.
+    for (int i = preferred_irq; i < NO_INTERRUPT_HANDLERS; ++i) {
+        if (used_irqs[i] == 0) {
+            // Found an available IRQ, mark it as used.
+            used_irqs[i] = device_id;
+            return i;
+        }
+    }
+
+    // No available IRQ found, return a negative value to indicate failure.
+    return -1;
+}
+
+void release_irq(int irq) {
+    // Mark the released IRQ as available.
+    used_irqs[irq] = 0;
+}
+
+int reserve_irq(int irq_to_reserve) {
+    irq_to_reserve = irq_to_reserve-IRQ_BASE;
+    // Check if the specified IRQ is available.
+    if (used_irqs[irq_to_reserve] == 0) {
+        // The specified IRQ is available, mark it as reserved.
+        used_irqs[irq_to_reserve] = -1;  // Using -1 to indicate a reserved IRQ.
+        return 0; // Successful reservation
+    } else {
+        // The specified IRQ is already reserved.
+        return -1; // Failure to reserve
+    }
+}
+int print_used_irq()
+{
+    for (size_t i = 0; i < NO_INTERRUPT_HANDLERS; i++)
+    {
+        if(used_irqs[i] != 0)
+        {
+            printf("IRQ %d(%d) is used\n",i,i+IRQ_BASE);
+        }
+    }
+    
 }

@@ -146,22 +146,22 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
     //printf("     Base Address: 0x%lX", e1000_base_port);
 
     // Map the MMIO in the page table
-    uint32_t mmioPage = e1000_mmAddress / FOUR_MEGABYTES;
+    // uint32_t mmioPage = e1000_mmAddress / FOUR_MEGABYTES;
     // pageDir[mmioPage] = ((mmioPage * FOUR_MEGABYTES)
                         //  | DIRECTORY_ENTRY_PRESENT | DIRECTORY_ENTRY_USER_ACCESSIBLE | DIRECTORY_ENTRY_WRITABLE | DIRECTORY_ENTRY_4MB);
 
     // get the IRQ
     RegisteredPCIDeviceInfo *device_info = return_registered_pci_device(bus,slot,function);
-    PCIDevice *di = PCI_search_device(device_info->vendor_id,device_info->device_id);
-    e1000_IRQ = di->IRQ;
-    printf(" - IRQ %d", e1000_IRQ);
+    // PCIDevice *di = PCI_search_device(device_info->vendor_id,device_info->device_id);
+    e1000_IRQ = device_info->header.interrupt_line;
+    printf(" - IRQ %d(0x%x)", e1000_IRQ,e1000_IRQ);
 
     // make sure an IRQ line is being used
-    // if (e1000_IRQ == 0xFF)
-    // {
-    //     printf("\n      Can't use I/O APIC interrupts. Aborting.\n");
-    //     return;
-    // }
+    if (e1000_IRQ == 0xFF)
+    {
+        printf("\n      Can't use I/O APIC interrupts. Aborting.\n");
+        return;
+    }
 
     // Get the MAC address
     e1000_Get_Mac();
@@ -188,21 +188,25 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
     // Setup an interrupt handler for this device
 
     // Are we using IRQ 9 or 11?
-    if (e1000_IRQ == 9 || e1000_IRQ == 11)
+    // if (e1000_IRQ == 9 || e1000_IRQ == 11)
+    // {
+    //     // Support IRQ sharing
+    //     printf("Hasre");
+    //     // Interrupts_Add_Shared_Handler(e1000_SharedInterruptHandler, e1000_IRQ);
+    // }
+    
+    if(e1000_IRQ == 10)
     {
-        // Support IRQ sharing
-        printf("Hasre");
-        // Interrupts_Add_Shared_Handler(e1000_SharedInterruptHandler, e1000_IRQ);
+        remap_irq(device_info,13);
+        e1000_IRQ = 13;
     }
-    else
-    {
         // No irq sharing
         // Set_IDT_Entry((unsigned long)e1000_InterruptHandler, HARDWARE_INTERRUPTS_BASE + e1000_IRQ);
-        isr_register_interrupt_handler(IRQ_BASE+ e1000_IRQ,e1000_InterruptHandler);
-
+    isr_register_interrupt_handler(IRQ_BASE+ e1000_IRQ,e1000_InterruptHandler);
+    printf("e1000_IRQ = %d",e1000_IRQ);
         // Tell the PIC to enable the NIC's IRQ
-        IRQ_Enable_Line(e1000_IRQ);
-    }
+    IRQ_Enable_Line(e1000_IRQ);
+    
 
     // Register this NIC with the ethernet subsystem
     EthernetRegisterNIC_SendFunction(e1000_SendPacket);
@@ -218,7 +222,7 @@ void e1000_Net_Init(uint8_t bus, uint8_t slot, uint8_t function)
 
 void e1000_InterruptHandler()
 {
-    
+    printf("e1000 fired\n");
     if (debugLevel)
         printf(" --------- e1000 interrupt fired! -------\n");
 
