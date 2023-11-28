@@ -1,4 +1,13 @@
 
+/**
+ * @file kernel.c
+ * @brief This file is the main code for the OS.
+ *
+ * Detailed description of the contents and purpose of the file.
+ *
+ * @author Tristan Kuhn
+ * @date 2023-11-28
+ */
 #include "../include/fat_filelib.h"
 #include "../include/fat32.h"
 #include "../include/installer.h"
@@ -456,136 +465,6 @@ done:
     }
 }
 
-
-int login(int skip)
-{
-    #ifdef NO_PASSWORD
-    return 0;
-    #endif
-    
-    set_scroll_mode(0);
-    
-    FILE *fp = fopen("/sec/user","r");
-    if(get_file_size(fp) <= 1)
-    {   
-        fclose(fp);
-        printf("NO USERS\n");
-        char *new_home = "/home/tristan";
-        User tristan = create_user("Tristan Kuhn", "tristan", "/home/tristan",
-                               "/sys/shell", 1, "tristanjkuhn007@gmail.com",
-                               "/home/tristan/config.conf", "123");
-        add_user(&tristan);
-    }
-    else
-    {
-        fclose(fp);
-    }
-    
-    char username[100] = {0};
-    char password[100] = {0};
-    memset(username,0,sizeof(username));
-    username[0] = '\0';
-    memset(password,0,sizeof(password));
-    password[0] = '\0';
-    printf("Enter username: ");
-    
-    while (1)
-    {
-         char *c = kb_getchar_w();
-         if(c == '\b')
-            {
-                if(backspace(username))
-                {
-                    printf_("\b");
-                }
-                else
-                {
-                    ///beep();
-                }
-            }
-            else if (c == '\n')
-            {
-                break;
-            }
-            else if (c == '\0')
-            {
-                //DEBUG("NULL");
-                //beep();
-            }
-            else if((int)c != 0x48 && (int)c != 0x50 && (int)c != 0x4D && (int)c != 0x4B )
-            {
-                char* s;
-                s = ctos(s, c);
-                printf(s);
-                append(username,c);
-            }
-            else
-            {
-            }
-    }
-    
-    #define OVERRIDE
-    #ifdef OVERRIDE
-    if(strcmp(username,"override") == 0 || strcmp(username,"over") == 0)
-    {
-        return 1;
-    }
-    #endif
-    
-    printf("\nEnter password: ");
-    
-    while (1)
-    {
-         char *c = kb_getchar_w();
-         if(c == '\b')
-            {
-                if(backspace(password))
-                {
-                    printf_("\b");
-                }
-                else
-                {
-                    ///beep();
-                }
-            }
-            else if (c == '\n')
-            {
-                break;
-            }
-            else if (c == '\0')
-            {
-                //DEBUG("NULL");
-                //beep();
-            }
-            else if(c != '\0')
-            {
-                char* s;
-                s = ctos(s, c);
-                printf("*");
-                append(password,c);
-            }
-            else
-            {
-            }
-    }
-    
-    printf("\n");
-    
-    if(validate_credentials(username,password) == 0 )
-    {
-        User user;
-        get_user(username,&user);
-        printf("home->%s\n",user.home_dir);
-        fl_createdirectory(user.home_dir);
-        set_cwd(user.home_dir);
-        return 1;
-    }
-    else
-    {
-        printf("invalid\n");
-        return -1;
-    }
-}
 /**
  * @brief User login function.
  *

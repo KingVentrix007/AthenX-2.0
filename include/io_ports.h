@@ -26,12 +26,12 @@ void outports(uint16 port, uint16 data);
 /**
  * read 4 bytes(long) from given port number
  */
-uint32 inportl(uint16 port);
+uint32_t inportl(uint16 port);
 
 /**
  * write given 4 bytes(long) to given port number
  */
-void outportl(uint16 port, uint32 data);
+void outportl(uint16_t port, uint32_t data);
 uint8_t scan(void);
 void out_bytes(uint16_t port, uint8_t val);
 #endif

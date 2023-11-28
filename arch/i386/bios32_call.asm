@@ -15,6 +15,7 @@ section .text
     global bios32_int_number_ptr ; bios interrupt number to be called
 
 ; 32 bit protected mode
+
 BIOS32_START:use32
     pusha
     ; save current esp to edx

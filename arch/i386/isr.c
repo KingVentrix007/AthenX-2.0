@@ -1,4 +1,17 @@
-// filename: isr.c
+/** 
+ * @file isr.c 
+ * @brief Interrupt Service Routines and System Calls 
+ * @author KingVentrix007 
+ * @date <date> 
+ * @license GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.en.html) 
+ * 
+ * @details This file contains the implementation of Interrupt Service Routines (ISRs), system calls, and related functions. 
+ * It includes functions for registering interrupt handlers, handling exceptions and interrupts, stack unwinding, printing registers, and extracting local variables. 
+ * The code also includes functions for managing interrupt requests (IRQs) and reserving IRQs. 
+ * 
+ * @note If you choose to use the GNU GPLv3 license, please ensure that your project complies with the terms of the license. 
+ */ 
+ 
 #include "../include/keyboard.h"
 #include "../include/printf.h"
 #include "../include/string.h"

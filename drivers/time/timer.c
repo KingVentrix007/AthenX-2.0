@@ -1,4 +1,13 @@
 
+/**
+ * @file timer.c
+ * @brief This file implements low-level timer functionality.
+ *
+ * Detailed description of the contents and purpose of the file.
+ *
+ * @author Tristan Kuhn
+ * @date 2023-11-28
+ */
 #include "../include/timer.h"
 #include "../include/debug.h"
 #include "../include/console.h"
@@ -37,16 +46,38 @@ void timer_set_frequency(uint16 f) {
 }
 
 
+/**
+ * @brief Timer handler function.
+ *
+ * This function is the handler for the timer interrupt. It is called whenever the timer interrupt is triggered.
+ *
+ * @param r Pointer to the register state at the time of the interrupt.
+ *
+ * @details The function performs the following steps:
+ * 1. Calls FUNC_ADDR_NAME() macro to log the function address and name for debugging purposes.
+ * 2. Increments the global variable g_ticks to keep track of the number of timer interrupts.
+ * 3. Iterates through the array of TIMER_FUNC_ARGS structures to check if any timer functions need to be executed.
+ * 4. If the timeout value of a TIMER_FUNC_ARGS structure is 0, it means the timer function is not active, so the loop continues to the next iteration.
+ * 5. If the timeout value is not 0 and the current value of g_ticks is a multiple of the timeout value, the corresponding timer function is executed.
+ *
+ * @note The timer functions are stored in the g_timer_function_manager.functions array, and the corresponding arguments are stored in the g_timer_function_manager.func_args array.
+ * The maximum number of timer functions is defined by MAXIMUM_TIMER_FUNCTIONS.
+ */
 void timer_handler(REGISTERS* r) {
-    FUNC_ADDR_NAME(&timer_handler,1,"T");
+    FUNC_ADDR_NAME(&timer_handler, 1, "T");
+
     uint32 i;
     TIMER_FUNC_ARGS *args = NULL;
     g_ticks++;
+
     //printf("timer triggered at frequency %d\n", g_ticks);
+
     for (i = 0; i < MAXIMUM_TIMER_FUNCTIONS; i++) {
         args = &g_timer_function_manager.func_args[i];
+
         if (args->timeout == 0)
             continue;
+
         if ((g_ticks % args->timeout) == 0) {
             g_timer_function_manager.functions[i](args);
         }
