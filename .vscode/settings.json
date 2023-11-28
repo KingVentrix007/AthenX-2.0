@@ -88,7 +88,8 @@
     "code-runner.executorMap": {
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here
     },
-    "vscord.enabled": true
+    "vscord.enabled": true,
+    "editor.inlineSuggest.showToolbar": "onHover"
     
    
     
