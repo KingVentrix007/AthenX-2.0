@@ -56,6 +56,16 @@
 // #include "fb.h"
 // #define STB_IMAGE_IMPLEMENTATION
 // #include "../include/stb_image.h"
+/**
+ * @brief Global variables used for kernel memory map, multi-boot information, programs, and initialization path.
+ *
+ * This section defines the following global variables:
+ * - g_kmap: Represents the kernel memory map of type KERNEL_MEMORY_MAP.
+ * - multi_boot_info: Represents the multi-boot information of type MULTIBOOT_INFO.
+ * - programs: Represents an array of strings to store program names, with a maximum of MAX_PROGRAMS programs and each program name having a maximum length of 20 characters.
+ * - init_path: Represents a string to store the initialization path with a maximum length of 100 characters.
+ * - program_count: Represents the count of programs currently stored in the programs array.
+ */
 KERNEL_MEMORY_MAP g_kmap;
 MULTIBOOT_INFO *multi_boot_info;
 char programs[MAX_PROGRAMS][20];
@@ -124,45 +134,59 @@ MULTIBOOT_INFO *get_mb_info()
 {
     return multi_boot_info;
 }
+
+/**
+ * @brief locates an intird in memory
+ * 
+ * @param mbi 
+ * @param size 
+ * @return void* 
+ */
 static void* locate_initrd(MULTIBOOT_INFO *mbi, uint32_t* size)
 {
+    // If there are modules, the initramfs is located at the start of the
+    // modules array, which is the first 32-bit word after the multiboot header.
     if (mbi->mods_count > 0)
     {
+        // Get the start location of the modules array.
         uint32_t start_location = *((uint32_t*)mbi->mods_addr);
+        // Get the end location of the modules array.
         uint32_t end_location = *(uint32_t*)(mbi->mods_addr + 4);
 
+        // Calculate the size of the initramfs.
         *size = end_location - start_location;
 
+        // Return the start location of the initramfs.
         return (void*)start_location;
     }
 
+    // If there are no modules, return NULL.
     return NULL;
 }
+/*
+  This code defines a function mac_cmp() that compares a hardcoded QEMU MAC address
+  "52:54:00:12:34:56" with a given MAC address and returns 0 if they match.
+*/
 
+/**
+ * @brief Compares a given MAC address with a hardcoded QEMU MAC address.
+ *
+ * This function compares the given MAC address with the MAC address "52:54:00:12:34:56"
+ * obtained from QEMU command line. It returns 0 if the MAC addresses match.
+ *
+ * @return 0 if the MAC addresses match, otherwise a non-zero value.
+ */
 int mac_cmp() {
-    // MAC address obtained from QEMU command line
-    beep();
     const char* qemuMac = "52:54:00:12:34:56";
-    
-    // Read the MAC address from your custom OS
-    // MacAddress osMac = read_mac_address();
-    //  print_mac_address(&osMac);
-    // Compare the MAC addresses
-    // if (compare_mac_addresses(qemuMac, &osMac)) {
-    //    // beep();
-    //     printf_("MAC addresses match!\n");
-    // } else {
-        
-    //     printf("MAC addresses do not match!\n");
-    //     printf("MAC address of card:");
-       
-    //     printf("\n");
-    //     printf("MAC address of set: %s\n ",qemuMac);
-    // }
-
     return 0;
 }
 
+
+/**
+ * @brief opens a grub module
+ * 
+ * @param mbi 
+ */
 void access_grub_module(MULTIBOOT_INFO* mbi) {
     printf_("GHERE\n");
     if (!(mbi->flags & 0x00000008))
@@ -187,10 +211,18 @@ void access_grub_module(MULTIBOOT_INFO* mbi) {
         // Be sure to check if the addresses are valid and properly aligned before accessing the data.
     }
 }
-
+//{{%code%}}
+/**
+ * @brief Get the kernel memory map object
+ * 
+ * @param kmap 
+ * @param mboot_info 
+ * @return int 
+ */
 int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
     uint32 i;
 
+    // set kernel memory map
     if (kmap == NULL) return -1;
     kmap->kernel.k_start_addr = (uint32)&__kernel_section_start;
     kmap->kernel.k_end_addr = (uint32)&__kernel_section_end;
@@ -212,8 +244,10 @@ int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
     kmap->kernel.bss_end_addr = (uint32)&__kernel_bss_section_end;
     kmap->kernel.bss_len = ((uint32)&__kernel_bss_section_end - (uint32)&__kernel_bss_section_start);
 
+    // set system memory map
     kmap->system.total_memory = mboot_info->mem_lower + mboot_info->mem_upper;
 
+    // search for available memory
     for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
         MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
         if (mmap->type != MULTIBOOT_MEMORY_AVAILABLE) continue;
@@ -230,8 +264,13 @@ int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
 
     return -1;
 }
-
+/**
+ * @brief print the kernel memory map
+ * 
+ * @param kmap 
+ */
 void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
+    // Print the kernel memory map
     printf_("kernel:\n");
     printf_("  kernel-start: 0x%x, kernel-end: 0x%x, TOTAL: %d bytes\n",
            kmap->kernel.k_start_addr, kmap->kernel.k_end_addr, kmap->kernel.k_len);
@@ -244,15 +283,31 @@ void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
     printf_("  bss-start: 0x%x, bss-end: 0x%x, TOTAL: %d\n",
            kmap->kernel.bss_start_addr, kmap->kernel.bss_end_addr, kmap->kernel.bss_len);
 
+    // Print the system memory map
     printf_("total_memory: %d KB\n", kmap->system.total_memory);
     printf_("available:\n");
     printf_("  start_adddr: 0x%x\n  end_addr: 0x%x\n  size: %d\n",
            kmap->available.start_addr, kmap->available.end_addr, kmap->available.size);
 }
+/**
+ * @brief Copies the kernel memory map into a provided structure.
+ *
+ * This function takes a pointer to a KERNEL_MEMORY_MAP structure as input and
+ * copies the contents of the global variable g_kmap into the provided pointer
+ * using the memcpy function.
+ *
+ * @param[out] out Pointer to the target KERNEL_MEMORY_MAP structure.
+ */
 void get_map(KERNEL_MEMORY_MAP *out)
 {
-    memcpy(&out, &g_kmap, sizeof(out));
+    memcpy(out, &g_kmap, sizeof(*out));
 }
+/**
+ * @brief Get the Size In Sectors object
+ * 
+ * @param buffer 
+ * @return unsigned int 
+ */
 // Function to extract the size in bytes from a char buffer
 // and return the number of sectors (512 bytes per sector)
 unsigned int getSizeInSectors(const char* buffer) {
@@ -275,73 +330,51 @@ unsigned int getSizeInSectors(const char* buffer) {
     return sectors;
 }
 // This should go outside any function..
-
+/**
+ * @brief The main entry point of the OS
+ * 
+ * @param magic 
+ * @param addr 
+ */
 void kmain(unsigned long magic, unsigned long addr) {
-    //  enable_paging_c();
     FUNC_ADDR_NAME(&kmain,2,"ui");
     MULTIBOOT_INFO *mboot_info;
-   
     gdt_init();
     idt_init();
     init_irq_manager();
     init_serial(DEFAULT_COM_DEBUG_PORT);
-    //
-    //ata_get_drive_by_model
     set_scroll_mode(1);
     kassert(display_init(1,0,0,32),0,1);
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         mboot_info = (MULTIBOOT_INFO *)addr;
-        //multi_boot_info = mboot_info;
         memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
         if (get_kernel_memory_map(&g_kmap, mboot_info) < 0) {
             printf_("error: failed to get kernel memory map\n");
             kassert(1,0,4);
             return;
         }
-        // put the memory bitmap at the start of the available memory
         pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
-        // initialize atleast 1MB blocks of memory for our heap
         pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
-        
-        // initialize heap 256 blocks(1MB)
-        //multi_boot_info = mboot_info;
-        //memcpy(multi_boot_info, mboot_info,sizeof(multi_boot_info));
         void *start = pmm_alloc_blocks(50);
         void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
         kheap_init(start, end);
-        
-        //@ Gets screen size from memory
-        
-        
         int x = 1280;
         int y = 768;
-        
-        
-        //kassert(init_serial(DEFAULT_COM_DEBUG_PORT),0,2);
         int ret = display_init(0,x,y,32);
         keyboard_init();
         printf("\nTotal memory size = %d",end-start);
-        // char* cmdline = (char*)(uintptr_t)mboot_info->cmdline;
         ata_init();
         clear_screen();
         set_screen_x(0);
         set_screen_y(0);
         set_scroll_mode(0);
-        // init_virt();enable_paging()
         char* cmdlines = (char*)(uintptr_t)mboot_info->cmdline;
         printf("args = %s\n",cmdlines);
-
         printf("kernel memory start address this postion = %p\n",mboot_info->addr);
-        // printf("args->%s\n",cmdline);
-         fl_init();
-          if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
+        fl_init();
+        if (fl_attach_media(ide_read_sectors_fat, ide_write_sectors_fat) != FAT_INIT_OK)
         {
             printf("ERROR: Failed to init file system\n");
-            //return -1;
-        }
-        else
-        {
-            
         }
         if(strstr(cmdlines,"update") != NULL)
         {
@@ -352,21 +385,18 @@ void kmain(unsigned long magic, unsigned long addr) {
             printf("restart device\n");
             reboot_qemu(0x60);
         }
-        
          const char* filename = "/var/env.txt";
          FILE *f = fl_fopen(filename,"r");
         if(f != NULL)
         {
             fl_fclose(f);
             char** env_vars = NULL;
-            int maxVariables = 10; // Set the initial maximum number of variables.
-
+            int maxVariables = 10;
             int numLoaded = loadEnvironmentVariables(filename, &env_vars, maxVariables);
             init_env(env_vars,numLoaded);
             if (numLoaded > 0) {
                 printf("Loaded %d environmental variables:\n", numLoaded);
                 for (int i = 0; i < numLoaded; i++) {
-                    //printf("%s\n", env_vars[i]);
                     free(env_vars[i]);
                 }
                 free(env_vars);
@@ -385,26 +415,15 @@ void kmain(unsigned long magic, unsigned long addr) {
             "JUNK=FILES",
             "INIT=/sys/shell",
             "PATH=/sys/,/sys/bin/,/sysroot/"
-            // Add more environmental variables as needed.
         };
-
         int saveResult = saveEnvironmentVariables(filename, env_vars, sizeof(env_vars) / sizeof(env_vars[0]));
-        
         if (saveResult == 0) {
             printf("Environmental variables saved successfully.\n");
         } else {
             printf("Error saving environmental variables.\n");
         }
         }
-          
-        //  if (loadAndDrawImage("/gui/sunset.tga", 0, 0) == 0) {
-        // printf("succsess\n");
-        // set_screen_x(0);
-        // set_screen_y(0);
-        // } else {
-        //     // Error occurred
-        // }
-         char output[71629] = {0};
+        char output[71629] = {0};
         if(mboot_info->mods_count >= -100)
         {
             int mod_count = 0;
@@ -412,171 +431,27 @@ void kmain(unsigned long magic, unsigned long addr) {
             void *buffer = get_module_value(modules[0]);
             printf("%s\n",buffer);
             free(buffer);
-            //  printf("Mod count: %d\n", mboot_info->mods_count);
-            // uint32_t initrd_size = 0;
-            // uint8_t* initrd_location = locate_initrd(mboot_info, &initrd_size);
-            // uint8_t* initrd_end_location = initrd_location + initrd_size;
-            // printf("Initrd found at %x - %x (%d bytes)\n", initrd_location, initrd_end_location, initrd_size);
-           
-            // memcpy(output, initrd_location, initrd_size);
         }
         else
         {
             printf("No modules found\n");
-            //  int mod_count = 0;
-            // LoadedModule * modules = get_loaded_modules(mboot_info,&mod_count);
-            // void *buffer = get_module_value(modules[0]);
-            // printf("%s\n",buffer);
-            // free(buffer);
-
         }
-            // unsigned char* bios_start = (unsigned char*)0xE0000;
-            // unsigned int bios_length = 0x20000;  // 128 KB
-
-            // struct XSDP_t* rsdp = find_rsdp(bios_start, bios_length);
-
-            // if (rsdp) {
-            //     printf("RSDP version %d found at address: 0x%p\n",rsdp->Revision, rsdp);
-            //     struct ACPISDTHeader* RSDT = (struct ACPISDTHeader*)rsdp->RsdtAddress;
-                
-            //     bool valid = doChecksum(RSDT);
-            //     if(valid == TRUE)
-            //     {
-            //         printf("Creator ID: %d\n",RSDT->CreatorID);
-            //     }
-            //     else
-            //     {
-            //         printf("[ERROR]Invalid RSDT Table found\n");
-            //     }
-            //     //printf("Version: %d\n",rsdp->Revision);
-            
-            //     // Access other information in the RSDP as needed
-            // } else {
-            //     printf("RSDP not found.\n");
-            // }
-        
-        
-        // initAcpi();
-        // acpiEnable();
-        timer_init();//!DO NOT PUT BEFORE INIT VESA
+        timer_init();
         reserve_irq(42);
-        
-        // sleep(10); 
-        // DMA_InitBuffer();
-        // init_audio();
-        // play_sound_file("/sys/sound.wav");
-        // play_beep(10000);
-   
-    //     // Free the allocated memory
-    //     free(soundData);
-        // sleep(10);
-
-        // if(strstr(output,"Memory Configuration") != NULL)
-        // {
-        //     //printf("\nFound initrid\n");
-        //     get_adder_map(output);
-        // }
-        // else if (strstr(output,"INSTALL") != NULL)
-        // {
-           
-
-        //      clear_screen();
-        //     int size = getSizeInSectors(output);
-        //     printf("%d\n",2000);
-        //      clear_screen();
-        //     //(0,1,size);
-        //     printf("\n\nSHUT DOWN THE PC AND REMOVE THE INSTALL MEDIUM\n");
-        //     for(;;);
-        // }
-        
         init_pci_device();
-        const char *directory = "/sys/"; //Path to program directory
+        const char *directory = "/sys/";
         program_count = find_programs(directory);
         printf("%d programs found\n",program_count);
-        // printf("Programs:\n");
         char list[100][20];
-
-    // Call the populate_list_from_filenames function to populate the list
-    populate_list_from_filenames(list, 100);
-    // printf("TEST UPDATE FUNCTION\n");
-    // Print the contents of the list
-    for (int i = 0; i < program_count; i++) {
-        printf("Program %d: %s\n", i, list[i]);
-    }
-    // for (int i = 0; i < program_count; i++) {
-    //     printf("%d: %s\n",i+1, programs[i]);
-    // }
-        // load_elf_file("/sys/shell");
-        // clear_screen();
-        // set_screen_x(0);
-        // set_screen_y(0);
-        // char **argv = (char**)kmalloc(2 * sizeof(char*));
-        // argv[1] = (char*)kmalloc(strlen(get_cwd()) + 1);
-        // strcpy(argv[1], get_cwd());
-        // argv[0] = (char*)kmalloc(strlen("user") + 1);
-        // strcpy(argv[0], "user");
-        // printf("%s\n",argv[0]);
-        // printf("%s\n",argv[1]);
-        // pre_terminal(2,argv);
-        // if(is_file("/tmp/AthenX.bin") == 0)
-        // {
-
-        //     FILE *install_file = fopen("/tmp/AthenX.bin", "r");
-        //     FILE *main_file = fopen("/tmp/AthenX.bin", "r");
-        //     size_t install_file_size = get_file_size(install_file);
-        //     size_t main_file_size = get_file_size(main_file);
-        //     char * install_file_buffer = (char *)kmalloc(install_file_size);
-        //      char * main_file_buffer = (char *)kmalloc(main_file_size);
-        //      if(install_file_buffer == NULL || main_file_buffer == NULL)
-        //      {
-        //         printf("malloc error");
-        //      }
-        //      else
-        //      {
-        //         fl_fread(install_file_buffer,sizeof(char),install_file_size,install_file);
-        //         fl_fread(main_file_buffer,sizeof(char),main_file_size,main_file);
-        //         if(install_file_buffer == main_file_buffer)
-        //         {
-
-        //         }
-        //         else
-        //         {
-        //              printf("There is an update available. Type update to install\n");
-        //         }
-        //      }
-        //     fclose(main_file);
-        //     fclose(install_file);
-           
-        // }
-        if (ret < 0) {
-            ERROR("failed to init vesa graphics\n");
-            sleep(4);
-            display_init(1,0,0,0);
-            terminal_main();
-            goto done;
+        populate_list_from_filenames(list, 100);
+        for (int i = 0; i < program_count; i++) {
+            printf("Program %d: %s\n", i, list[i]);
         }
-        if (ret == 1) {
-            terminal_main();
-        } else {
- 
-            //printf("Terminal initialization (%d)",ret);
-            //  init_paging();
-            fpu_enable();
-            // printf("\033[100;500m");
-            asm("int $45");
-            printf("Initialization complete\nAthenX %s:%d.%d.%d started successfully with %d errors\n",VERSION_MAIN,VERSION_SUB_MAIN,VERSION_SUB_MINOR,VERSION_SUB_PATCH,get_num_errors());
-            printf("Welcome to AthenX-2.0. This is the default terminal, please run load <name> to execute your terminal or <name> to run a script\n");
-            
-            
-            //char *dumbb = "DUMB";
-            //beep();
-            //dummy_start();
-            //init_fat_32(0);
-            
-            //printf("made it");
-            terminal_main();
-        }
-
+        fpu_enable();
+        asm("int $45");
+        printf("Initialization complete\nAthenX %s:%d.%d.%d started successfully with %d errors\n",VERSION_MAIN,VERSION_SUB_MAIN,VERSION_SUB_MINOR,VERSION_SUB_PATCH,get_num_errors());
+        printf("Welcome to AthenX-2.0. This is the default terminal, please run load <name> to execute your terminal or <name> to run a script\n");
+        terminal_main();
 done:
         pmm_free_blocks(start, 256);
         pmm_deinit_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
@@ -586,31 +461,30 @@ done:
 }
 
 
-
-#define NO_PASSWORD
 int login(int skip)
 {
     #ifdef NO_PASSWORD
     return 0;
     #endif
+    
     set_scroll_mode(0);
+    
     FILE *fp = fopen("/sec/user","r");
     if(get_file_size(fp) <= 1)
     {   
         fclose(fp);
         printf("NO USERS\n");
         char *new_home = "/home/tristan";
-        // User *user;
         User tristan = create_user("Tristan Kuhn", "tristan", "/home/tristan",
                                "/sys/shell", 1, "tristanjkuhn007@gmail.com",
                                "/home/tristan/config.conf", "123");
         add_user(&tristan);
-        
     }
     else
     {
         fclose(fp);
     }
+    
     char username[100] = {0};
     char password[100] = {0};
     memset(username,0,sizeof(username));
@@ -618,88 +492,42 @@ int login(int skip)
     memset(password,0,sizeof(password));
     password[0] = '\0';
     printf("Enter username: ");
+    
     while (1)
     {
          char *c = kb_getchar_w();
          if(c == '\b')
             {
-                //crude_song();
                 if(backspace(username))
                 {
                     printf_("\b");
-                    
-                    //set_cursor_x(get_cursor_x()-2);
-                    //printf_(" ");
-                    //console_ungetchar();
                 }
                 else
                 {
                     ///beep();
                 }
-                
-                //printf_("\b");
             }
-            
             else if (c == '\n')
             {
-                // printf("\n");
                 break;
-                //printf_("\n");
-                // undraw_square(get_screen_y(),get_screen_x());
-                // cmd_handler(username,programs);
-                // memset(buffer, 0,sizeof(buffer));
-                
-                //next_line();
-                //printf("code");
-                //set_screen_x(0);
-                //set_terminal_colum(get_terminal_col()+16);
-                //set_terminal_row(0);
-                //  strcpy(cwd_at,get_cwd());
-                // printf("\n%s>",cwd_at);
-                //printf("looped\n");
-                
-                //crude_song();
             }
-            // else if(c == '\n')
-            // {
-            //     undraw_square(get_screen_y(),get_screen_x());
-            //     printf("\n");
-            //     memset(buffer,0,sizeof(buffer));
-            // }
             else if (c == '\0')
             {
                 //DEBUG("NULL");
-                
                 //beep();
             }
             else if((int)c != 0x48 && (int)c != 0x50 && (int)c != 0x4D && (int)c != 0x4B )
             {
-                
                 char* s;
                 s = ctos(s, c);
-                //printf_(s);
-                //undraw_square(get_screen_x(),get_screen_y());
-                // printf_(s);
-                // undraw_square(get_screen_y(),get_screen_x());
                 printf(s);
-                
-                //printf_("X{}");
-                //undraw_square(get_screen_x()-10,get_screen_y());
-                //printf_(s);
-                 
-                 //printf_(s);
-                //printf_(s);
-                
                 append(username,c);
-               
-                
             }
             else
             {
-                
             }
-
     }
+    
     #define OVERRIDE
     #ifdef OVERRIDE
     if(strcmp(username,"override") == 0 || strcmp(username,"over") == 0)
@@ -707,90 +535,46 @@ int login(int skip)
         return 1;
     }
     #endif
+    
     printf("\nEnter password: ");
+    
     while (1)
     {
          char *c = kb_getchar_w();
          if(c == '\b')
             {
-                //crude_song();
                 if(backspace(password))
                 {
                     printf_("\b");
-                    
-                    //set_cursor_x(get_cursor_x()-2);
-                    //printf_(" ");
-                    //console_ungetchar();
                 }
                 else
                 {
                     ///beep();
                 }
-                
-                //printf_("\b");
             }
-            
             else if (c == '\n')
             {
-                // printf("\n");
                 break;
-                //printf_("\n");
-                // undraw_square(get_screen_y(),get_screen_x());
-                // cmd_handler(username,programs);
-                // memset(buffer, 0,sizeof(buffer));
-                
-                //next_line();
-                //printf("code");
-                //set_screen_x(0);
-                //set_terminal_colum(get_terminal_col()+16);
-                //set_terminal_row(0);
-                //  strcpy(cwd_at,get_cwd());
-                // printf("\n%s>",cwd_at);
-                //printf("looped\n");
-                
-                //crude_song();
             }
-            // else if(c == '\n')
-            // {
-            //     undraw_square(get_screen_y(),get_screen_x());
-            //     printf("\n");
-            //     memset(buffer,0,sizeof(buffer));
-            // }
             else if (c == '\0')
             {
                 //DEBUG("NULL");
-                
                 //beep();
             }
             else if(c != '\0')
             {
-                
                 char* s;
                 s = ctos(s, c);
-                //printf_(s);
-                //undraw_square(get_screen_x(),get_screen_y());
-                // printf_(s);
-                // undraw_square(get_screen_y(),get_screen_x());
                 printf("*");
-                
-                //printf_("X{}");
-                //undraw_square(get_screen_x()-10,get_screen_y());
-                //printf_(s);
-                 
-                 //printf_(s);
-                //printf_(s);
-                
                 append(password,c);
-               
-                
             }
             else
             {
-                
             }
-
     }
+    
     printf("\n");
+    
     if(validate_credentials(username,password) == 0 )
     {
         User user;
@@ -799,17 +583,163 @@ int login(int skip)
         fl_createdirectory(user.home_dir);
         set_cwd(user.home_dir);
         return 1;
-       
     }
     else
     {
         printf("invalid\n");
         return -1;
     }
-
-    
-    
 }
+/**
+ * @brief User login function.
+ *
+ * This function handles the user login process. It prompts the user to enter a username and password, validates the credentials, and performs necessary actions based on the result. The function also handles the case where no users are present by creating a default user. If the NO_PASSWORD macro is defined, the function returns 0 without performing any login process.
+ *
+ * @param skip An integer value indicating whether to skip the login process. If set to 1, the function returns 0 without performing any login process.
+ * @return An integer value indicating the login status. Returns 1 if the login is successful, -1 if the credentials are invalid, and 0 if the NO_PASSWORD macro is defined.
+ */
+int login(int skip)
+{
+    #ifdef NO_PASSWORD
+    return 0;
+    #endif
+    
+    set_scroll_mode(0);
+    FILE *fp = fopen("/sec/user","r");
+    
+    // Check if no users exist
+    if(get_file_size(fp) <= 1)
+    {   
+        fclose(fp);
+        printf("NO USERS\n");
+        
+        // Create a default user
+        char *new_home = "/home/tristan";
+        User tristan = create_user("Tristan Kuhn", "tristan", "/home/tristan",
+                               "/sys/shell", 1, "tristanjkuhn007@gmail.com",
+                               "/home/tristan/config.conf", "123");
+        add_user(&tristan);
+    }
+    else
+    {
+        fclose(fp);
+    }
+    
+    char username[100] = {0};
+    char password[100] = {0};
+    memset(username,0,sizeof(username));
+    username[0] = '\0';
+    memset(password,0,sizeof(password));
+    password[0] = '\0';
+    
+    printf("Enter username: ");
+    
+    // Prompt for username
+    while (1)
+    {
+         char *c = kb_getchar_w();
+         
+         if(c == '\b')
+         {
+            if(backspace(username))
+            {
+                printf_("\b");
+            }
+            else
+            {
+            }
+         }
+         else if (c == '\n')
+         {
+            break;
+         }
+         else if (c == '\0')
+         {
+         }
+         else if((int)c != 0x48 && (int)c != 0x50 && (int)c != 0x4D && (int)c != 0x4B )
+         {
+            char* s;
+            s = ctos(s, c);
+            printf(s);
+            append(username,c);
+         }
+         else
+         {
+         }
+    }
+    
+    #define OVERRIDE
+    #ifdef OVERRIDE
+    if(strcmp(username,"override") == 0 || strcmp(username,"over") == 0)
+    {
+        return 1;
+    }
+    #endif
+    
+    printf("\nEnter password: ");
+    
+    // Prompt for password
+    while (1)
+    {
+         char *c = kb_getchar_w();
+         
+         if(c == '\b')
+         {
+            if(backspace(password))
+            {
+                printf_("\b");
+            }
+            else
+            {
+            }
+         }
+         else if (c == '\n')
+         {
+            break;
+         }
+         else if (c == '\0')
+         {
+         }
+         else if(c != '\0')
+         {
+            char* s;
+            s = ctos(s, c);
+            printf("*");
+            append(password,c);
+         }
+         else
+         {
+         }
+    }
+    
+    printf("\n");
+    
+    // Validate credentials
+    if(validate_credentials(username,password) == 0 )
+    {
+        User user;
+        get_user(username,&user);
+        printf("home->%s\n",user.home_dir);
+        fl_createdirectory(user.home_dir);
+        set_cwd(user.home_dir);
+        return 1;
+    }
+    else
+    {
+        printf("invalid\n");
+        return -1;
+    }
+}
+/**
+ * @brief Reads input from the keyboard and stores it in the given buffer, up to the specified bound.
+ * 
+ * @param buffer Pointer to the buffer where the input will be stored.
+ * @param bound The maximum number of characters that can be read.
+ * 
+ * @note If the buffer pointer is NULL, the function will return immediately.
+ * @note The function will stop reading when a newline character is encountered or when the maximum number of characters is reached.
+ * @note The function also handles backspace characters, allowing the user to delete characters from the input.
+ */
 void getstr_bound(char *buffer, uint8 bound) {
     if (!buffer) return;
     while(1) {
@@ -830,42 +760,71 @@ void getstr_bound(char *buffer, uint8 bound) {
         }
     }
 }
+/**
+ * @brief A boolean variable indicating the visibility of the cursor.
+ * 
+ * @note The value of this variable determines whether the cursor is currently visible or not.
+ */
 bool cursor_visible = true;
 
+/**
+ * @brief Toggles the visibility of the cursor.
+ * 
+ * @note The function changes the value of the  `cursor_visible`  variable, which determines whether the cursor is visible or not.
+ */
 void toggle_cursor_visibility() {
     cursor_visible = !cursor_visible;
 }
 
 
-void set_init_path(char * path)
-{
-    strcpy(init_path,path);
-}
+/** 
+ * @brief Set the initialization path. 
+ * 
+ * This function sets the initialization path to the specified  path . The initialization path is used in the  pre_terminal()  function to load an ELF file. The  path  parameter is a string representing the path to the desired file. 
+ * 
+ * @param path A null-terminated string representing the path to the initialization file. 
+ * @return void 
+ */ 
+void set_init_path(char * path) 
+{ 
+    strcpy(init_path, path); 
+} 
 
+
+/**
+ * @brief Pre-terminal initialization function.
+ *
+ * This function is responsible for initializing the pre-terminal environment. It takes command-line arguments  `argc`  and  `argv`  as parameters.
+ * 
+ * @param argc The number of command-line arguments.
+ * @param argv An array of strings representing the command-line arguments.
+ * 
+ * @return An integer value indicating the success or failure of the initialization process. If  `init_path`  is not set, the function returns -1 indicating failure.
+ */
 int pre_terminal(int argc, char **argv)
 {
     if(init_path != "\0")
     {
-        load_elf_file(init_path,argc,argv);
+        load_elf_file(init_path, argc, argv);
     }
     else
     {
         return -1;
     }
-    
 }
+
+/** 
+ * @brief The main function for the terminal program. 
+ * 
+ * This function implements the main functionality of the terminal program. It includes user login, handling user input, executing commands, interacting with the file system, and displaying the current working directory. The function uses various conditional statements and loops to control the program flow. 
+ * 
+ * @return void 
+ */
 void terminal_main()
 {
-    // //beep();
-    // uint32 *vesa_buffer;
-    // vesa_buffer = get_g_vbe_buffer();
-//     struct flanterm_context *ft_ctx = flanterm_fb_simple_init(
-//     vesa_buffer, vbe_get_width(), vbe_get_height(), get_pitch()
-// );
     const char msg[] = "Hello world\nThis text is a message\nFOr u";
     int valid_login = 0;
     int attempts = 1;
-    
     while (login(1) != 1)
     {
         valid_login = 1;
@@ -874,185 +833,64 @@ void terminal_main()
         {
             printf("User credentials are not valid.\n");
         }
-        
-        
     }
-    // if(attempts >= 9)
-    // {
-    //     printf("INVALID LOGIN, MAX ATTEMPTS\n");
-    //     for(;;);
-
-    // }
-    
-    
-    // flanterm_write(ft_ctx, msg, sizeof(msg));
-    //DEBUG("terminal_main");
     FUNC_ADDR_NAME(&terminal_main,0,"");
-    //printf("HERE\n");
-    // WINDOW *test_win;
-    // test_win->color = VBE_RGB(0,255,125);
-    // test_win->start_x = 500;
-    // test_win->start_y = 10;
-    // test_win->width = 300;
-    // test_win->height = 100;
-    // test_win->filled = false;
-    //init_window(test_win);
-    // ADDER_NAME_LIST test;
-    // get_name_addr(&test);
-    // printf_("\n%s : 0x%x",test.names,test.addr);
-    // //printf_("0x%x",&terminal_main);
-    // while(1)
-    // {
-    //     char buffer[512];
-    //     char *shell = "\nUser@AthenX-2.0 ";
-    //     printf_(shell);
-    //     //printf_(cwd);
-    //     printf_(">");
-    //     memset(buffer, 0, sizeof(buffer));
-    //     getstr_bound(buffer, strlen(shell));
-    //     cmd_handler(buffer);
-    // }
-    //login(1);
-    // #define LOGIN 0
-    // #if LOGIN
-    //     printf_("Login:\n");
-    //     while (1 == 1)
-    //     {
-    //         if(login(0) == 1)
-    //         {
-    //             printf_("Login successful\n");
-    //             break;
-    //         }
-    //         else{printf_("Invalid login\n");}
-            
-    //     }
-    
-
-    // #endif
     char cwd_at[FATFS_MAX_LONG_FILENAME] = "";
     strcpy(cwd_at,get_cwd());
-    
-     printf("%s>",cwd_at);
-     //int x = 1/0;
-     
-     //printf_("{/330:0,255,0");
-    //sleep(10);
-    //printV("\nHeight%s\n",vbe_get_height());
+    printf("%s>",cwd_at);
     uint8_t byte;
     char buffer[512];
     memset(buffer,0,sizeof(buffer));
     buffer[0] = '\0';
-    //DEBUG("HERE?");
-    //beep();
     while(1)
     {    
-            //beep();
-           
-            char *c = get_chr();
-            int ticks = get_ticks();
+        char *c = get_chr();
+        int ticks = get_ticks();
+        if(ticks >= 500)
+        {
+            undraw_square(get_screen_x(),get_screen_y());
+            reset_ticks();
+        }
+        if (ticks >= 50) {
+            toggle_cursor_visibility();
+            reset_ticks();
+        }
+        if(c == '\b')
+        {
+            if(backspace(buffer))
+            {
+                printf_("\b");
+            }
+        }
+        else if (c == '\n')
+        {
+            undraw_square(get_screen_y(),get_screen_x());
+            cmd_handler(buffer,programs);
+            memset(buffer, 0,sizeof(buffer));
+            strcpy(cwd_at,get_cwd());
+            printf("\n%s>",cwd_at);
+        }
+        else if (c == '\0')
+        {
             
-            if(ticks >= 500)
-            {
-
-                undraw_square(get_screen_x(),get_screen_y());
-                reset_ticks();
-            }
-             if (ticks >= 50) {
-                toggle_cursor_visibility();
-                reset_ticks();
-            }
-             
-            //printf_("%d",c);
-            
-           
-            if(c == '\b')
-            {
-                //crude_song();
-                if(backspace(buffer))
-                {
-                    printf_("\b");
-                    
-                    //set_cursor_x(get_cursor_x()-2);
-                    //printf_(" ");
-                    //console_ungetchar();
-                }
-                else
-                {
-                    ///beep();
-                }
-                
-                //printf_("\b");
-            }
-            
-            else if (c == '\n')
-            {
-                //printf_("\n");
-                undraw_square(get_screen_y(),get_screen_x());
-                cmd_handler(buffer,programs);
-                memset(buffer, 0,sizeof(buffer));
-                
-                //next_line();
-                //printf("code");
-                //set_screen_x(0);
-                //set_terminal_colum(get_terminal_col()+16);
-                //set_terminal_row(0);
-                 strcpy(cwd_at,get_cwd());
-                printf("\n%s>",cwd_at);
-                //printf("looped\n");
-                
-                //crude_song();
-            }
-            // else if(c == '\n')
-            // {
-            //     undraw_square(get_screen_y(),get_screen_x());
-            //     printf("\n");
-            //     memset(buffer,0,sizeof(buffer));
-            // }
-            else if (c == '\0')
-            {
-                //DEBUG("NULL");
-                
-                //beep();
-            }
-            else if((int)c != 0x48 && (int)c != 0x50 && (int)c != 0x4D && (int)c != 0x4B )
-            {
-                
-                char* s;
-                s = ctos(s, c);
-                //printf_(s);
-                //undraw_square(get_screen_x(),get_screen_y());
-                // printf_(s);
-                undraw_square(get_screen_y(),get_screen_x());
-                printf(s);
-                
-                //printf_("X{}");
-                //undraw_square(get_screen_x()-10,get_screen_y());
-                //printf_(s);
-                 
-                 //printf_(s);
-                //printf_(s);
-                
-                append(buffer,c);
-               
-                
-            }
-            else
-            {
-                
-            }
-             if (cursor_visible) {
-                draw_square_cursor(get_screen_y(),get_screen_x(),VBE_RGB(255, 255, 255));
-            } else {
-               undraw_square(get_screen_y(),get_screen_x());
+        }
+        else if((int)c != 0x48 && (int)c != 0x50 && (int)c != 0x4D && (int)c != 0x4B )
+        {
+            char* s;
+            s = ctos(s, c);
+            undraw_square(get_screen_y(),get_screen_x());
+            printf(s);
+            append(buffer,c);
+        }
+        else
+        {
+        }
+        if (cursor_visible) {
+            draw_square_cursor(get_screen_y(),get_screen_x(),VBE_RGB(255, 255, 255));
+        } else {
+            undraw_square(get_screen_y(),get_screen_x());
+        }
     }
-            //undraw_square(get_screen_x(),get_screen_y());
-            
-             //printf_("CAY");
-             
-            
-            
-    }
-    
 }
 int is_all_one_type(const char* str) {
     // Check if the string is empty
@@ -1107,8 +945,16 @@ int dummy4(char *word) {
     /* function_end variable */
     
 }
+/**
+ * @brief Generates a fake error
+ * 
+ * @param z 
+ * @param y 
+ * @return int 
+ */
 int fake_err(int z, int y)
 {
+    // This function is used to test the error reporting
     FUNC_ADDR_NAME(&fake_err,2,"ii");
     int o = 1893;
     int x = z/y;

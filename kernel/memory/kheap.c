@@ -17,8 +17,30 @@ unsigned long g_total_used_size = 0;
 KHEAP_BLOCK *g_head = NULL;
 
 /**
- * initialize heap and set total memory size
-*/
+ * @file kheap.c
+ * @brief Implementation of kheap_init() function to initialize the heap and set the total memory size.
+ * @language C
+ */
+
+/**
+ * @brief Initialize the heap and set the total memory size.
+ *
+ * This function initializes the heap memory by setting the start and end addresses, calculating the total size, and initializing the total used size to 0.
+ *
+ * @param start_addr The starting address of the heap memory.
+ * @param end_addr The ending address of the heap memory.
+ * @return 0 on successful initialization, -1 if the start address is greater than the end address.
+ *
+ * @details The function performs the following steps:
+ * 1. Checks if the start address is greater than the end address. If true, it prints an error message and returns -1.
+ * 2. Sets the global variable g_kheap_start_addr to the provided start address.
+ * 3. Sets the global variable g_kheap_end_addr to the provided end address.
+ * 4. Calculates the total size of the heap memory by subtracting the start address from the end address.
+ * 5. Sets the global variable g_total_size to the calculated total size.
+ * 6. Initializes the global variable g_total_used_size to 0.
+ * 7. Prints the total size for debugging purposes.
+ * 8. Returns 0 to indicate successful initialization.
+ */
 int kheap_init(void *start_addr, void *end_addr) {
     if (start_addr > end_addr) {
         printf_("failed to init kheap\n");
@@ -27,11 +49,10 @@ int kheap_init(void *start_addr, void *end_addr) {
     g_kheap_start_addr = start_addr;
     g_kheap_end_addr = end_addr;
     g_total_size = end_addr - start_addr;
-    printf_("total size ->%d\n",g_total_size);
+    printf_("total size ->%d\n", g_total_size);
     g_total_used_size = 0;
     return 0;
 }
-
 /**
  * increase the heap memory by size & get its address
 */
