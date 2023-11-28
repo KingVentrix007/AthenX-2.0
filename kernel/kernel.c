@@ -52,10 +52,6 @@
 #include "qemu.h"
 #include "sound.h"
 
-// #include "flanterm.h"
-// #include "fb.h"
-// #define STB_IMAGE_IMPLEMENTATION
-// #include "../include/stb_image.h"
 /**
  * @brief Global variables used for kernel memory map, multi-boot information, programs, and initialization path.
  *
