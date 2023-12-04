@@ -5,6 +5,7 @@
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url] -->
 <!-- [![GNU License][license-shield]][license-url] -->
+[![Sonar Cube Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=KingVentrix007_AthenX-2.0&metric=ncloc)](https://sonarcloud.io/dashboard?id=AthenX-2.0)
 
 <div align="center">
   <a href="https://github.com/KingVentrix007/AthenX-2.0">
