@@ -6,6 +6,10 @@
 [![LinkedIn][linkedin-shield]][linkedin-url] -->
 <!-- [![GNU License][license-shield]][license-url] -->
 [![Sonar Cube Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=KingVentrix007_AthenX-2.0&metric=ncloc)](https://sonarcloud.io/dashboard?id=AthenX-2.0)
+[![Sonar Cube Number of bugs](https://sonarcloud.io/api/project_badges/measure?project=KingVentrix007_AthenX-2.0&metric=bugs)](https://sonarcloud.io/dashboard?id=AthenX-2.0)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![Completion](https://img.shields.io/badge/Completion-65%25-yellow.svg)](https://github.com/KingVentrix007/AthenX-2.0)
+
 
 <div align="center">
   <a href="https://github.com/KingVentrix007/AthenX-2.0">
