@@ -5,6 +5,11 @@
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url] -->
 <!-- [![GNU License][license-shield]][license-url] -->
+[![Sonar Cube Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=KingVentrix007_AthenX-2.0&metric=ncloc)](https://sonarcloud.io/dashboard?id=AthenX-2.0)
+[![Sonar Cube Number of bugs](https://sonarcloud.io/api/project_badges/measure?project=KingVentrix007_AthenX-2.0&metric=bugs)](https://sonarcloud.io/dashboard?id=AthenX-2.0)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![Completion](https://img.shields.io/badge/Completion-65%25-yellow.svg)](https://github.com/KingVentrix007/AthenX-2.0)
+
 
 <div align="center">
   <a href="https://github.com/KingVentrix007/AthenX-2.0">
@@ -164,7 +169,7 @@ Simply add any changes you want then and save them, then type 'make run' and wat
 
 ## User programs
 
-Creating userspace programs for AthenX is always incouraged, please read this [documentation for more information](/docs/Manuals+roadmaps/Creating+running%20user%20programs.md)
+Creating userspace programs for AthenX is always encouraged, please read this [documentation for more information](/docs/Manuals+roadmaps/Creating+running%20user%20programs.md)
 
 ## Ports
 Currently I am attempting to port some software to AthenX-2.0.
@@ -210,6 +215,7 @@ Best-README-Template](https://github.com/othneildrew/Best-README-Template) This 
 * And anyone else that I have missed, thanks.
 * [OS](https://github.com/pritamzope/OS): I used A LOT of his code, ATA driver, VESA, FPU, etc
 * My mom:  she did all my editing and made sure my grammar was correct
+* vaythe(friend from discord): Checked my repo for errors
 * [Incon8](https://icons8.com/):The smaller logos
 * [MyOS/codeTrevor](https://github.com/coderTrevor/MyOS/tree/master) I used his e1000 driver and his Networ kStack
 
