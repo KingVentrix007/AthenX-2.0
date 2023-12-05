@@ -90,7 +90,17 @@
         "c": "bash ./build_and_run.sh"  // Use the correct path to your build script here
     },
     "vscord.enabled": true,
-    "editor.inlineSuggest.showToolbar": "onHover"
+    "editor.inlineSuggest.showToolbar": "onHover",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/king/AthenXDev/AthenX-2.0",
+            "binaryPath": "/home/king/AthenXDev/AthenX-2.0/AthenX.bin",
+            "binaryArgs": []
+        }
+    ],
+    "makefile.configurations": [
+      
+    ]
     
    
     

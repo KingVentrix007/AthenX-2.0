@@ -105,4 +105,8 @@ user-c:
 dis: $(OUT_DIR)/AthenX.bin
 	objdump -D -b binary -m i386 $< > disassembly.asm
 
+cloc:
+	cloc --exclude-dir doxyout .
 
+cloc-f:
+	cloc --by-file --exclude-dir doxyout . > cloc.out
