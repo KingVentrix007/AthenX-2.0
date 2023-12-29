@@ -9,14 +9,18 @@ uint8_t sb16VersionMinor;
 uint8_t sb16IRQ = 5;    // TODO: provide some way to configure the SB16 IRQ
 uint8_t sb16_8bitDMAchannel = 1; // TODO: Make these configurable as well
 uint8_t sb16_16bitDMAchannel = 5;
-void readIRQ(uint
-int debugLevelSB16 = 0;16 port) {
+int debugLevelSB16 = 0;
+void readIRQ(uint32 port)
+{
+    
     // Read the IRQ value from the specified port
     uint8_t irq = inportb(port);
 
     // Print out the IRQ value
     printf("IRQ Read: 0x%X\n", irq);
+
 }
+
 bool sb16_present()
 {
     return sb16Present;

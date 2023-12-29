@@ -2,6 +2,7 @@
 #include "../include/timer.h"
 #include "../include/speaker.h"
 #include "../include/debug.h"
+
 void play_sound(uint32_t nFrequency)
 {
     // This function plays a sound at the specified frequency.

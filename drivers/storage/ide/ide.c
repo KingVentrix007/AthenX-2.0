@@ -50,17 +50,30 @@ static void ide_write_register(uint8 channel, uint8 reg, uint8 data) {
     // write value ata-control to tell irq is ready
     if (reg > 0x07 && reg < 0x0C)
         ide_write_register(channel, ATA_REG_CONTROL, 0x80 | g_ide_channels[channel].no_intr);
+        DEBUG(" ");
 
     // write data to register ports
     if (reg < 0x08)
+    {
         outportb(g_ide_channels[channel].base + reg - 0x00, data);
-    else if (reg < 0x0C)
-        outportb(g_ide_channels[channel].base + reg - 0x06, data);
-    else if (reg < 0x0E)
+        DEBUG(" ");
+    }
+        
+    else if (reg < 0x0C){
+                outportb(g_ide_channels[channel].base + reg - 0x06, data);
+                DEBUG(" ");
+    }
+    else if (reg < 0x0E){
         outportb(g_ide_channels[channel].control + reg - 0x0A, data);
+        DEBUG(" ");
+    }
     else if (reg < 0x16)
-        outportb(g_ide_channels[channel].bm_ide + reg - 0x0E, data);
-
+    {
+         outportb(g_ide_channels[channel].bm_ide + reg - 0x0E, data);
+        DEBUG(" ");
+    }
+       
+    DEBUG(" ");
     // write value to tell reading is done
     if (reg > 0x07 && reg < 0x0C)
         ide_write_register(channel, ATA_REG_CONTROL, g_ide_channels[channel].no_intr);
@@ -258,41 +271,46 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
     g_ide_channels[ATA_SECONDARY].control = sec_channel_control_addr;
     g_ide_channels[ATA_PRIMARY].bm_ide = bus_master_addr;
     g_ide_channels[ATA_SECONDARY].bm_ide = bus_master_addr;
-
+    DEBUG(" ");
     // 2- Disable IRQs:
     ide_write_register(ATA_PRIMARY, ATA_REG_CONTROL, 2);
     ide_write_register(ATA_SECONDARY, ATA_REG_CONTROL, 2);
-
+    DEBUG(" ");
     // 3- Detect ATA-ATAPI Devices:
     for (i = 0; i < 2; i++) {
+        DEBUG(" ");
         for (j = 0; j < 2; j++) {
             uint8 err = 0, type = IDE_ATA, status;
             g_ide_devices[count].reserved = 0;  // Assuming that no drive here.
 
             // (I) Select Drive:
             ide_write_register(i, ATA_REG_HDDEVSEL, 0xA0 | (j << 4));  // Select Drive.
+            DEBUG(" ");
             //sleep(1); // Wait 1ms for drive select to work.
 
             // (II) Send ATA Identify Command:
             ide_write_register(i, ATA_REG_COMMAND, ATA_CMD_IDENTIFY);
+            DEBUG(" ");
             //sleep(1); // This function should be implemented in your OS. which waits for 1 ms.
             // it is based on System Timer Device Driver.
 
             // (III) Polling:
             if (ide_read_register(i, ATA_REG_STATUS) == 0) continue;  // If Status = 0, No Device.
-
+            DEBUG(" ");
             while (1) {
                 status = ide_read_register(i, ATA_REG_STATUS);
                 if ((status & ATA_SR_ERR)) {
                     err = 1;
+                    DEBUG(" ");
                     break;
                 }                                                            // If Err, Device is not ATA.
                 if (!(status & ATA_SR_BSY) && (status & ATA_SR_DRQ)) break;  // Everything is right.
             }
-
+            DEBUG(" ");
             // (IV) Probe for ATAPI Devices:
 
             if (err != 0) {
+                DEBUG(" ");
                 unsigned char cl = ide_read_register(i, ATA_REG_LBA1);
                 unsigned char ch = ide_read_register(i, ATA_REG_LBA2);
 
@@ -309,7 +327,7 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
 
             // (V) Read Identification Space of the Device:
             ide_read_buffer(i, ATA_REG_DATA, (unsigned int *)ide_buf, 128);
-
+            DEBUG(" ");
             // (VI) Read Device Parameters:
             g_ide_devices[count].reserved = 1;
             g_ide_devices[count].type = type;
@@ -318,7 +336,7 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
             g_ide_devices[count].signature = *((unsigned short *)(ide_buf + ATA_IDENT_DEVICETYPE));
             g_ide_devices[count].features = *((unsigned short *)(ide_buf + ATA_IDENT_CAPABILITIES));
             g_ide_devices[count].command_sets = *((unsigned int *)(ide_buf + ATA_IDENT_COMMANDSETS));
-
+            DEBUG(" ");
             // (VII) Get Size:
             if (g_ide_devices[count].command_sets & (1 << 26))
                 // Device uses 48-Bit Addressing:
@@ -332,6 +350,7 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
                 g_ide_devices[count].model[k] = ide_buf[ATA_IDENT_MODEL + k + 1];
                 g_ide_devices[count].model[k + 1] = ide_buf[ATA_IDENT_MODEL + k];
             }
+            DEBUG(" ");
             g_ide_devices[count].model[40] = '\0';  // Terminate String.
             // remove trailing spaces in model string
             for(k = 39; k >= 0; k--) {
@@ -606,7 +625,9 @@ int ide_write_sectors_fat(uint32 sector, uint8 *buffer, uint32 sector_count) {
     return 1;
 }
 void ata_init() {
+    printf("\nInit IDE\n");
     ide_init(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
+    printf("\nInited IDE\n");
 }
 
 int ata_get_drive_by_model(const char *model) {

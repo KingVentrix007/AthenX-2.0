@@ -359,15 +359,33 @@ void kmain(unsigned long magic, unsigned long addr) {
             return;
         }
         pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
-        pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
-        void *start = pmm_alloc_blocks(50);
-        void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
+        pmm_init_region(g_kmap.available.start_addr, g_kmap.available.size);
+        size_t initialHeapSize = 16 * 1024 * 1024;
+        
+        void *start = pmm_alloc_blocks(initialHeapSize / PMM_BLOCK_SIZE);
+        void *end = start + initialHeapSize;
         kheap_init(start, end);
+        // kbrk(1000);
+        //! 8843264
+        //! 8843264
         int x = 1280;
         int y = 768;
         int ret = display_init(0,x,y,32);
+        printf("Total PMM meme = %zu\n",get_total_memory_size());
         keyboard_init();
-        printf("\nTotal memory size = %d",end-start);
+        printf("\nTotal memory size = %zu",get_heap_size());
+        printf("\nTotal used memory size = %zu\n",get_used_heap_size());
+        void *new_memory_block = kbrk(1024);
+        if (new_memory_block != NULL) {
+            printf("\nsuccessfully allocated memory block\n");
+            printf("Total memory size = %zu",get_heap_size());
+             printf("\nTotal used memory size = %zu\n",get_used_heap_size());
+            // Memory allocation successful
+            // You can use the new_memory_block for your data
+        } else {
+            printf("Failed");
+        }
+        // k
         ata_init();
         clear_screen();
         set_screen_x(0);

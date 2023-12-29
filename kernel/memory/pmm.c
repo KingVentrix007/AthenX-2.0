@@ -228,3 +228,8 @@ void* alloc_contig(size_t len, int flags, phys_bytes *phys)
 
     return buf;
 }
+
+size_t get_total_memory_size()
+{
+    return g_pmm_info.memory_size;
+}

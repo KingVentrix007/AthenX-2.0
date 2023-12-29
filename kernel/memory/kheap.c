@@ -53,9 +53,23 @@ int kheap_init(void *start_addr, void *end_addr) {
     g_total_used_size = 0;
     return 0;
 }
+
 /**
- * increase the heap memory by size & get its address
-*/
+ * @brief Increase the heap memory by size and get its address.
+ *
+ * This function increases the heap memory by the specified size and returns the address of the allocated memory block.
+ *
+ * @param size The size of the memory block to allocate.
+ * @return The address of the allocated memory block, or NULL if allocation fails.
+ *
+ * @details The function performs the following steps:
+ * 1. Checks if the size is greater than 0. If not, returns NULL.
+ * 2. Checks if there is enough free space in the heap for the requested size.
+ *    If not, prints an error message and returns NULL.
+ * 3. Allocates memory from the heap and updates the g_total_used_size variable.
+ * 4. Updates the g_total_size variable by adding the allocated size.
+ * 5. Returns the address of the allocated memory block.
+ */
 void *kbrk(int size) {
     FUNC_ADDR_NAME(&kbrk, 1, "i");
     void *addr = NULL;
@@ -63,14 +77,15 @@ void *kbrk(int size) {
         return NULL;
     // Check if memory is available or not
     if (g_total_size - g_total_used_size < size + sizeof(void*)) {
-         printf("(kbrk)Memory allocation failed: Not enough free space:\nrequested: %d \n| total %d \n| extra nedded %d\n",size,g_total_size,g_total_size-size);
-            
+         printf("(kbrk) Memory allocation failed: Not enough free space:\nrequested: %d \n| total %d \n| extra needed %d\n", size, g_total_size, g_total_used_size + size);
         sleep(10);
         return NULL;
     }
     // Add start address with total previously used memory and difference between each data block pointer
     addr = g_kheap_start_addr + g_total_used_size;
     g_total_used_size += size + sizeof(void*);
+    g_total_size += size + sizeof(void*);  // Update the total size
+    printf("\n%zu bytes\n",g_total_size);
     return addr;
 }
 
@@ -241,4 +256,18 @@ void* malloc_aligned(size_t size, size_t alignment) {
     void* aligned_mem = (void*)(((uintptr_t)(mem + alignment - 1) / alignment) * alignment);
     
     return aligned_mem;
+}
+/**
+ * Function Name: get_heap_size
+ * Description: Get the total size of the heap.
+ *
+ * Return:
+ *   size_t - The total size of the heap.
+ */
+size_t get_heap_size() {
+    return g_total_size;
+}
+size_t get_used_heap_size()
+{
+    return g_total_used_size;
 }

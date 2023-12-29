@@ -73,4 +73,6 @@ void* pmm_alloc_blocks(uint32 size);
  */
 void pmm_free_blocks(void* p, uint32 size);
 
+
+size_t get_total_memory_size();
 #endif
